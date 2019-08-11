@@ -1,19 +1,18 @@
-from datetime import datetime
+import time
 
 from aio_i3status.core import PollingModule
 
 
-class TestModule(PollingModule):
-    def __init__(self, sleep=0.5):
-        super().__init__(sleep)
+class CountModule(PollingModule):
+    def __init__(self):
+        super().__init__()
         self.result = 0
 
     def run(self):
-        if self.result >= 10:
-            raise Exception("Error!")
         self.result += 1
 
 
-class AnotherTestModule(PollingModule):
+class TimeModule(PollingModule):
     def run(self):
-        self.result = datetime.now().time()
+        current_time = time.localtime()
+        self.result = time.strftime("%Y-%m-%d %T", current_time)

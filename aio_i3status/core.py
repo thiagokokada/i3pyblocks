@@ -1,10 +1,16 @@
 import abc
 import asyncio
+import json
+import sys
 
 
 class Module(metaclass=abc.ABCMeta):
     def __init__(self):
+        self.name = self.__class__.__name__
         self.result = None
+
+    def format(self, result):
+        return {"name": self.name, "full_text": str(result)}
 
     @abc.abstractmethod
     async def loop(self):
@@ -38,9 +44,16 @@ class Runner:
 
     async def write_results(self):
         while True:
+            output = []
+
             for module in self.modules:
-                if module.result:
-                    print(module.result)
+                result = module.result
+                if result is not None:
+                    output.append(json.dumps(module.format(result)))
+
+            sys.stdout.write("[" + ",".join(output) + "],\n")
+            sys.stdout.flush()
+
             await asyncio.sleep(self.sleep)
 
     def register_module(self, module):
@@ -52,4 +65,7 @@ class Runner:
         self.tasks.append(task)
 
     async def start(self):
+        sys.stdout.write('{"version": 1}\n[\n')
+        sys.stdout.flush()
+
         await asyncio.wait(self.tasks)

@@ -7,8 +7,8 @@ from aio_i3status import core, test_module
 
 async def main():
     runner = core.Runner()
-    runner.register_module(test_module.TestModule())
-    runner.register_module(test_module.AnotherTestModule())
+    runner.register_module(test_module.CountModule())
+    runner.register_module(test_module.TimeModule())
     await runner.start()
 
 
