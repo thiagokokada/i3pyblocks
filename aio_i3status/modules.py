@@ -88,3 +88,18 @@ class NetworkModule(PollingModule):
             self.color = None
 
         self.full_text = f" {bytes2human(upload)}  {bytes2human(download)}"
+
+
+class TemperatureModule(PollingModule):
+    def __init__(self, sensor=None):
+        if sensor:
+            self.sensor = sensor
+        else:
+            self.sensor = next(iter(psutil.sensors_temperatures().keys()))
+        super().__init__()
+
+    def run(self):
+        temperatures = psutil.sensors_temperatures()[self.sensor]
+        temperature = temperatures[0]
+
+        self.full_text = f" {temperature.current}°C"

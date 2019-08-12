@@ -16,6 +16,7 @@ async def main():
     runner = core.Runner()
 
     runner.register_module(modules.NetworkModule())
+    runner.register_module(modules.TemperatureModule())
     for partition in partitions():
         runner.register_module(
             modules.DiskModule(path=partition.mountpoint, short_name=True)
