@@ -1,3 +1,4 @@
+import datetime
 import time
 
 import psutil
@@ -12,9 +13,51 @@ class Color:
     URGENT = "#FF0000"
 
 
+class BatteryModule(PollingModule):
+    def __init__(self, sleep=5):
+        super().__init__(sleep=sleep)
+
+    def format_battery(self, percent):
+        if percent > 75:
+            self.color = None
+            return ""
+        elif percent > 50:
+            self.color = None
+            return ""
+        elif percent > 25:
+            self.color = None
+            return ""
+        elif percent > 10:
+            self.color = Color.WARN
+            return ""
+        else:
+            self.color = Color.URGENT
+            return ""
+
+    def run(self):
+        battery = psutil.sensors_battery()
+
+        if not battery:
+            self.full_text = None
+            return
+
+        percent = battery.percent
+        remaining_time = battery.secsleft
+        remaining_time_formatted = datetime.timedelta(seconds=battery.secsleft)
+        plugged = battery.power_plugged
+
+        if plugged:
+            self.color = None
+            self.full_text = f" {percent:.0f}%"
+        elif remaining_time != psutil.POWER_TIME_UNKNOWN:
+            self.full_text = f"{self.format_battery(percent)} {percent:.0f}% {remaining_time_formatted}"
+        else:
+            self.full_text = f"{self.format_battery(percent)} {percent:.0f}%"
+
+
 class DiskModule(PollingModule):
-    def __init__(self, path="/", short_name=False):
-        super().__init__(instance=path)
+    def __init__(self, sleep=5, path="/", short_name=False):
+        super().__init__(sleep=sleep, instance=path)
         self.path = path
         self.short_name = short_name
 
@@ -31,6 +74,9 @@ class DiskModule(PollingModule):
 
 
 class LoadModule(PollingModule):
+    def __init__(self, sleep=5):
+        super().__init__(sleep=sleep)
+
     def run(self):
         load1, load5, load15 = psutil.getloadavg()
         cpu_count = psutil.cpu_count()
@@ -68,9 +114,9 @@ class MemoryModule(PollingModule):
 
 
 class NetworkModule(PollingModule):
-    def __init__(self):
+    def __init__(self, sleep=3):
         self.previous = psutil.net_io_counters()
-        super().__init__()
+        super().__init__(sleep=sleep)
 
     def run(self):
         now = psutil.net_io_counters()
@@ -91,12 +137,12 @@ class NetworkModule(PollingModule):
 
 
 class TemperatureModule(PollingModule):
-    def __init__(self, sensor=None):
+    def __init__(self, sleep=5, sensor=None):
         if sensor:
             self.sensor = sensor
         else:
             self.sensor = next(iter(psutil.sensors_temperatures().keys()))
-        super().__init__()
+        super().__init__(sleep=sleep)
 
     def run(self):
         temperatures = psutil.sensors_temperatures()[self.sensor]

@@ -23,6 +23,7 @@ async def main():
         )
     runner.register_module(modules.MemoryModule())
     runner.register_module(modules.LoadModule())
+    runner.register_module(modules.BatteryModule())
     runner.register_module(modules.LocalTimeModule())
     await runner.start()
 
