@@ -15,13 +15,14 @@ def partitions(excludes=["/boot", "/nix/store"]):
 async def main():
     runner = core.Runner()
 
+    runner.register_module(modules.NetworkModule())
     for partition in partitions():
         runner.register_module(
             modules.DiskModule(path=partition.mountpoint, short_name=True)
         )
     runner.register_module(modules.MemoryModule())
     runner.register_module(modules.LoadModule())
-    runner.register_module(modules.TimeModule())
+    runner.register_module(modules.LocalTimeModule())
     await runner.start()
 
 
