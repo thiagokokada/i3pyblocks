@@ -4,12 +4,6 @@ import json
 import sys
 
 
-class Color:
-    GOOD = "#00FF00"
-    WARN = "#FFFF00"
-    URGENT = "#FF0000"
-
-
 class Markup:
     NONE = "none"
     PANGO = "pango"

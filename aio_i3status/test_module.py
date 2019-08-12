@@ -2,7 +2,13 @@ import time
 
 import psutil
 
-from aio_i3status.core import Color, PollingModule
+from aio_i3status.core import PollingModule
+
+
+class Color:
+    GOOD = "#00FF00"
+    WARN = "#FFFF00"
+    URGENT = "#FF0000"
 
 
 class TimeModule(PollingModule):
