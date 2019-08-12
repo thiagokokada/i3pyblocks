@@ -40,3 +40,21 @@ class MemoryModule(PollingModule):
 
         memory_in_gib = memory.available / 1024 ** 3
         self.full_text = f" {memory_in_gib:.1f}GiB"
+
+
+class DiskModule(PollingModule):
+    def __init__(self, path="/", short_name=False):
+        super().__init__(instance=path)
+        self.path = path
+        self.short_name = short_name
+
+    def run(self):
+        free = psutil.disk_usage("/").free
+        free_in_gib = free / 1024 ** 3
+
+        if self.short_name:
+            name = "/" + "/".join(x[0] for x in self.path.split("/") if x)
+        else:
+            name = self.path
+
+        self.full_text = f" {name}: {free_in_gib:.1f}GiB"
