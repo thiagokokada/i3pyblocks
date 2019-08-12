@@ -5,7 +5,7 @@ import signal
 
 import psutil
 
-from aio_i3status import core, modules
+from i3pyblocks import core, modules
 
 
 def partitions(excludes=["/boot", "/nix/store"]):

@@ -5,7 +5,7 @@ import signal
 import psutil
 from psutil._common import bytes2human
 
-from aio_i3status.core import PollingModule
+from i3pyblocks.core import PollingModule
 
 
 class Color:
@@ -39,7 +39,7 @@ class BatteryModule(PollingModule):
         battery = psutil.sensors_battery()
 
         if not battery:
-            self.full_text = None
+            self.full_text = ""
             return
 
         percent = battery.percent
