@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
+import signal
 
 import psutil
 
@@ -24,7 +25,9 @@ async def main():
     runner.register_module(modules.MemoryModule())
     runner.register_module(modules.LoadModule())
     runner.register_module(modules.BatteryModule())
-    runner.register_module(modules.LocalTimeModule())
+    runner.register_module(
+        modules.LocalTimeModule(), signals=[signal.SIGUSR1, signal.SIGUSR2]
+    )
     await runner.start()
 
 

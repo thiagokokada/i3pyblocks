@@ -1,6 +1,7 @@
 import abc
 import asyncio
 import json
+import signal
 import sys
 
 
@@ -49,6 +50,9 @@ class Module(metaclass=abc.ABCMeta):
         self.short_text = None
         self.full_text = ""
 
+    def signal_handler(self, signum, frame):
+        raise NotImplemented("Must implement handler method")
+
     def format(self):
         try:
             return {
@@ -96,6 +100,9 @@ class PollingModule(Module):
     def run(self):
         raise NotImplemented("Must implement run method")
 
+    def signal_handler(self, _signum, _frame):
+        self.run()
+
     async def loop(self):
         try:
             while True:
@@ -115,25 +122,38 @@ class Runner:
         task = asyncio.create_task(self.write_results())
         self.tasks = [task]
 
-    async def write_results(self):
-        while True:
-            output = []
+    def register_signal(self, module, signums=[]):
+        def _handler(signum, frame):
+            module.signal_handler(signum, frame)
+            self.write_result()
 
-            for module in self.modules:
-                output.append(json.dumps(module.format()))
+        for signum in signums:
+            signal.signal(signum, _handler)
 
-            sys.stdout.write("[" + ",".join(output) + "],\n")
-            sys.stdout.flush()
-
-            await asyncio.sleep(self.sleep)
-
-    def register_module(self, module):
+    def register_module(self, module, signals=None):
         if not isinstance(module, Module):
             raise ValueError("Must be a Module instance")
+
+        if signals:
+            self.register_signal(module, signals)
 
         self.modules.append(module)
         task = asyncio.create_task(module.loop())
         self.tasks.append(task)
+
+    def write_result(self):
+        output = []
+
+        for module in self.modules:
+            output.append(json.dumps(module.format()))
+
+        sys.stdout.write("[" + ",".join(output) + "],\n")
+        sys.stdout.flush()
+
+    async def write_results(self):
+        while True:
+            self.write_result()
+            await asyncio.sleep(self.sleep)
 
     async def start(self):
         sys.stdout.write('{"version": 1}\n[\n')

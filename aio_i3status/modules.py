@@ -1,5 +1,6 @@
 import datetime
 import time
+import signal
 
 import psutil
 from psutil._common import bytes2human
@@ -92,6 +93,12 @@ class LoadModule(PollingModule):
 
 
 class LocalTimeModule(PollingModule):
+    def signal_handler(self, signum, _):
+        if signum == signal.SIGUSR1:
+            self.color = Color.URGENT
+        else:
+            self.color = None
+
     def run(self):
         current_time = time.localtime()
         formatted_time = time.strftime("%a %T", current_time)
