@@ -117,7 +117,7 @@ class Runner:
 
     def register_module(self, module):
         if not isinstance(module, Module):
-            raise ValueError
+            raise ValueError("Must be a Module instance")
 
         self.modules.append(module)
         task = asyncio.create_task(module.loop())
