@@ -4,7 +4,7 @@ import asyncio
 
 import psutil
 
-from aio_i3status import core, test_module
+from aio_i3status import core, modules
 
 
 def partitions(excludes=["/boot", "/nix/store"]):
@@ -17,11 +17,11 @@ async def main():
 
     for partition in partitions():
         runner.register_module(
-            test_module.DiskModule(path=partition.mountpoint, short_name=True)
+            modules.DiskModule(path=partition.mountpoint, short_name=True)
         )
-    runner.register_module(test_module.MemoryModule())
-    runner.register_module(test_module.LoadModule())
-    runner.register_module(test_module.TimeModule())
+    runner.register_module(modules.MemoryModule())
+    runner.register_module(modules.LoadModule())
+    runner.register_module(modules.TimeModule())
     await runner.start()
 
 
