@@ -103,11 +103,11 @@ async def test_valid_polling_module():
 
     task = asyncio.create_task(module.loop())
 
-    await asyncio.wait([task], timeout=1)
+    await asyncio.wait([task], timeout=0.5)
 
     task.cancel()
 
-    assert module.format() == {"name": "ValidPollingModule", "full_text": "10"}
+    assert module.format() == {"name": "ValidPollingModule", "full_text": "5"}
 
 
 @pytest.mark.asyncio
@@ -134,7 +134,7 @@ async def test_polling_module_with_error():
 @pytest.mark.asyncio
 async def test_runner(capsys):
     class ValidPollingModule(PollingModule):
-        def __init__(self, sleep=1):
+        def __init__(self, sleep=0.1):
             self.state = 0
             super().__init__(sleep=sleep, separator=None, urgent=None)
 
@@ -142,10 +142,10 @@ async def test_runner(capsys):
             self.state += 1
             self.full_text = str(self.state)
 
-    runner = Runner()
+    runner = Runner(sleep=0.1)
     runner.register_module(ValidPollingModule())
 
-    await runner.start(timeout=5)
+    await runner.start(timeout=0.5)
 
     captured = capsys.readouterr()
 
