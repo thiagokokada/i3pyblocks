@@ -1,0 +1,41 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2
+jobs:
+  build-python37:
+    docker:
+      - image: circleci/python:3.7.4
+    working_directory: ~/i3pyblocks
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - py37-dependencies-{{ checksum "requirements-dev.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - py37-dependencies-
+      - run:
+          name: Install Python deps in a venv
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements-dev.txt
+      - save_cache:
+          paths:
+            - ./venv
+          key: py37-dependencies-{{ checksum "requirements.txt" }}
+      - run:
+          name : Run tests
+          command: |
+            . venv/bin/activate
+            pytest -vv --cov=i3pyblocks --cov-report=term --cov-report=html tests/ 
+      - store_artifacts:
+          path: htmlcov
+          destination: htmlcov
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build-python37
