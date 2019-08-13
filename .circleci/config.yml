@@ -4,66 +4,6 @@
 #
 version: 2
 jobs:
-  build-python35:
-    docker:
-      - image: circleci/python:3.5.7
-    working_directory: ~/i3pyblocks
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - py35-dependencies-{{ checksum "requirements-dev.txt" }}
-            # fallback to using the latest cache if no exact match is found
-            - py35-dependencies-
-      - run:
-          name: Install Python deps in a venv
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements-dev.txt
-      - save_cache:
-          paths:
-            - ./venv
-          key: py35-dependencies-{{ checksum "requirements.txt" }}
-      - run:
-          name : Run tests
-          command: |
-            . venv/bin/activate
-            pytest -vv --cov=i3pyblocks --cov-report=term --cov-report=html tests/ 
-      - store_artifacts:
-          path: htmlcov
-          destination: htmlcov
-
-  build-python36:
-    docker:
-      - image: circleci/python:3.6.9
-    working_directory: ~/i3pyblocks
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - py36-dependencies-{{ checksum "requirements-dev.txt" }}
-            # fallback to using the latest cache if no exact match is found
-            - py36-dependencies-
-      - run:
-          name: Install Python deps in a venv
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements-dev.txt
-      - save_cache:
-          paths:
-            - ./venv
-          key: py36-dependencies-{{ checksum "requirements.txt" }}
-      - run:
-          name : Run tests
-          command: |
-            . venv/bin/activate
-            pytest -vv --cov=i3pyblocks --cov-report=term --cov-report=html tests/ 
-      - store_artifacts:
-          path: htmlcov
-          destination: htmlcov
-
   build-python37:
     docker:
       - image: circleci/python:3.7.4
@@ -98,6 +38,4 @@ workflows:
   version: 2
   build:
     jobs:
-      - build-python35
-      - build-python36
       - build-python37
