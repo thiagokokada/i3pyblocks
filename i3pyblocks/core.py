@@ -60,38 +60,28 @@ class Module(metaclass=abc.ABCMeta):
         raise NotImplementedError("Must implement handler method")
 
     def format(self):
-        try:
-            return {
-                k: v
-                for k, v in {
-                    "name": self.name,
-                    "instance": self.instance,
-                    "color": self.color,
-                    "background": self.background,
-                    "border": self.border,
-                    "border_top": self.border_top,
-                    "border_right": self.border_right,
-                    "border_left": self.border_left,
-                    "border_bottom": self.border_bottom,
-                    "min_width": self.min_width,
-                    "align": self.align,
-                    "urgent": self.urgent,
-                    "separator": self.separator,
-                    "separator_block_width": self.separator_block_width,
-                    "full_text": self.full_text,
-                    "short_text": self.short_text,
-                }.items()
-                if v is not None
-            }
-        except Exception as e:
-            module_name = self.__class__.__name__
-            return {
-                "urgent": True,
-                "name": module_name,
-                "full_text": "Exception in {name}.format(): {exception}".format(
-                    name=module_name, exception=e
-                ),
-            }
+        return {
+            k: v
+            for k, v in {
+                "name": self.name,
+                "instance": self.instance,
+                "color": self.color,
+                "background": self.background,
+                "border": self.border,
+                "border_top": self.border_top,
+                "border_right": self.border_right,
+                "border_left": self.border_left,
+                "border_bottom": self.border_bottom,
+                "min_width": self.min_width,
+                "align": self.align,
+                "urgent": self.urgent,
+                "separator": self.separator,
+                "separator_block_width": self.separator_block_width,
+                "full_text": self.full_text,
+                "short_text": self.short_text,
+            }.items()
+            if v is not None
+        }
 
     @abc.abstractmethod
     async def loop(self):
@@ -117,7 +107,7 @@ class PollingModule(Module):
                 await asyncio.sleep(self.sleep)
         except Exception as e:
             self.urgent = True
-            self.full_text = "Exception in {name}.run(): {exception}".format(
+            self.full_text = "Exception in {name}: {exception}".format(
                 name=self.name, exception=e
             )
 

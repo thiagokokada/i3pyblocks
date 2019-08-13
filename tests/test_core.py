@@ -125,7 +125,7 @@ async def test_polling_module_with_error():
     await module.loop()
 
     assert module.format() == {
-        "full_text": "Exception in PollingModuleWithError.run(): Boom!",
+        "full_text": "Exception in PollingModuleWithError: Boom!",
         "name": "PollingModuleWithError",
         "urgent": True,
     }
