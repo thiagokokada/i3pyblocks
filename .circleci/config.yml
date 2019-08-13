@@ -25,7 +25,7 @@ commands:
       - save_cache:
           paths:
             - ./venv
-          key: py<< parameters.version >>-dependencies-{{ checksum "requirements.txt" }}
+          key: py<< parameters.version >>-dependencies-{{ checksum "requirements-dev.txt" }}
 
 jobs:
   black-lint:
