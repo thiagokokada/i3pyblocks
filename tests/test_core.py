@@ -1,4 +1,6 @@
 import asyncio
+import os
+import signal
 
 import pytest
 
@@ -161,3 +163,48 @@ async def test_runner(capsys):
 [{"name": "ValidPollingModule", "full_text": "4"}],
 """
     )
+
+
+@pytest.mark.asyncio
+async def test_runner_with_signal_handler(capsys):
+    async def send_signal():
+        await asyncio.sleep(0.1)
+        os.kill(os.getpid(), signal.SIGUSR1)
+
+    async def send_another_signal():
+        await asyncio.sleep(0.2)
+        os.kill(os.getpid(), signal.SIGUSR2)
+
+    class ValidPollingModuleWithSignalHandler(PollingModule):
+        def __init__(self, sleep=0.1):
+            self.state = 0
+            super().__init__(sleep=sleep, separator=None, urgent=None)
+
+        def run(self):
+            pass
+
+        def signal_handler(self, signum, frame):
+            if signum == signal.SIGUSR1:
+                self.full_text = "received_signal"
+            elif signum == signal.SIGUSR2:
+                self.full_text = "received_another_signal"
+            else:
+                raise Exception("This shouldn't happen")
+
+    runner = Runner(sleep=0.1)
+    runner.register_module(
+        ValidPollingModuleWithSignalHandler(), signals=[signal.SIGUSR1, signal.SIGUSR2]
+    )
+
+    task = asyncio.create_task(send_signal())
+    runner._register_task(task)
+
+    task = asyncio.create_task(send_another_signal())
+    runner._register_task(task)
+
+    await runner.start(timeout=0.5)
+
+    captured = capsys.readouterr()
+
+    assert "received_signal" in captured.out
+    assert "received_another_signal" in captured.out

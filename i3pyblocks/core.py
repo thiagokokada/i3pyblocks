@@ -123,6 +123,9 @@ class Runner:
         for task in self.tasks:
             task.cancel()
 
+    def _register_task(self, task):
+        self.tasks.append(task)
+
     def register_signal(self, module, signums=[]):
         def _handler(signum, frame):
             module.signal_handler(signum, frame)
@@ -140,7 +143,7 @@ class Runner:
 
         self.modules.append(module)
         task = asyncio.create_task(module.loop())
-        self.tasks.append(task)
+        self._register_task(task)
 
     def write_result(self):
         output = []
