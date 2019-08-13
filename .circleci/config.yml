@@ -2,19 +2,20 @@
 #
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
-version: 2
-jobs:
-  build-python37:
-    docker:
-      - image: circleci/python:3.7.4
-    working_directory: ~/i3pyblocks
+version: 2.1
+commands:
+  setup_python:
+    parameters:
+      version:
+        type: string
+        default: "3.7"
     steps:
       - checkout
       - restore_cache:
           keys:
-            - py37-dependencies-{{ checksum "requirements-dev.txt" }}
+            - py<< parameters.version >>-dependencies-{{ checksum "requirements-dev.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - py37-dependencies-
+            - py<< parameters.version >>-dependencies-
       - run:
           name: Install Python deps in a venv
           command: |
@@ -24,7 +25,16 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: py37-dependencies-{{ checksum "requirements.txt" }}
+          key: py<< parameters.version >>-dependencies-{{ checksum "requirements.txt" }}
+
+jobs:
+  build-python37:
+    docker:
+      - image: circleci/python:3.7.4
+    working_directory: ~/i3pyblocks
+    steps:
+      - setup_python:
+          version: "3.7"
       - run:
           name : Run tests
           command: |
@@ -35,7 +45,6 @@ jobs:
           destination: htmlcov
 
 workflows:
-  version: 2
   build:
     jobs:
       - build-python37
