@@ -16,17 +16,20 @@ def partitions(excludes=["/boot", "/nix/store"]):
 async def main():
     runner = core.Runner()
 
-    runner.register_module(modules.NetworkModule())
-    runner.register_module(modules.TemperatureModule())
+    runner.register_module(modules.NetworkModule(separator=False))
+    runner.register_module(modules.TemperatureModule(separator=False))
     for partition in partitions():
         runner.register_module(
-            modules.DiskModule(path=partition.mountpoint, short_name=True)
+            modules.DiskModule(
+                path=partition.mountpoint, short_name=True, separator=False
+            )
         )
-    runner.register_module(modules.MemoryModule())
-    runner.register_module(modules.LoadModule())
-    runner.register_module(modules.BatteryModule())
+    runner.register_module(modules.MemoryModule(separator=False))
+    runner.register_module(modules.LoadModule(separator=False))
+    runner.register_module(modules.BatteryModule(separator=False))
     runner.register_module(
-        modules.LocalTimeModule(), signals=[signal.SIGUSR1, signal.SIGUSR2]
+        modules.LocalTimeModule(separator=False),
+        signals=[signal.SIGUSR1, signal.SIGUSR2],
     )
     await runner.start()
 

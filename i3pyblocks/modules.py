@@ -15,8 +15,8 @@ class Color:
 
 
 class BatteryModule(PollingModule):
-    def __init__(self, sleep=5):
-        super().__init__(sleep=sleep)
+    def __init__(self, sleep=5, **kwargs):
+        super().__init__(sleep=sleep, **kwargs)
 
     def format_battery(self, percent):
         if percent > 75:
@@ -57,8 +57,8 @@ class BatteryModule(PollingModule):
 
 
 class DiskModule(PollingModule):
-    def __init__(self, sleep=5, path="/", short_name=False):
-        super().__init__(sleep=sleep, instance=path)
+    def __init__(self, sleep=5, path="/", short_name=False, **kwargs):
+        super().__init__(sleep=sleep, instance=path, **kwargs)
         self.path = path
         self.short_name = short_name
 
@@ -75,8 +75,8 @@ class DiskModule(PollingModule):
 
 
 class LoadModule(PollingModule):
-    def __init__(self, sleep=5):
-        super().__init__(sleep=sleep)
+    def __init__(self, sleep=5, **kwargs):
+        super().__init__(sleep=sleep, **kwargs)
 
     def run(self):
         load1, load5, load15 = psutil.getloadavg()
@@ -106,6 +106,9 @@ class LocalTimeModule(PollingModule):
 
 
 class MemoryModule(PollingModule):
+    def __init__(self, sleep=3, **kwargs):
+        super().__init__(sleep=sleep, **kwargs)
+
     def run(self):
         memory = psutil.virtual_memory()
 
@@ -121,9 +124,9 @@ class MemoryModule(PollingModule):
 
 
 class NetworkModule(PollingModule):
-    def __init__(self, sleep=3):
+    def __init__(self, sleep=3, **kwargs):
+        super().__init__(sleep=sleep, **kwargs)
         self.previous = psutil.net_io_counters()
-        super().__init__(sleep=sleep)
 
     def run(self):
         now = psutil.net_io_counters()
@@ -144,12 +147,12 @@ class NetworkModule(PollingModule):
 
 
 class TemperatureModule(PollingModule):
-    def __init__(self, sleep=5, sensor=None):
+    def __init__(self, sleep=5, sensor=None, **kwargs):
+        super().__init__(sleep=sleep, **kwargs)
         if sensor:
             self.sensor = sensor
         else:
             self.sensor = next(iter(psutil.sensors_temperatures().keys()))
-        super().__init__(sleep=sleep)
 
     def run(self):
         temperatures = psutil.sensors_temperatures()[self.sensor]
