@@ -3,6 +3,9 @@
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
 version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.2
+
 commands:
   setup_python:
     parameters:
@@ -51,10 +54,9 @@ jobs:
           name : Run tests
           command: |
             . venv/bin/activate
-            pytest -vv --cov=i3pyblocks --cov-report=term --cov-report=html tests/ 
-      - store_artifacts:
-          path: htmlcov
-          destination: htmlcov
+            pytest -vv --cov=i3pyblocks --cov-report=term --cov-report=xml tests/
+      - codecov/upload:
+          file: coverage.xml
 
 workflows:
   build:
