@@ -5,6 +5,12 @@ import signal
 import sys
 
 
+class Align:
+    CENTER = "center"
+    RIGHT = "right"
+    LEFT = "left"
+
+
 class Markup:
     NONE = "none"
     PANGO = "pango"
@@ -51,7 +57,7 @@ class Module(metaclass=abc.ABCMeta):
         self.full_text = ""
 
     def signal_handler(self, signum, frame):
-        raise NotImplemented("Must implement handler method")
+        raise NotImplementedError("Must implement handler method")
 
     def format(self):
         try:
@@ -66,6 +72,7 @@ class Module(metaclass=abc.ABCMeta):
                     "border_top": self.border_top,
                     "border_right": self.border_right,
                     "border_left": self.border_left,
+                    "border_bottom": self.border_bottom,
                     "min_width": self.min_width,
                     "align": self.align,
                     "urgent": self.urgent,
@@ -88,7 +95,7 @@ class Module(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     async def loop(self):
-        raise NotImplemented("Must implement loop method")
+        pass
 
 
 class PollingModule(Module):
@@ -98,7 +105,7 @@ class PollingModule(Module):
 
     @abc.abstractmethod
     def run(self):
-        raise NotImplemented("Must implement run method")
+        pass
 
     def signal_handler(self, _signum, _frame):
         self.run()
@@ -121,6 +128,10 @@ class Runner:
         self.modules = []
         task = asyncio.create_task(self.write_results())
         self.tasks = [task]
+
+    def _clean_up(self):
+        for task in self.tasks:
+            task.cancel()
 
     def register_signal(self, module, signums=[]):
         def _handler(signum, frame):
@@ -155,8 +166,10 @@ class Runner:
             self.write_result()
             await asyncio.sleep(self.sleep)
 
-    async def start(self):
+    async def start(self, timeout=None):
         sys.stdout.write('{"version": 1}\n[\n')
         sys.stdout.flush()
 
-        await asyncio.wait(self.tasks)
+        await asyncio.wait(self.tasks, timeout=timeout)
+
+        self._clean_up()
