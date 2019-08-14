@@ -3,6 +3,7 @@ import asyncio
 import json
 import signal
 import sys
+from typing import Dict, Optional, List, Union
 
 
 class Align:
@@ -20,22 +21,22 @@ class Module(metaclass=abc.ABCMeta):
     def __init__(
         self,
         *,
-        name=None,
-        instance=None,
-        color=None,
-        background=None,
-        border=None,
-        border_top=None,
-        border_right=None,
-        border_bottom=None,
-        border_left=None,
-        min_width=None,
-        align=None,
-        urgent=False,
-        separator=True,
-        separator_block_width=None,
-        markup=Markup.NONE,
-    ):
+        name: Optional[str] = None,
+        instance: Optional[str] = None,
+        color: Optional[str] = None,
+        background: Optional[str] = None,
+        border: Optional[str] = None,
+        border_top: Optional[str] = None,
+        border_right: Optional[str] = None,
+        border_bottom: Optional[str] = None,
+        border_left: Optional[str] = None,
+        min_width: Optional[int] = None,
+        align: Optional[str] = None,
+        urgent: Optional[bool] = False,
+        separator: Optional[bool] = True,
+        separator_block_width: Optional[int] = None,
+        markup: Optional[str] = Markup.NONE,
+    ) -> None:
         if name:
             self.name = name
         else:
@@ -56,10 +57,10 @@ class Module(metaclass=abc.ABCMeta):
         self.short_text = None
         self.full_text = ""
 
-    def signal_handler(self, signum, frame):
+    def signal_handler(self, signum: int, frame: Optional[object]) -> None:
         raise NotImplementedError("Must implement handler method")
 
-    def format(self):
+    def format(self) -> Dict[str, Union[str, int, bool]]:
         return {
             k: v
             for k, v in {
@@ -77,30 +78,31 @@ class Module(metaclass=abc.ABCMeta):
                 "urgent": self.urgent,
                 "separator": self.separator,
                 "separator_block_width": self.separator_block_width,
-                "full_text": self.full_text,
+                # full_text must be present, even if it is an empty string
+                "full_text": str(self.full_text),
                 "short_text": self.short_text,
             }.items()
             if v is not None
         }
 
     @abc.abstractmethod
-    async def loop(self):
+    async def loop(self) -> None:
         pass
 
 
 class PollingModule(Module):
-    def __init__(self, sleep=1, **kwargs):
+    def __init__(self, sleep: int = 1, **kwargs) -> None:
         super().__init__(**kwargs)
         self.sleep = sleep
 
     @abc.abstractmethod
-    def run(self):
+    def run(self) -> None:
         pass
 
-    def signal_handler(self, _signum, _frame):
+    def signal_handler(self, _signum, _frame) -> None:
         self.run()
 
-    async def loop(self):
+    async def loop(self) -> None:
         try:
             while True:
                 self.run()
@@ -113,20 +115,20 @@ class PollingModule(Module):
 
 
 class Runner:
-    def __init__(self, sleep=1):
+    def __init__(self, sleep: int = 1) -> None:
         self.sleep = sleep
-        self.modules = []
+        self.modules: List[Module] = []
         task = asyncio.ensure_future(self.write_results())
         self.tasks = [task]
 
-    def _clean_up(self):
+    def _clean_up(self) -> None:
         for task in self.tasks:
             task.cancel()
 
-    def _register_task(self, task):
+    def _register_task(self, task: asyncio.Future) -> None:
         self.tasks.append(task)
 
-    def register_signal(self, module, signums=[]):
+    def register_signal(self, module: Module, signums: List[int] = []) -> None:
         def _handler(signum, frame):
             module.signal_handler(signum, frame)
             self.write_result()
@@ -134,7 +136,7 @@ class Runner:
         for signum in signums:
             signal.signal(signum, _handler)
 
-    def register_module(self, module, signals=None):
+    def register_module(self, module: Module, signals: List[int] = []) -> None:
         if not isinstance(module, Module):
             raise ValueError("Must be a Module instance")
 
@@ -145,8 +147,8 @@ class Runner:
         task = asyncio.ensure_future(module.loop())
         self._register_task(task)
 
-    def write_result(self):
-        output = []
+    def write_result(self) -> None:
+        output: List[str] = []
 
         for module in self.modules:
             output.append(json.dumps(module.format()))
@@ -154,12 +156,12 @@ class Runner:
         sys.stdout.write("[" + ",".join(output) + "],\n")
         sys.stdout.flush()
 
-    async def write_results(self):
+    async def write_results(self) -> None:
         while True:
             self.write_result()
             await asyncio.sleep(self.sleep)
 
-    async def start(self, timeout=None):
+    async def start(self, timeout: Optional[int] = None) -> None:
         sys.stdout.write('{"version": 1}\n[\n')
         sys.stdout.flush()
 
