@@ -37,24 +37,24 @@ class Module(metaclass=abc.ABCMeta):
         separator_block_width: Optional[int] = None,
         markup: Optional[str] = Markup.NONE,
     ) -> None:
+        self.name: str
         if name:
             self.name = name
         else:
             self.name = self.__class__.__name__
-        self.instance = instance
-        self.color = color
-        self.background = background
-        self.border = border
-        self.border_top = border_top
-        self.border_right = border_right
-        self.border_bottom = border_bottom
-        self.border_left = border_left
-        self.min_width = min_width
-        self.align = align
-        self.urgent = urgent
-        self.separator = separator
-        self.separator_block_width = separator_block_width
-
+        self.instance: Optional[str] = instance
+        self.color: Optional[str] = color
+        self.background: Optional[str] = background
+        self.border: Optional[str] = border
+        self.border_top: Optional[str] = border_top
+        self.border_right: Optional[str] = border_right
+        self.border_bottom: Optional[str] = border_bottom
+        self.border_left: Optional[str] = border_left
+        self.min_width: Optional[int] = min_width
+        self.align: Optional[str] = align
+        self.urgent: Optional[bool] = urgent
+        self.separator: Optional[bool] = separator
+        self.separator_block_width: Optional[int] = separator_block_width
         self.short_text: Optional[str] = None
         self.full_text: str = ""
 
