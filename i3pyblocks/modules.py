@@ -87,16 +87,38 @@ class LoadModule(PollingModule):
 
 
 class LocalTimeModule(PollingModule):
-    def signal_handler(self, signum, _):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.run_fn = self.time
+
+    def time(self):
+        current_time = time.localtime()
+        formatted_time = time.strftime("%T", current_time)
+        self.update(f" {formatted_time}")
+
+    def date(self):
+        current_time = time.localtime()
+        formatted_date = time.strftime("%d %a %Y", current_time)
+        self.update(f" {formatted_date}")
+
+    def signal_handler(self, signum, frame):
         if signum == signal.SIGUSR1:
-            self._color = Color.URGENT
+            self.run_fn = self.time
+        elif signum == signal.SIGUSR2:
+            self.run_fn = self.date
+
+        super().signal_handler(signum, frame)
+
+    def click_handler(self, **kwargs):
+        if self.run_fn == self.time:
+            self.run_fn = self.date
         else:
-            self._color = None
+            self.run_fn = self.time
+
+        super().click_handler(**kwargs)
 
     def run(self):
-        current_time = time.localtime()
-        formatted_time = time.strftime("%a %T", current_time)
-        self.update(f" {formatted_time}")
+        self.run_fn()
 
 
 class MemoryModule(PollingModule):

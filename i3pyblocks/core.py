@@ -25,7 +25,7 @@ class Module(metaclass=abc.ABCMeta):
     def __init__(
         self,
         name: Optional[str] = None,
-        instance: Optional[str] = None,
+        instance: Optional[str] = "default",
         *,
         color: Optional[str] = None,
         background: Optional[str] = None,
@@ -118,11 +118,26 @@ class Module(metaclass=abc.ABCMeta):
             "markup": self._get_value_or_default(markup, "_markup"),
         }
 
-    def signal_handler(self, signum: int, frame: Optional[object]) -> None:
-        raise NotImplementedError("Must implement handler method")
-
     def result(self) -> Dict[str, Union[str, int, bool]]:
         return {k: v for k, v in self._state.items() if v is not None}
+
+    @abc.abstractmethod
+    def click_handler(
+        self,
+        x: int,
+        y: int,
+        button: int,
+        relative_x: int,
+        relative_y: int,
+        width: int,
+        height: int,
+        modifiers: List[str],
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    def signal_handler(self, signum: int, frame: Optional[object]) -> None:
+        pass
 
     @abc.abstractmethod
     async def loop(self) -> None:
@@ -138,7 +153,10 @@ class PollingModule(Module):
     def run(self) -> None:
         pass
 
-    def signal_handler(self, _signum, _frame) -> None:
+    def click_handler(self, *_, **__) -> None:
+        self.run()
+
+    def signal_handler(self, *_, **__) -> None:
         self.run()
 
     async def loop(self) -> None:
@@ -154,13 +172,22 @@ class PollingModule(Module):
 class Runner:
     def __init__(self, sleep: int = 1) -> None:
         self.sleep = sleep
-        self.modules: List[Module] = []
-        task = asyncio.ensure_future(self.write_results())
-        self.tasks = [task]
+        self.modules: Dict[str, Module] = {}
+        self.loop = asyncio.get_event_loop()
+
+        write_task = asyncio.ensure_future(self.write_results())
+        click_task = asyncio.ensure_future(self.click_events())
+        self.tasks = [write_task, click_task]
 
     def _clean_up(self) -> None:
         for task in self.tasks:
             task.cancel()
+
+    def _get_module_key(self, module: Module) -> str:
+        return f"{module.name}__{module.instance or 'none'}"
+
+    def _get_module_from_key(self, name: str, instance: str = None):
+        return self.modules.get(f"{name}__{instance or 'none'}")
 
     def _register_task(self, task: asyncio.Future) -> None:
         self.tasks.append(task)
@@ -180,14 +207,16 @@ class Runner:
         if signals:
             self.register_signal(module, signals)
 
-        self.modules.append(module)
+        module_key = self._get_module_key(module)
+        self.modules[module_key] = module
+
         task = asyncio.ensure_future(module.loop())
         self._register_task(task)
 
     def write_result(self) -> None:
         output: List[str] = []
 
-        for module in self.modules:
+        for module in self.modules.values():
             output.append(json.dumps(module.result()))
 
         sys.stdout.write("[" + ",".join(output) + "],\n")
@@ -198,10 +227,41 @@ class Runner:
             self.write_result()
             await asyncio.sleep(self.sleep)
 
+    async def click_events(self) -> None:
+        reader = asyncio.StreamReader(loop=self.loop)
+        protocol = asyncio.StreamReaderProtocol(reader, loop=self.loop)
+
+        await self.loop.connect_read_pipe(lambda: protocol, sys.stdin)
+
+        await reader.readuntil(b"\n")
+
+        try:
+            while True:
+                raw = await reader.readuntil(b"}")
+                click_event = json.loads(raw)
+                module = self._get_module_from_key(
+                    click_event.get("name"), click_event.get("instance")
+                )
+                module.click_handler(
+                    x=click_event.get("x"),
+                    y=click_event.get("y"),
+                    button=click_event.get("button"),
+                    relative_x=click_event.get("relative_x"),
+                    relative_y=click_event.get("relative_y"),
+                    width=click_event.get("width"),
+                    height=click_event.get("height"),
+                    modifiers=click_event.get("modifiers"),
+                )
+                self.write_result()
+                await reader.readuntil(b",")
+        except Exception as e:
+            # TODO: Improve exception handling
+            pass
+
     async def start(self, timeout: Optional[int] = None) -> None:
-        sys.stdout.write('{"version": 1}\n[\n')
+        sys.stdout.write('{"version": 1, "click_events": true}\n[\n')
         sys.stdout.flush()
 
-        await asyncio.wait(self.tasks, timeout=timeout)
+        await asyncio.wait(self.tasks, timeout=timeout, loop=self.loop)
 
         self._clean_up()
