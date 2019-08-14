@@ -19,9 +19,7 @@ def test_invalid_module():
 async def test_valid_module():
     class ValidModule(Module):
         async def loop(self):
-            self.urgent = False
-            self.color = None
-            self.full_text = "Done!"
+            self.update("Done!", color=None, urgent=False, markup=Markup.NONE)
 
     module = ValidModule(
         name="Name",
@@ -41,7 +39,7 @@ async def test_valid_module():
         markup=Markup.PANGO,
     )
 
-    assert module.format() == {
+    assert module.result() == {
         "align": "center",
         "background": "#FFFFFF",
         "border": "#FF0000",
@@ -57,11 +55,12 @@ async def test_valid_module():
         "separator": False,
         "separator_block_width": 9,
         "urgent": True,
+        "markup": "pango",
     }
 
     await module.loop()
 
-    assert module.format() == {
+    assert module.result() == {
         "align": "center",
         "background": "#FFFFFF",
         "border": "#FF0000",
@@ -69,6 +68,7 @@ async def test_valid_module():
         "border_left": 1,
         "border_right": 1,
         "border_top": 1,
+        "color": "#000000",
         "full_text": "Done!",
         "instance": "Instance",
         "min_width": 10,
@@ -76,6 +76,7 @@ async def test_valid_module():
         "separator": False,
         "separator_block_width": 9,
         "urgent": False,
+        "markup": "none",
     }
 
     with pytest.raises(NotImplementedError):
@@ -95,11 +96,11 @@ async def test_valid_polling_module():
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None)
+            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
 
         def run(self):
             self.state += 1
-            self.full_text = str(self.state)
+            self.update(str(self.state))
 
     module = ValidPollingModule()
 
@@ -109,7 +110,7 @@ async def test_valid_polling_module():
 
     task.cancel()
 
-    assert module.format() == {"name": "ValidPollingModule", "full_text": "5"}
+    assert module.result() == {"name": "ValidPollingModule", "full_text": "5"}
 
 
 @pytest.mark.asyncio
@@ -117,7 +118,7 @@ async def test_polling_module_with_error():
     class PollingModuleWithError(PollingModule):
         def __init__(self, sleep=1):
             self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None)
+            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
 
         def run(self):
             raise Exception("Boom!")
@@ -126,7 +127,7 @@ async def test_polling_module_with_error():
 
     await module.loop()
 
-    assert module.format() == {
+    assert module.result() == {
         "full_text": "Exception in PollingModuleWithError: Boom!",
         "name": "PollingModuleWithError",
         "urgent": True,
@@ -138,11 +139,11 @@ async def test_runner(capsys):
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None)
+            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
 
         def run(self):
             self.state += 1
-            self.full_text = str(self.state)
+            self.update(str(self.state))
 
     runner = Runner(sleep=0.1)
     runner.register_module(ValidPollingModule())
@@ -178,16 +179,16 @@ async def test_runner_with_signal_handler(capsys):
     class ValidPollingModuleWithSignalHandler(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None)
+            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
 
         def run(self):
             pass
 
         def signal_handler(self, signum, frame):
             if signum == signal.SIGUSR1:
-                self.full_text = "received_signal"
+                self.update("received_signal")
             elif signum == signal.SIGUSR2:
-                self.full_text = "received_another_signal"
+                self.update("received_another_signal")
             else:
                 raise Exception("This shouldn't happen")
 

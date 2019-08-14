@@ -20,9 +20,9 @@ class Markup:
 class Module(metaclass=abc.ABCMeta):
     def __init__(
         self,
-        *,
         name: Optional[str] = None,
         instance: Optional[str] = None,
+        *,
         color: Optional[str] = None,
         background: Optional[str] = None,
         border: Optional[str] = None,
@@ -43,48 +43,82 @@ class Module(metaclass=abc.ABCMeta):
         else:
             self.name = self.__class__.__name__
         self.instance: Optional[str] = instance
-        self.color: Optional[str] = color
-        self.background: Optional[str] = background
-        self.border: Optional[str] = border
-        self.border_top: Optional[str] = border_top
-        self.border_right: Optional[str] = border_right
-        self.border_bottom: Optional[str] = border_bottom
-        self.border_left: Optional[str] = border_left
-        self.min_width: Optional[int] = min_width
-        self.align: Optional[str] = align
-        self.urgent: Optional[bool] = urgent
-        self.separator: Optional[bool] = separator
-        self.separator_block_width: Optional[int] = separator_block_width
-        self.short_text: Optional[str] = None
-        self.full_text: str = ""
+
+        # Those are default values for properties if they are not overrided
+        self._color: Optional[str] = color
+        self._background: Optional[str] = background
+        self._border: Optional[str] = border
+        self._border_top: Optional[str] = border_top
+        self._border_right: Optional[str] = border_right
+        self._border_bottom: Optional[str] = border_bottom
+        self._border_left: Optional[str] = border_left
+        self._min_width: Optional[int] = min_width
+        self._align: Optional[str] = align
+        self._urgent: Optional[bool] = urgent
+        self._separator: Optional[bool] = separator
+        self._separator_block_width: Optional[int] = separator_block_width
+        self._markup: Optional[str] = markup
+        self._short_text: Optional[str] = None
+        self._full_text: str = ""
+
+        self._state: Dict[str, Optional[Union[str, int, bool]]]
+        self.update()
+
+    def _get_value_or_default(
+        self, value: Optional[Union[str, int, bool]], key: str
+    ) -> Optional[Union[str, int, bool]]:
+        if value is not None:
+            return value
+        else:
+            return getattr(self, key)
+
+    def update(
+        self,
+        full_text: str = "",
+        short_text: Optional[str] = None,
+        color: Optional[str] = None,
+        background: Optional[str] = None,
+        border: Optional[str] = None,
+        border_top: Optional[str] = None,
+        border_right: Optional[str] = None,
+        border_bottom: Optional[str] = None,
+        border_left: Optional[str] = None,
+        min_width: Optional[int] = None,
+        align: Optional[str] = None,
+        urgent: Optional[bool] = None,
+        separator: Optional[bool] = None,
+        separator_block_width: Optional[int] = None,
+        markup: Optional[str] = None,
+    ):
+        self._state = {
+            "name": self.name,
+            "instance": self.instance,
+            "full_text": full_text,
+            "short_text": short_text,
+            "color": self._get_value_or_default(color, "_color"),
+            "background": self._get_value_or_default(background, "_background"),
+            "border": self._get_value_or_default(border, "_border"),
+            "border_top": self._get_value_or_default(border_top, "_border_top"),
+            "border_right": self._get_value_or_default(border_right, "_border_right"),
+            "border_left": self._get_value_or_default(border_left, "_border_left"),
+            "border_bottom": self._get_value_or_default(
+                border_bottom, "_border_bottom"
+            ),
+            "min_width": self._get_value_or_default(min_width, "_min_width"),
+            "align": self._get_value_or_default(align, "_align"),
+            "urgent": self._get_value_or_default(urgent, "_urgent"),
+            "separator": self._get_value_or_default(separator, "_separator"),
+            "separator_block_width": self._get_value_or_default(
+                separator_block_width, "_separator_block_width"
+            ),
+            "markup": self._get_value_or_default(markup, "_markup"),
+        }
 
     def signal_handler(self, signum: int, frame: Optional[object]) -> None:
         raise NotImplementedError("Must implement handler method")
 
-    def format(self) -> Dict[str, Union[str, int, bool]]:
-        return {
-            k: v
-            for k, v in {
-                "name": self.name,
-                "instance": self.instance,
-                "color": self.color,
-                "background": self.background,
-                "border": self.border,
-                "border_top": self.border_top,
-                "border_right": self.border_right,
-                "border_left": self.border_left,
-                "border_bottom": self.border_bottom,
-                "min_width": self.min_width,
-                "align": self.align,
-                "urgent": self.urgent,
-                "separator": self.separator,
-                "separator_block_width": self.separator_block_width,
-                # full_text must be present, even if it is an empty string
-                "full_text": str(self.full_text),
-                "short_text": self.short_text,
-            }.items()
-            if v is not None
-        }
+    def result(self) -> Dict[str, Union[str, int, bool]]:
+        return {k: v for k, v in self._state.items() if v is not None}
 
     @abc.abstractmethod
     async def loop(self) -> None:
@@ -109,10 +143,7 @@ class PollingModule(Module):
                 self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:
-            self.urgent = True
-            self.full_text = "Exception in {name}: {exception}".format(
-                name=self.name, exception=e
-            )
+            self.update(f"Exception in {self.name}: {e}", urgent=True)
 
 
 class Runner:
@@ -152,7 +183,7 @@ class Runner:
         output: List[str] = []
 
         for module in self.modules:
-            output.append(json.dumps(module.format()))
+            output.append(json.dumps(module.result()))
 
         sys.stdout.write("[" + ",".join(output) + "],\n")
         sys.stdout.flush()
