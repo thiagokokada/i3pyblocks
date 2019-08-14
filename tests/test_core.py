@@ -103,7 +103,7 @@ async def test_valid_polling_module():
 
     module = ValidPollingModule()
 
-    task = asyncio.create_task(module.loop())
+    task = asyncio.ensure_future(module.loop())
 
     await asyncio.wait([task], timeout=0.5)
 
@@ -196,10 +196,10 @@ async def test_runner_with_signal_handler(capsys):
         ValidPollingModuleWithSignalHandler(), signals=[signal.SIGUSR1, signal.SIGUSR2]
     )
 
-    task = asyncio.create_task(send_signal())
+    task = asyncio.ensure_future(send_signal())
     runner._register_task(task)
 
-    task = asyncio.create_task(send_another_signal())
+    task = asyncio.ensure_future(send_another_signal())
     runner._register_task(task)
 
     await runner.start(timeout=0.5)
