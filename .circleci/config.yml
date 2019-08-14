@@ -43,21 +43,6 @@ jobs:
             . venv/bin/activate
             black --check --exclude venv .
 
-  build-python35:
-    docker:
-      - image: circleci/python:3.5.7
-    working_directory: ~/i3pyblocks
-    steps:
-      - setup_python:
-          version: "3.5"
-      - run:
-          name : Run tests
-          command: |
-            . venv/bin/activate
-            pytest -vv --mypy-ignore-missing-imports --cov=i3pyblocks --cov-report=term --cov-report=xml tests/
-      - codecov/upload:
-          file: coverage.xml
-
   build-python36:
     docker:
       - image: circleci/python:3.6.9
@@ -92,6 +77,5 @@ workflows:
   build:
     jobs:
       - black-lint
-      - build-python35
       - build-python36
       - build-python37
