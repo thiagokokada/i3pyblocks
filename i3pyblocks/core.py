@@ -116,7 +116,7 @@ class Runner:
     def __init__(self, sleep=1):
         self.sleep = sleep
         self.modules = []
-        task = asyncio.create_task(self.write_results())
+        task = asyncio.ensure_future(self.write_results())
         self.tasks = [task]
 
     def _clean_up(self):
@@ -142,7 +142,7 @@ class Runner:
             self.register_signal(module, signals)
 
         self.modules.append(module)
-        task = asyncio.create_task(module.loop())
+        task = asyncio.ensure_future(module.loop())
         self._register_task(task)
 
     def write_result(self):
