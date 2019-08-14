@@ -21,7 +21,7 @@ async def main():
     for partition in partitions():
         runner.register_module(
             modules.DiskModule(
-                path=partition.mountpoint, short_name=True, separator=False
+                path=partition.mountpoint, short_label=True, separator=False
             )
         )
     runner.register_module(modules.MemoryModule(separator=False))

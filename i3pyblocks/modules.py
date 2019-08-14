@@ -20,58 +20,52 @@ class BatteryModule(PollingModule):
 
     def format_battery(self, percent):
         if percent > 75:
-            self.color = None
-            return ""
+            return "", None
         elif percent > 50:
-            self.color = None
-            return ""
+            return "", None
         elif percent > 25:
-            self.color = None
-            return ""
+            return "", None
         elif percent > 10:
-            self.color = Color.WARN
-            return ""
+            return "", Color.WARN
         else:
-            self.color = Color.URGENT
-            return ""
+            return "", Color.URGENT
 
     def run(self):
         battery = psutil.sensors_battery()
 
         if not battery:
-            self.full_text = ""
             return
 
         percent = battery.percent
         remaining_time = battery.secsleft
         remaining_time_formatted = datetime.timedelta(seconds=battery.secsleft)
         plugged = battery.power_plugged
+        icon, color = self.format_battery(percent)
 
         if plugged:
-            self.color = None
-            self.full_text = f" {percent:.0f}%"
+            self.update(f" {percent:.0f}%")
         elif remaining_time != psutil.POWER_TIME_UNKNOWN:
-            self.full_text = f"{self.format_battery(percent)} {percent:.0f}% {remaining_time_formatted}"
+            self.update(
+                f"{icon} {percent:.0f}% {remaining_time_formatted}", color=color
+            )
         else:
-            self.full_text = f"{self.format_battery(percent)} {percent:.0f}%"
+            self.update(f"{icon} {percent:.0f}%", color=color)
 
 
 class DiskModule(PollingModule):
-    def __init__(self, sleep=5, path="/", short_name=False, **kwargs):
+    def __init__(self, sleep=5, path="/", short_label=False, **kwargs):
         super().__init__(sleep=sleep, instance=path, **kwargs)
         self.path = path
-        self.short_name = short_name
+        if short_label:
+            self.label = "/" + "/".join(x[0] for x in self.path.split("/") if x)
+        else:
+            self.label = self.path
 
     def run(self):
         free = psutil.disk_usage("/").free
         free_in_gib = free / 1024 ** 3
 
-        if self.short_name:
-            name = "/" + "/".join(x[0] for x in self.path.split("/") if x)
-        else:
-            name = self.path
-
-        self.full_text = f" {name}: {free_in_gib:.1f}GiB"
+        self.update(f" {self.label}: {free_in_gib:.1f}GiB")
 
 
 class LoadModule(PollingModule):
@@ -83,26 +77,26 @@ class LoadModule(PollingModule):
         cpu_count = psutil.cpu_count()
 
         if load1 > cpu_count:
-            self.color = Color.URGENT
+            color = Color.URGENT
         elif load1 > cpu_count // 2:
-            self.color = Color.WARN
+            color = Color.WARN
         else:
-            self.color = None
+            color = None
 
-        self.full_text = f" {load1}"
+        self.update(f" {load1}", color=color)
 
 
 class LocalTimeModule(PollingModule):
     def signal_handler(self, signum, _):
         if signum == signal.SIGUSR1:
-            self.color = Color.URGENT
+            self._color = Color.URGENT
         else:
-            self.color = None
+            self._color = None
 
     def run(self):
         current_time = time.localtime()
         formatted_time = time.strftime("%a %T", current_time)
-        self.full_text = f" {formatted_time}"
+        self.update(f" {formatted_time}")
 
 
 class MemoryModule(PollingModule):
@@ -113,14 +107,14 @@ class MemoryModule(PollingModule):
         memory = psutil.virtual_memory()
 
         if memory.available < 0.1 * memory.total:
-            self.color = Color.URGENT
+            color = Color.URGENT
         elif memory.available < 0.3 * memory.total:
-            self.color = Color.WARN
+            color = Color.WARN
         else:
-            self.color = None
+            color = None
 
         memory_in_gib = memory.available / 1024 ** 3
-        self.full_text = f" {memory_in_gib:.1f}GiB"
+        self.update(f" {memory_in_gib:.1f}GiB", color=color)
 
 
 class NetworkModule(PollingModule):
@@ -134,16 +128,16 @@ class NetworkModule(PollingModule):
         upload = (now.bytes_sent - self.previous.bytes_sent) / self.sleep
         download = (now.bytes_recv - self.previous.bytes_recv) / self.sleep
 
-        self.previous = now
-
         if download > 5 * 1024 ** 2 or upload > 5 * 1024 ** 2:
-            self.color = Color.URGENT
+            color = Color.URGENT
         elif download > 1024 ** 2 or upload > 1024 ** 2:
-            self.color = Color.WARN
+            color = Color.WARN
         else:
-            self.color = None
+            color = None
 
-        self.full_text = f" {bytes2human(upload)}  {bytes2human(download)}"
+        self.update(f" {bytes2human(upload)}  {bytes2human(download)}", color=color)
+
+        self.previous = now
 
 
 class TemperatureModule(PollingModule):
@@ -156,6 +150,13 @@ class TemperatureModule(PollingModule):
 
     def run(self):
         temperatures = psutil.sensors_temperatures()[self.sensor]
-        temperature = temperatures[0]
+        temperature = temperatures[0].current
 
-        self.full_text = f" {temperature.current}°C"
+        if temperature > 75:
+            color = Color.URGENT
+        elif temperature > 50:
+            color = Color.WARN
+        else:
+            color = None
+
+        self.update(f" {temperature:.0f}°C", color=color)
