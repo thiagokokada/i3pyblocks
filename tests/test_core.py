@@ -166,6 +166,15 @@ async def test_runner(capsys):
     )
 
 
+def test_runner_with_invalid_module():
+    class InvalidModule:
+        pass
+
+    runner = Runner(sleep=0.1)
+    with pytest.raises(ValueError):
+        runner.register_module(InvalidModule())
+
+
 @pytest.mark.asyncio
 async def test_runner_with_signal_handler(capsys):
     async def send_signal():
