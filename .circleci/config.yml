@@ -54,7 +54,7 @@ jobs:
           name : Run tests
           command: |
             . venv/bin/activate
-            pytest -vv --cov=i3pyblocks --cov-report=term --cov-report=xml tests/
+            pytest -vv --mypy-ignore-missing-imports --cov=i3pyblocks --cov-report=term --cov-report=xml tests/
       - codecov/upload:
           file: coverage.xml
 
@@ -69,7 +69,7 @@ jobs:
           name : Run tests
           command: |
             . venv/bin/activate
-            pytest -vv --cov=i3pyblocks --cov-report=term --cov-report=xml tests/
+            pytest -vv --mypy-ignore-missing-imports --cov=i3pyblocks --cov-report=term --cov-report=xml tests/
       - codecov/upload:
           file: coverage.xml
 
