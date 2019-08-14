@@ -2,6 +2,7 @@
 
 import asyncio
 import signal
+import sys
 
 import psutil
 
@@ -35,4 +36,8 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    if sys.version_info >= (3, 6):
+        asyncio.run(main())
+    else:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
