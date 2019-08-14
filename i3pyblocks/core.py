@@ -54,8 +54,9 @@ class Module(metaclass=abc.ABCMeta):
         self.urgent = urgent
         self.separator = separator
         self.separator_block_width = separator_block_width
-        self.short_text = None
-        self.full_text = ""
+
+        self.short_text: Optional[str] = None
+        self.full_text: str = ""
 
     def signal_handler(self, signum: int, frame: Optional[object]) -> None:
         raise NotImplementedError("Must implement handler method")
