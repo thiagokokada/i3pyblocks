@@ -231,6 +231,22 @@ class Runner:
             self.write_result()
             await asyncio.sleep(self.sleep)
 
+    def click_event(self, raw: Union[str, bytes, bytearray]) -> None:
+        click_event = json.loads(raw)
+        module = self._get_module_from_key(
+            click_event.get("name"), click_event.get("instance")
+        )
+        module.click_handler(
+            x=click_event.get("x"),
+            y=click_event.get("y"),
+            button=click_event.get("button"),
+            relative_x=click_event.get("relative_x"),
+            relative_y=click_event.get("relative_y"),
+            width=click_event.get("width"),
+            height=click_event.get("height"),
+            modifiers=click_event.get("modifiers"),
+        )
+
     async def click_events(self) -> None:
         reader = asyncio.StreamReader(loop=self.loop)
         protocol = asyncio.StreamReaderProtocol(reader, loop=self.loop)
@@ -242,20 +258,7 @@ class Runner:
         try:
             while True:
                 raw = await reader.readuntil(b"}")
-                click_event = json.loads(raw)
-                module = self._get_module_from_key(
-                    click_event.get("name"), click_event.get("instance")
-                )
-                module.click_handler(
-                    x=click_event.get("x"),
-                    y=click_event.get("y"),
-                    button=click_event.get("button"),
-                    relative_x=click_event.get("relative_x"),
-                    relative_y=click_event.get("relative_y"),
-                    width=click_event.get("width"),
-                    height=click_event.get("height"),
-                    modifiers=click_event.get("modifiers"),
-                )
+                self.click_event(raw)
                 self.write_result()
                 await reader.readuntil(b",")
         except Exception as e:

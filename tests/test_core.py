@@ -217,3 +217,32 @@ async def test_runner_with_signal_handler(capsys):
 
     assert "received_signal" in captured.out
     assert "received_another_signal" in captured.out
+
+
+# TODO: Test with mocked sys.stdin instead of calling functions directly
+def test_runner_with_click_handler(capsys, monkeypatch):
+    click_event = b'{"name":"ValidPollingModuleWithClickHandler","instance":"default","button":1,"modifiers":["Mod1"],"x":123,"y":456,"relative_x":12,"relative_y":34,"width":20,"height":40}'
+
+    class ValidPollingModuleWithClickHandler(PollingModule):
+        def __init__(self, sleep=0.1):
+            self.state = 0
+            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
+
+        def run(self):
+            pass
+
+        def click_handler(
+            self, x, y, button, relative_x, relative_y, width, height, modifiers
+        ):
+            self.update(
+                f"{x}-{y}-{button}-{relative_x}-{relative_y}-{width}-{height}-{modifiers}"
+            )
+
+    runner = Runner(sleep=0.1)
+    module = ValidPollingModuleWithClickHandler()
+    runner.register_module(module)
+    runner.click_event(click_event)
+
+    result = module.result()
+
+    assert "123-456-1-12-34-20-40-['Mod1']" == result["full_text"]
