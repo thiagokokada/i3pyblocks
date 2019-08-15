@@ -1,9 +1,13 @@
 import abc
 import asyncio
 import json
+import logging
 import signal
 import sys
 from typing import Dict, Optional, List, Union
+
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 
 class Align:
@@ -143,6 +147,7 @@ class PollingModule(Module):
                 self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:
+            log.exception(f"Exception in {self.name}")
             self.update(f"Exception in {self.name}: {e}", urgent=True)
 
 

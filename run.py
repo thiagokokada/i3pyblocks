@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
 import asyncio
+import logging
+import os
 import signal
 
 import psutil
 
 from i3pyblocks import core, modules
+
+logging.basicConfig(filename=f".i3pyblocks-{os.getpid()}.log", level=logging.INFO)
 
 
 def partitions(excludes=["/boot", "/nix/store"]):
