@@ -194,8 +194,11 @@ class Runner:
 
     def register_signal(self, module: Module, signums: List[int] = []) -> None:
         def _handler(signum, frame):
-            module.signal_handler(signum, frame)
-            self.write_result()
+            try:
+                module.signal_handler(signum=signum, frame=frame)
+                self.write_result()
+            except Exception as e:
+                log.exception("Exception in signal handler")
 
         for signum in signums:
             signal.signal(signum, _handler)
@@ -255,8 +258,7 @@ class Runner:
                 self.write_result()
                 await reader.readuntil(b",")
         except Exception as e:
-            # TODO: Improve exception handling
-            pass
+            log.exception("Error in click handler")
 
     async def start(self, timeout: Optional[int] = None) -> None:
         sys.stdout.write('{"version": 1, "click_events": true}\n[\n')
