@@ -174,6 +174,22 @@ async def test_runner(capsys):
     )
 
 
+def test_runner_with_two_equal_modules(capsys):
+    class ValidPollingModule(PollingModule):
+        def __init__(self, sleep=0.1):
+            self.state = 0
+            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
+
+        def run(self):
+            self.state += 1
+            self.update(str(self.state))
+
+    runner = Runner(sleep=0.1)
+    runner.register_module(ValidPollingModule())
+    with pytest.raises(ValueError):
+        runner.register_module(ValidPollingModule())
+
+
 @pytest.mark.asyncio
 async def test_runner_with_signal_handler(capsys):
     async def send_signal():
