@@ -209,7 +209,12 @@ class Runner:
 
     def register_module(self, module: Module, signals: List[int] = []) -> None:
         module_key = self._get_module_key(module)
-        self.modules[module_key] = module
+        if not module_key in self.modules.keys():
+            self.modules[module_key] = module
+        else:
+            raise ValueError(
+                f"Module '{module.name}' with instance '{module.instance}' already exists"
+            )
 
         task = asyncio.ensure_future(module.loop())
         self._register_task(task)
