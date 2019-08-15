@@ -4,7 +4,7 @@ import signal
 
 import pytest
 
-from i3pyblocks.core import *
+from i3pyblocks.core import Align, Markup, Module, PollingModule, Runner
 
 
 def test_invalid_module():

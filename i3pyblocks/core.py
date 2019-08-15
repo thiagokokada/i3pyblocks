@@ -201,7 +201,7 @@ class Runner:
             try:
                 module.signal_handler(signum=signum, frame=frame)
                 self.write_result()
-            except Exception as e:
+            except Exception:
                 log.exception("Exception in signal handler")
 
         for signum in signums:
@@ -209,7 +209,7 @@ class Runner:
 
     def register_module(self, module: Module, signals: List[int] = []) -> None:
         module_key = self._get_module_key(module)
-        if not module_key in self.modules.keys():
+        if module_key not in self.modules.keys():
             self.modules[module_key] = module
         else:
             raise ValueError(
@@ -266,7 +266,7 @@ class Runner:
                 self.click_event(raw)
                 self.write_result()
                 await reader.readuntil(b",")
-        except Exception as e:
+        except Exception:
             log.exception("Error in click handler")
 
     async def start(self, timeout: Optional[int] = None) -> None:

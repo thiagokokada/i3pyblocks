@@ -38,10 +38,22 @@ jobs:
     steps:
       - setup_python
       - run:
-          name : Run tests
+          name : Run lint
           command: |
             . venv/bin/activate
             black --check --exclude venv .
+
+  flake8-lint:
+    docker:
+      - image: circleci/python:3.7.4
+    working_directory: ~/i3pyblocks
+    steps:
+      - setup_python
+      - run:
+          name : Run lint
+          command: |
+            . venv/bin/activate
+            flake8 --ignore=E501,W503 --exclude=venv .
 
   build-python36:
     docker:
@@ -77,5 +89,6 @@ workflows:
   build:
     jobs:
       - black-lint
+      - flake8-lint
       - build-python36
       - build-python37
