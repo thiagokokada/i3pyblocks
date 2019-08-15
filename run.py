@@ -2,14 +2,13 @@
 
 import asyncio
 import logging
-import os
 import signal
 
 import psutil
 
 from i3pyblocks import core, modules
 
-logging.basicConfig(filename=f".i3pyblocks-{os.getpid()}.log", level=logging.INFO)
+logging.basicConfig(filename=f".i3pyblocks.log", level=logging.INFO)
 
 
 def partitions(excludes=["/boot", "/nix/store"]):
@@ -17,8 +16,8 @@ def partitions(excludes=["/boot", "/nix/store"]):
     return [p for p in partitions if p.mountpoint not in excludes]
 
 
-async def main():
-    runner = core.Runner()
+async def main(loop):
+    runner = core.Runner(loop=loop)
 
     runner.register_module(modules.NetworkModule(separator=False))
     runner.register_module(modules.TemperatureModule(separator=False))
@@ -39,4 +38,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main(loop))
+    loop.close()
