@@ -21,6 +21,12 @@ async def test_valid_module():
         async def loop(self):
             self.update("Done!", color=None, urgent=False, markup=Markup.NONE)
 
+        def click_handler(self, *_, **__):
+            pass
+
+        def signal_handler(self, *_, **__):
+            pass
+
     module = ValidModule(
         name="Name",
         instance="Instance",
@@ -79,9 +85,6 @@ async def test_valid_module():
         "markup": "none",
     }
 
-    with pytest.raises(NotImplementedError):
-        module.signal_handler(0, None)
-
 
 def test_invalid_polling_module():
     class InvalidPollingModule(PollingModule):
@@ -110,7 +113,11 @@ async def test_valid_polling_module():
 
     task.cancel()
 
-    assert module.result() == {"name": "ValidPollingModule", "full_text": "5"}
+    assert module.result() == {
+        "full_text": "5",
+        "instance": "default",
+        "name": "ValidPollingModule",
+    }
 
 
 @pytest.mark.asyncio
@@ -129,6 +136,7 @@ async def test_polling_module_with_error():
 
     assert module.result() == {
         "full_text": "Exception in PollingModuleWithError: Boom!",
+        "instance": "default",
         "name": "PollingModuleWithError",
         "urgent": True,
     }
@@ -155,24 +163,15 @@ async def test_runner(capsys):
     assert (
         captured.out
         == """\
-{"version": 1}
+{"version": 1, "click_events": true}
 [
-[{"name": "ValidPollingModule", "full_text": ""}],
-[{"name": "ValidPollingModule", "full_text": "1"}],
-[{"name": "ValidPollingModule", "full_text": "2"}],
-[{"name": "ValidPollingModule", "full_text": "3"}],
-[{"name": "ValidPollingModule", "full_text": "4"}],
+[{"name": "ValidPollingModule", "instance": "default", "full_text": ""}],
+[{"name": "ValidPollingModule", "instance": "default", "full_text": "1"}],
+[{"name": "ValidPollingModule", "instance": "default", "full_text": "2"}],
+[{"name": "ValidPollingModule", "instance": "default", "full_text": "3"}],
+[{"name": "ValidPollingModule", "instance": "default", "full_text": "4"}],
 """
     )
-
-
-def test_runner_with_invalid_module():
-    class InvalidModule:
-        pass
-
-    runner = Runner(sleep=0.1)
-    with pytest.raises(ValueError):
-        runner.register_module(InvalidModule())
 
 
 @pytest.mark.asyncio
