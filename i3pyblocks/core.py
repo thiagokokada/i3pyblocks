@@ -170,10 +170,14 @@ class PollingModule(Module):
 
 
 class Runner:
-    def __init__(self, sleep: int = 1) -> None:
+    def __init__(self, sleep: int = 1, loop=None) -> None:
         self.sleep = sleep
         self.modules: Dict[str, Module] = {}
-        self.loop = asyncio.get_event_loop()
+
+        if loop:
+            self.loop = loop
+        else:
+            self.loop = asyncio.get_event_loop()
 
         write_task = asyncio.ensure_future(self.write_results())
         click_task = asyncio.ensure_future(self.click_events())
@@ -204,17 +208,14 @@ class Runner:
             signal.signal(signum, _handler)
 
     def register_module(self, module: Module, signals: List[int] = []) -> None:
-        if not isinstance(module, Module):
-            raise ValueError("Must be a Module instance")
-
-        if signals:
-            self.register_signal(module, signals)
-
         module_key = self._get_module_key(module)
         self.modules[module_key] = module
 
         task = asyncio.ensure_future(module.loop())
         self._register_task(task)
+
+        if signals:
+            self.register_signal(module, signals)
 
     def write_result(self) -> None:
         output: List[str] = []
