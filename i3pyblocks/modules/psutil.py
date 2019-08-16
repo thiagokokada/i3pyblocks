@@ -5,7 +5,7 @@ import psutil
 from psutil._common import bytes2human
 
 from i3pyblocks.core import PollingModule
-from i3pyblocks.utils import _calculate_threshold
+from i3pyblocks.utils import _calculate_threshold, IECUnits
 from i3pyblocks.modules import Color
 
 
@@ -42,7 +42,7 @@ class DiskUsageModule(PollingModule):
             75: Color.WARN,
             90: Color.URGENT,
         },
-        divisor: int = 1_073_741_824,
+        divisor: int = IECUnits.GiB,
         sleep: int = 5,
         path: str = "/",
         short_label: bool = False,
@@ -113,8 +113,8 @@ class NetworkSpeedModule(PollingModule):
         format: str = "U: {upload} D: {download}",
         colors: Dict[float, Optional[str]] = {
             0: Color.NEUTRAL,
-            2_097_152: Color.WARN,
-            5_242_880: Color.URGENT,
+            2 * IECUnits.MiB: Color.WARN,
+            5 * IECUnits.MiB: Color.URGENT,
         },
         sleep: int = 3,
         **kwargs,
@@ -152,11 +152,11 @@ class SensorsBatteryModule(PollingModule):
         self,
         format_plugged: str = "B: {percent:.0f}%",
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
+        format_unplugged_full: str = "B: {icon} {percent:.0f}%",
         colors: Dict[float, Optional[str]] = {
             0: Color.URGENT,
             10: Color.WARN,
             25: Color.NEUTRAL,
-            90: Color.GOOD,
         },
         icons: Dict[float, Optional[str]] = {
             0.0: "▁",
@@ -174,6 +174,7 @@ class SensorsBatteryModule(PollingModule):
         super().__init__(sleep=sleep, **kwargs)
         self.format_plugged = format_plugged
         self.format_unplugged = format_unplugged
+        self.format_unplugged_full = format_unplugged_full
         self.colors = colors
         self.icons = icons
 
@@ -186,10 +187,13 @@ class SensorsBatteryModule(PollingModule):
         color = _calculate_threshold(self.colors, battery.percent)
         icon = _calculate_threshold(self.icons, battery.percent)
 
-        if battery.power_plugged:
+        if battery.power_plugged or battery.secsleft == psutil.POWER_TIME_UNLIMITED:
             self.format = self.format_plugged
         else:
-            self.format = self.format_unplugged
+            if battery.secsleft == psutil.POWER_TIME_UNKNOWN:
+                self.format = self.format_unplugged_full
+            else:
+                self.format = self.format_unplugged
 
         self.update(
             self.format.format(
@@ -254,7 +258,7 @@ class VirtualMemoryModule(PollingModule):
             75: Color.WARN,
             90: Color.URGENT,
         },
-        divisor: int = 1_073_741_824,
+        divisor: int = IECUnits.GiB,
         sleep=3,
         **kwargs,
     ) -> None:
