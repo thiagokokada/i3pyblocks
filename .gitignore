@@ -1,5 +1,6 @@
+*.log
 .coverage
+.mypy_cache/
 __pycache__/
 htmlcov/
 venv/
-.mypy_cache/

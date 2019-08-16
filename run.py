@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-import signal
 
 import psutil
 
@@ -19,21 +18,18 @@ def partitions(excludes=["/boot", "/nix/store"]):
 async def main(loop):
     runner = core.Runner(loop=loop)
 
-    runner.register_module(modules.NetworkModule(separator=False))
-    runner.register_module(modules.TemperatureModule(separator=False))
+    runner.register_module(modules.psutil.NetworkSpeedModule(separator=False))
+    runner.register_module(modules.psutil.TemperatureModule(separator=False))
     for partition in partitions():
         runner.register_module(
-            modules.DiskModule(
+            modules.psutil.DiskModule(
                 path=partition.mountpoint, short_label=True, separator=False
             )
         )
-    runner.register_module(modules.MemoryModule(separator=False))
-    runner.register_module(modules.LoadModule(separator=False))
-    runner.register_module(modules.BatteryModule(separator=False))
-    runner.register_module(
-        modules.LocalTimeModule(separator=False),
-        signals=[signal.SIGUSR1, signal.SIGUSR2],
-    )
+    runner.register_module(modules.psutil.MemoryModule(separator=False))
+    runner.register_module(modules.psutil.LoadModule(separator=False))
+    runner.register_module(modules.psutil.BatteryModule(separator=False))
+    runner.register_module(modules.LocalTimeModule(separator=False))
     await runner.start()
 
 
