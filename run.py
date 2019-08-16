@@ -62,7 +62,9 @@ async def main(loop):
     runner.register_module(
         modules.psutil.SensorsBatteryModule(
             format_plugged=" {percent:.0f}%",
-            format_unplugged={0: "", 10: "", 25: "", 50: "", 75: ""},
+            format_unplugged="{icon} {percent:.0f}% {remaining_time}",
+            format_unplugged_full="{icon} {percent:.0f}%",
+            icons={0: "", 10: "", 25: "", 50: "", 75: ""},
             separator=False,
         )
     )
