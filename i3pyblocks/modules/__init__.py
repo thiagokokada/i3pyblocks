@@ -5,8 +5,9 @@ from i3pyblocks.core import PollingModule
 
 class Color:
     GOOD = "#00FF00"
-    WARN = "#FFFF00"
+    NEUTRAL = None
     URGENT = "#FF0000"
+    WARN = "#FFFF00"
 
 
 class LocalTimeModule(PollingModule):

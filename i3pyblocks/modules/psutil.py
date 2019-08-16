@@ -14,7 +14,7 @@ class CpuPercentModule(PollingModule):
         self,
         format: str = "C: {percent}%",
         colors: Dict[float, Optional[str]] = {
-            0: None,
+            0: Color.NEUTRAL,
             75: Color.WARN,
             90: Color.URGENT,
         },
@@ -38,7 +38,7 @@ class DiskUsageModule(PollingModule):
         self,
         format: str = "{label}: {free:.1f}GiB",
         colors: Dict[float, Optional[str]] = {
-            0: None,
+            0: Color.NEUTRAL,
             75: Color.WARN,
             90: Color.URGENT,
         },
@@ -85,7 +85,11 @@ class LoadAvgModule(PollingModule):
     def __init__(
         self,
         format: str = "L: {load1}",
-        colors: Dict[float, Optional[str]] = {0: None, 2: Color.WARN, 4: Color.URGENT},
+        colors: Dict[float, Optional[str]] = {
+            0: Color.NEUTRAL,
+            2: Color.WARN,
+            4: Color.URGENT,
+        },
         sleep: int = 5,
         **kwargs,
     ) -> None:
@@ -108,7 +112,7 @@ class NetworkSpeedModule(PollingModule):
         self,
         format: str = "U: {upload} D: {download}",
         colors: Dict[float, Optional[str]] = {
-            0: None,
+            0: Color.NEUTRAL,
             2_097_152: Color.WARN,
             5_242_880: Color.URGENT,
         },
@@ -149,9 +153,10 @@ class SensorsBatteryModule(PollingModule):
         format_plugged: str = "B: {percent:.0f}%",
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         colors: Dict[float, Optional[str]] = {
-            0: None,
-            75: Color.WARN,
-            90: Color.URGENT,
+            0: Color.URGENT,
+            10: Color.WARN,
+            25: Color.NEUTRAL,
+            90: Color.GOOD,
         },
         icons: Dict[float, Optional[str]] = {
             0.0: "▁",
@@ -201,7 +206,7 @@ class SensorsTemperaturesModule(PollingModule):
         self,
         format: str = "T: {temperature:.0f}°C",
         colors: Dict[float, Optional[str]] = {
-            0: None,
+            0: Color.NEUTRAL,
             50: Color.WARN,
             75: Color.URGENT,
         },
@@ -245,7 +250,7 @@ class VirtualMemoryModule(PollingModule):
         self,
         format: str = "M: {available:.1f}GiB",
         colors: Dict[float, Optional[str]] = {
-            0: None,
+            0: Color.NEUTRAL,
             75: Color.WARN,
             90: Color.URGENT,
         },
