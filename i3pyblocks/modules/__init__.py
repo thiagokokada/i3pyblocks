@@ -1,5 +1,4 @@
 import time
-import signal
 
 from i3pyblocks.core import PollingModule
 
@@ -33,4 +32,4 @@ class LocalTimeModule(PollingModule):
 
 
 # Import sub-modules so they're available for imports
-import i3pyblocks.modules.psutil
+import i3pyblocks.modules.psutil  # noqa: E402, F401
