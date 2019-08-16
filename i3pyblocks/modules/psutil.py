@@ -5,7 +5,7 @@ import psutil
 from psutil._common import bytes2human
 
 from i3pyblocks.core import PollingModule
-from i3pyblocks.utils import _calculate_threshold
+from i3pyblocks.utils import _calculate_threshold, IECUnits
 from i3pyblocks.modules import Color
 
 
@@ -42,7 +42,7 @@ class DiskUsageModule(PollingModule):
             75: Color.WARN,
             90: Color.URGENT,
         },
-        divisor: int = 1_073_741_824,
+        divisor: int = IECUnits.GiB,
         sleep: int = 5,
         path: str = "/",
         short_label: bool = False,
@@ -113,8 +113,8 @@ class NetworkSpeedModule(PollingModule):
         format: str = "U: {upload} D: {download}",
         colors: Dict[float, Optional[str]] = {
             0: Color.NEUTRAL,
-            2_097_152: Color.WARN,
-            5_242_880: Color.URGENT,
+            2 * IECUnits.MiB: Color.WARN,
+            5 * IECUnits.MiB: Color.URGENT,
         },
         sleep: int = 3,
         **kwargs,
@@ -254,7 +254,7 @@ class VirtualMemoryModule(PollingModule):
             75: Color.WARN,
             90: Color.URGENT,
         },
-        divisor: int = 1_073_741_824,
+        divisor: int = IECUnits.GiB,
         sleep=3,
         **kwargs,
     ) -> None:
