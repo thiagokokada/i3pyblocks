@@ -14,7 +14,7 @@ class BatteryModule(PollingModule):
     def __init__(
         self,
         format_plugged: str = "B: {percent:.0f}%",
-        format_unplugged: str = "B: {icon} {percent:.0f}%",
+        format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         colors: Dict[float, Optional[str]] = {
             75: None,
             90: Color.WARN,
@@ -224,6 +224,16 @@ class TemperatureModule(PollingModule):
             75: Color.WARN,
             math.inf: Color.URGENT,
         },
+        icons: Dict[float, Optional[str]] = {
+            12.5: "▁",
+            25.0: "▂",
+            37.5: "▃",
+            50.0: "▄",
+            62.5: "▅",
+            75.0: "▆",
+            87.5: "▇",
+            math.inf: "█",
+        },
         fahrenheit: bool = False,
         sensor: str = None,
         sleep: int = 5,
@@ -232,6 +242,7 @@ class TemperatureModule(PollingModule):
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = colors
+        self.icons = icons
         self.fahrenheit = fahrenheit
         if sensor:
             self.sensor = sensor
@@ -243,5 +254,6 @@ class TemperatureModule(PollingModule):
         temperature = temperatures[0].current
 
         color = _calculate_threshold(self.colors, temperature)
+        icon = _calculate_threshold(self.icons, temperature)
 
-        self.update(self.format.format(temperature=temperature), color=color)
+        self.update(self.format.format(temperature=temperature, icon=icon), color=color)
