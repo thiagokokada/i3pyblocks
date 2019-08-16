@@ -10,6 +10,30 @@ from i3pyblocks.utils import _calculate_threshold
 from i3pyblocks.modules import Color
 
 
+class CpuPercentModule(PollingModule):
+    def __init__(
+        self,
+        format: str = "C: {percent}%",
+        colors: Dict[float, Optional[str]] = {
+            75: None,
+            90: Color.WARN,
+            math.inf: Color.URGENT,
+        },
+        sleep: int = 5,
+        **kwargs,
+    ) -> None:
+        self.format = format
+        self.colors = colors
+        super().__init__(sleep=sleep, **kwargs)
+
+    def run(self) -> None:
+        percent = psutil.cpu_percent(interval=None)
+
+        color = _calculate_threshold(self.colors, percent)
+
+        self.update(self.format.format(percent=percent), color=color)
+
+
 class DiskUsageModule(PollingModule):
     def __init__(
         self,

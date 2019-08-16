@@ -46,6 +46,9 @@ async def main(loop):
         )
     )
     runner.register_module(
+        modules.psutil.CpuPercentModule(format=" {percent}%", separator=False)
+    )
+    runner.register_module(
         modules.psutil.LoadAvgModule(format=" {load1}", separator=False)
     )
     runner.register_module(
