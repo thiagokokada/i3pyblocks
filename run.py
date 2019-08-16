@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-import math
 
 import psutil
 
@@ -28,7 +27,7 @@ async def main(loop):
     runner.register_module(
         modules.psutil.SensorsTemperaturesModule(
             format="{icon} {temperature:.0f}°C",
-            icons={25: "", 50: "", 75: "", math.inf: ""},
+            icons={0: "", 25: "", 50: "", 75: ""},
             separator=False,
         )
     )
@@ -53,9 +52,9 @@ async def main(loop):
         modules.psutil.LoadAvgModule(
             format=" {load1}",
             colors={
-                cpu_count // 2: None,
-                cpu_count: modules.Color.WARN,
-                math.inf: modules.Color.URGENT,
+                0: None,
+                cpu_count // 2: modules.Color.WARN,
+                cpu_count: modules.Color.URGENT,
             },
             separator=False,
         )
@@ -63,7 +62,7 @@ async def main(loop):
     runner.register_module(
         modules.psutil.SensorsBatteryModule(
             format_plugged=" {percent:.0f}%",
-            format_unplugged={10: "", 25: "", 50: "", 75: "", math.inf: ""},
+            format_unplugged={0: "", 10: "", 25: "", 50: "", 75: ""},
             separator=False,
         )
     )
