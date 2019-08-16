@@ -1,26 +1,43 @@
 import datetime
+import math
+from typing import Dict, Optional, Tuple
 
 import psutil
 from psutil._common import bytes2human
 
 from i3pyblocks.core import PollingModule
+from i3pyblocks.utils import _calculate_threshold
+from i3pyblocks.modules import Color
 
 
 class BatteryModule(PollingModule):
-    def __init__(self, sleep=5, **kwargs):
+    def __init__(
+        self,
+        format_plugged: str = "B: {percent:.0f}%",
+        format_unplugged: str = "B: {icon} {percent:.0f}%",
+        colors: Dict[float, Optional[str]] = {
+            75: None,
+            90: Color.WARN,
+            math.inf: Color.URGENT,
+        },
+        icons: Dict[float, Optional[str]] = {
+            12.5: "▁",
+            25.0: "▂",
+            37.5: "▃",
+            50.0: "▄",
+            62.5: "▅",
+            75.0: "▆",
+            87.5: "▇",
+            math.inf: "█",
+        },
+        sleep=5,
+        **kwargs,
+    ):
         super().__init__(sleep=sleep, **kwargs)
-
-    def format_battery(self, percent):
-        if percent > 75:
-            return "", None
-        elif percent > 50:
-            return "", None
-        elif percent > 25:
-            return "", None
-        elif percent > 10:
-            return "", Color.WARN
-        else:
-            return "", Color.URGENT
+        self.format_plugged = format_plugged
+        self.format_unplugged = format_unplugged
+        self.colors = colors
+        self.icons = icons
 
     def run(self):
         battery = psutil.sensors_battery()
@@ -28,114 +45,203 @@ class BatteryModule(PollingModule):
         if not battery:
             return
 
-        percent = battery.percent
-        remaining_time = battery.secsleft
-        remaining_time_formatted = datetime.timedelta(seconds=battery.secsleft)
-        plugged = battery.power_plugged
-        icon, color = self.format_battery(percent)
+        color = _calculate_threshold(self.colors, battery.percent)
+        icon = _calculate_threshold(self.icons, battery.percent)
 
-        if plugged:
-            self.update(f" {percent:.0f}%")
-        elif remaining_time != psutil.POWER_TIME_UNKNOWN:
-            self.update(
-                f"{icon} {percent:.0f}% {remaining_time_formatted}", color=color
-            )
+        if battery.power_plugged:
+            self.format = self.format_plugged
         else:
-            self.update(f"{icon} {percent:.0f}%", color=color)
+            self.format = self.format_unplugged
+
+        self.update(
+            self.format.format(
+                percent=battery.percent,
+                remaining_time=(datetime.timedelta(seconds=battery.secsleft)),
+                icon=icon,
+            ),
+            color=color,
+        )
 
 
 class DiskModule(PollingModule):
-    def __init__(self, sleep=5, path="/", short_label=False, **kwargs):
+    def __init__(
+        self,
+        format: str = "{label}: {free:.1f}GiB",
+        colors: Dict[float, Optional[str]] = {
+            75: None,
+            90: Color.WARN,
+            math.inf: Color.URGENT,
+        },
+        divisor: int = 1_073_741_824,
+        sleep: int = 5,
+        path: str = "/",
+        short_label: bool = False,
+        **kwargs,
+    ) -> None:
         super().__init__(sleep=sleep, instance=path, **kwargs)
+        self.format = format
+        self.colors = colors
+        self.divisor = divisor
         self.path = path
         if short_label:
-            self.label = "/" + "/".join(x[0] for x in self.path.split("/") if x)
+            self.label = self._get_short_label(self.path)
         else:
             self.label = self.path
 
-    def run(self):
-        free = psutil.disk_usage("/").free
-        free_in_gib = free / 1024 ** 3
+    def _convert(self, dividend: float) -> float:
+        return dividend / self.divisor
 
-        self.update(f" {self.label}: {free_in_gib:.1f}GiB")
+    def _get_short_label(self, path: str) -> str:
+        return "/" + "/".join(x[0] for x in self.path.split("/") if x)
+
+    def run(self) -> None:
+        disk = psutil.disk_usage(self.path)
+
+        color = _calculate_threshold(self.colors, disk.percent)
+
+        self.update(
+            self.format.format(
+                label=self.label,
+                total=self._convert(disk.total),
+                used=self._convert(disk.used),
+                free=self._convert(disk.free),
+                percent=disk.percent,
+            ),
+            color=color,
+        )
 
 
 class LoadModule(PollingModule):
-    def __init__(self, sleep=5, **kwargs):
+    def __init__(
+        self,
+        format: str = "L: {load1}",
+        colors: Dict[float, Optional[str]] = {
+            2: None,
+            4: Color.WARN,
+            math.inf: Color.URGENT,
+        },
+        sleep: int = 5,
+        **kwargs,
+    ) -> None:
+        self.format = format
+        self.colors = colors
         super().__init__(sleep=sleep, **kwargs)
 
-    def run(self):
+    def run(self) -> None:
         load1, load5, load15 = psutil.getloadavg()
-        cpu_count = psutil.cpu_count()
 
-        if load1 > cpu_count:
-            color = Color.URGENT
-        elif load1 > cpu_count // 2:
-            color = Color.WARN
-        else:
-            color = None
+        color = _calculate_threshold(self.colors, load1)
 
-        self.update(f" {load1}", color=color)
+        self.update(
+            self.format.format(load1=load1, load5=load5, load15=load15), color=color
+        )
 
 
 class MemoryModule(PollingModule):
-    def __init__(self, sleep=3, **kwargs):
+    def __init__(
+        self,
+        format: str = "M: {available:.1f}GiB",
+        colors: Dict[float, Optional[str]] = {
+            75: None,
+            90: Color.WARN,
+            math.inf: Color.URGENT,
+        },
+        divisor: int = 1_073_741_824,
+        sleep=3,
+        **kwargs,
+    ) -> None:
         super().__init__(sleep=sleep, **kwargs)
+        self.format = format
+        self.colors = colors
+        self.divisor = divisor
 
-    def run(self):
+    def _convert(self, dividend: float) -> float:
+        return dividend / self.divisor
+
+    def run(self) -> None:
         memory = psutil.virtual_memory()
 
-        if memory.available < 0.1 * memory.total:
-            color = Color.URGENT
-        elif memory.available < 0.3 * memory.total:
-            color = Color.WARN
-        else:
-            color = None
+        color = _calculate_threshold(self.colors, memory.percent)
 
-        memory_in_gib = memory.available / 1024 ** 3
-        self.update(f" {memory_in_gib:.1f}GiB", color=color)
+        self.update(
+            self.format.format(
+                total=self._convert(memory.total),
+                available=self._convert(memory.available),
+                used=self._convert(memory.used),
+                free=self._convert(memory.free),
+                percent=memory.percent,
+            ),
+            color=color,
+        )
 
 
-class NetworkModule(PollingModule):
-    def __init__(self, sleep=3, **kwargs):
+class NetworkSpeedModule(PollingModule):
+    def __init__(
+        self,
+        format: str = "U: {upload} D: {download}",
+        colors: Dict[float, Optional[str]] = {
+            2_097_152: None,
+            5_242_880: Color.WARN,
+            math.inf: Color.URGENT,
+        },
+        sleep: int = 3,
+        **kwargs,
+    ) -> None:
         super().__init__(sleep=sleep, **kwargs)
+        self.format = format
+        self.colors = colors
         self.previous = psutil.net_io_counters()
 
-    def run(self):
+    def _calculate_speed(self, previous, now) -> Tuple[float, float]:
+        upload = (now.bytes_sent - previous.bytes_sent) / self.sleep
+        download = (now.bytes_recv - previous.bytes_recv) / self.sleep
+
+        return upload, download
+
+    def run(self) -> None:
         now = psutil.net_io_counters()
 
-        upload = (now.bytes_sent - self.previous.bytes_sent) / self.sleep
-        download = (now.bytes_recv - self.previous.bytes_recv) / self.sleep
+        upload, download = self._calculate_speed(self.previous, now)
 
-        if download > 5 * 1024 ** 2 or upload > 5 * 1024 ** 2:
-            color = Color.URGENT
-        elif download > 1024 ** 2 or upload > 1024 ** 2:
-            color = Color.WARN
-        else:
-            color = None
+        color = _calculate_threshold(self.colors, max(upload, download))
 
-        self.update(f" {bytes2human(upload)}  {bytes2human(download)}", color=color)
+        self.update(
+            self.format.format(
+                upload=bytes2human(upload), download=bytes2human(download)
+            ),
+            color=color,
+        )
 
         self.previous = now
 
 
 class TemperatureModule(PollingModule):
-    def __init__(self, sleep=5, sensor=None, **kwargs):
+    def __init__(
+        self,
+        format: str = "T: {temperature:.0f}°C",
+        colors: Dict[float, Optional[str]] = {
+            50: None,
+            75: Color.WARN,
+            math.inf: Color.URGENT,
+        },
+        fahrenheit: bool = False,
+        sensor: str = None,
+        sleep: int = 5,
+        **kwargs,
+    ) -> None:
         super().__init__(sleep=sleep, **kwargs)
+        self.format = format
+        self.colors = colors
+        self.fahrenheit = fahrenheit
         if sensor:
             self.sensor = sensor
         else:
-            self.sensor = next(iter(psutil.sensors_temperatures().keys()))
+            self.sensor = next(iter(psutil.sensors_temperatures()))
 
-    def run(self):
-        temperatures = psutil.sensors_temperatures()[self.sensor]
+    def run(self) -> None:
+        temperatures = psutil.sensors_temperatures(self.fahrenheit)[self.sensor]
         temperature = temperatures[0].current
 
-        if temperature > 75:
-            color = Color.URGENT
-        elif temperature > 50:
-            color = Color.WARN
-        else:
-            color = None
+        color = _calculate_threshold(self.colors, temperature)
 
-        self.update(f" {temperature:.0f}°C", color=color)
+        self.update(self.format.format(temperature=temperature), color=color)

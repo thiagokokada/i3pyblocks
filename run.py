@@ -19,7 +19,7 @@ def partitions(excludes=["/boot", "/nix/store"]):
 async def main(loop):
     runner = core.Runner(loop=loop)
 
-    runner.register_module(modules.psutil.NetworkModule(separator=False))
+    runner.register_module(modules.psutil.NetworkSpeedModule(separator=False))
     runner.register_module(modules.psutil.TemperatureModule(separator=False))
     for partition in partitions():
         runner.register_module(
@@ -30,10 +30,7 @@ async def main(loop):
     runner.register_module(modules.psutil.MemoryModule(separator=False))
     runner.register_module(modules.psutil.LoadModule(separator=False))
     runner.register_module(modules.psutil.BatteryModule(separator=False))
-    runner.register_module(
-        modules.LocalTimeModule(separator=False),
-        signals=[signal.SIGUSR1, signal.SIGUSR2],
-    )
+    runner.register_module(modules.LocalTimeModule(separator=False))
     await runner.start()
 
 
