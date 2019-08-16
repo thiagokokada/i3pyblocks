@@ -17,6 +17,7 @@ def partitions(excludes=["/boot", "/nix/store"]):
 
 
 async def main(loop):
+    cpu_count = psutil.cpu_count()
     runner = core.Runner(loop=loop)
 
     runner.register_module(
@@ -25,7 +26,7 @@ async def main(loop):
         )
     )
     runner.register_module(
-        modules.psutil.TemperatureModule(
+        modules.psutil.SensorsTemperaturesModule(
             format="{icon} {temperature:.0f}°C",
             icons={25: "", 50: "", 75: "", math.inf: ""},
             separator=False,
@@ -33,7 +34,7 @@ async def main(loop):
     )
     for partition in partitions():
         runner.register_module(
-            modules.psutil.DiskModule(
+            modules.psutil.DiskUsageModule(
                 format=" {label}: {free:.1f}GiB",
                 path=partition.mountpoint,
                 short_label=True,
@@ -41,13 +42,26 @@ async def main(loop):
             )
         )
     runner.register_module(
-        modules.psutil.MemoryModule(format=" {available:.1f}GiB", separator=False)
+        modules.psutil.VirtualMemoryModule(
+            format=" {available:.1f}GiB", separator=False
+        )
     )
     runner.register_module(
-        modules.psutil.LoadModule(format=" {load1}", separator=False)
+        modules.psutil.CpuPercentModule(format=" {percent}%", separator=False)
     )
     runner.register_module(
-        modules.psutil.BatteryModule(
+        modules.psutil.LoadAvgModule(
+            format=" {load1}",
+            colors={
+                cpu_count // 2: None,
+                cpu_count: modules.Color.WARN,
+                math.inf: modules.Color.URGENT,
+            },
+            separator=False,
+        )
+    )
+    runner.register_module(
+        modules.psutil.SensorsBatteryModule(
             format_plugged=" {percent:.0f}%",
             format_unplugged={10: "", 25: "", 50: "", 75: "", math.inf: ""},
             separator=False,
