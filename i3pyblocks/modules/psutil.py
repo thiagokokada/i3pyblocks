@@ -152,7 +152,7 @@ class SensorsBatteryModule(PollingModule):
         self,
         format_plugged: str = "B: {percent:.0f}%",
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
-        format_unplugged_full: str = "B: {icon} {percent:.0f}%",
+        format_unknown: str = "B: {icon} {percent:.0f}%",
         colors: Dict[float, Optional[str]] = {
             0: Color.URGENT,
             10: Color.WARN,
@@ -174,7 +174,7 @@ class SensorsBatteryModule(PollingModule):
         super().__init__(sleep=sleep, **kwargs)
         self.format_plugged = format_plugged
         self.format_unplugged = format_unplugged
-        self.format_unplugged_full = format_unplugged_full
+        self.format_unknown = format_unknown
         self.colors = colors
         self.icons = icons
 
@@ -191,7 +191,7 @@ class SensorsBatteryModule(PollingModule):
             self.format = self.format_plugged
         else:
             if battery.secsleft == psutil.POWER_TIME_UNKNOWN:
-                self.format = self.format_unplugged_full
+                self.format = self.format_unknown
             else:
                 self.format = self.format_unplugged
 
