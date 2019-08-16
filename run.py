@@ -17,6 +17,7 @@ def partitions(excludes=["/boot", "/nix/store"]):
 
 
 async def main(loop):
+    cpu_count = psutil.cpu_count()
     runner = core.Runner(loop=loop)
 
     runner.register_module(
@@ -49,7 +50,15 @@ async def main(loop):
         modules.psutil.CpuPercentModule(format=" {percent}%", separator=False)
     )
     runner.register_module(
-        modules.psutil.LoadAvgModule(format=" {load1}", separator=False)
+        modules.psutil.LoadAvgModule(
+            format=" {load1}",
+            colors={
+                cpu_count // 2: None,
+                cpu_count: modules.Color.WARN,
+                math.inf: modules.Color.URGENT,
+            },
+            separator=False,
+        )
     )
     runner.register_module(
         modules.psutil.SensorsBatteryModule(
