@@ -11,7 +11,7 @@ class Color:
 
 class LocalTimeModule(PollingModule):
     def __init__(
-        self, format_date: str = "%d %a %Y", format_time: str = "%T", **kwargs
+        self, format_date: str = "%D", format_time: str = "%T", **kwargs
     ) -> None:
         super().__init__(**kwargs)
         self.format_date = format_date
