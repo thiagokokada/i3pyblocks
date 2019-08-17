@@ -246,6 +246,7 @@ class Runner:
             height=click_event.get("height"),
             modifiers=click_event.get("modifiers"),
         )
+        self.write_result()
 
     async def click_events(self) -> None:
         reader = asyncio.StreamReader(loop=self.loop)
@@ -259,7 +260,6 @@ class Runner:
             while True:
                 raw = await reader.readuntil(b"}")
                 self.click_event(raw)
-                self.write_result()
                 await reader.readuntil(b",")
         except Exception:
             log.exception("Error in click handler")
