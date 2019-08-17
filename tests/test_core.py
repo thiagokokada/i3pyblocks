@@ -245,7 +245,7 @@ async def test_runner_with_signal_handler(capsys, mocker):
 
 
 # TODO: Test with mocked sys.stdin instead of calling functions directly
-def test_runner_with_click_handler():
+def test_runner_with_click_handler(capsys):
     click_event = b'{"name":"ValidPollingModuleWithClickHandler","instance":"default","button":1,"modifiers":["Mod1"],"x":123,"y":456,"relative_x":12,"relative_y":34,"width":20,"height":40}'
 
     class ValidPollingModuleWithClickHandler(PollingModule):
@@ -268,6 +268,6 @@ def test_runner_with_click_handler():
     runner.register_module(module)
     runner.click_event(click_event)
 
-    result = module.result()
+    captured = capsys.readouterr()
 
-    assert "123-456-1-12-34-20-40-['Mod1']" == result["full_text"]
+    assert "123-456-1-12-34-20-40-['Mod1']" in captured.out
