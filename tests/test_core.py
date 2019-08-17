@@ -1,6 +1,7 @@
 import asyncio
 import os
 import signal
+import sys
 
 import pytest
 
@@ -143,7 +144,9 @@ async def test_polling_module_with_error():
 
 
 @pytest.mark.asyncio
-async def test_runner(capsys):
+async def test_runner(capsys, mocker):
+    mocker.patch.object(sys, "stdin")
+
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
@@ -191,7 +194,9 @@ def test_runner_with_two_equal_modules():
 
 
 @pytest.mark.asyncio
-async def test_runner_with_signal_handler(capsys):
+async def test_runner_with_signal_handler(capsys, mocker):
+    mocker.patch.object(sys, "stdin")
+
     async def send_signal():
         await asyncio.sleep(0.1)
         os.kill(os.getpid(), signal.SIGUSR1)
@@ -236,7 +241,7 @@ async def test_runner_with_signal_handler(capsys):
 
 
 # TODO: Test with mocked sys.stdin instead of calling functions directly
-def test_runner_with_click_handler(capsys, monkeypatch):
+def test_runner_with_click_handler():
     click_event = b'{"name":"ValidPollingModuleWithClickHandler","instance":"default","button":1,"modifiers":["Mod1"],"x":123,"y":456,"relative_x":12,"relative_y":34,"width":20,"height":40}'
 
     class ValidPollingModuleWithClickHandler(PollingModule):
