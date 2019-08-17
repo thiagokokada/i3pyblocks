@@ -171,29 +171,23 @@ class PollingModule(Module):
 
 class Runner:
     def __init__(self, sleep: int = 1, loop=None) -> None:
-        self.sleep = sleep
+        self.sleep: int = sleep
         self.modules: Dict[str, Module] = {}
+        self.tasks: List[asyncio.Future] = []
 
         if loop:
             self.loop = loop
         else:
             self.loop = asyncio.get_event_loop()
 
-        write_task = asyncio.ensure_future(self.write_results())
-        click_task = asyncio.ensure_future(self.click_events())
-        self.tasks = [write_task, click_task]
-
-    def _clean_up(self) -> None:
-        for task in self.tasks:
-            task.cancel()
-
     def _get_module_key(self, module: Module) -> str:
         return f"{module.name}__{module.instance or 'none'}"
 
-    def _get_module_from_key(self, name: str, instance: str = None):
-        return self.modules.get(f"{name}__{instance or 'none'}")
+    def _get_module_from_key(self, name: str, instance: str = None) -> Module:
+        return self.modules[f"{name}__{instance or 'none'}"]
 
-    def _register_task(self, task: asyncio.Future) -> None:
+    def _register_coroutine(self, coro) -> None:
+        task = asyncio.ensure_future(coro)
         self.tasks.append(task)
 
     def register_signal(self, module: Module, signums: List[int] = []) -> None:
@@ -216,8 +210,7 @@ class Runner:
                 f"Module '{module.name}' with instance '{module.instance}' already exists"
             )
 
-        task = asyncio.ensure_future(module.loop())
-        self._register_task(task)
+        self._register_coroutine(module.loop())
 
         if signals:
             self.register_signal(module, signals)
@@ -266,7 +259,17 @@ class Runner:
         except Exception:
             log.exception("Error in click handler")
 
+    def _setup(self) -> None:
+        self._register_coroutine(self.click_events())
+        self._register_coroutine(self.write_results())
+
+    def _clean_up(self) -> None:
+        for task in self.tasks:
+            task.cancel()
+
     async def start(self, timeout: Optional[int] = None) -> None:
+        self._setup()
+
         sys.stdout.write('{"version": 1, "click_events": true}\n[\n')
         sys.stdout.flush()
 
