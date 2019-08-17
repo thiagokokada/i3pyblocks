@@ -41,29 +41,25 @@ class Module(metaclass=abc.ABCMeta):
         separator_block_width: Optional[int] = None,
         markup: Optional[str] = Markup.NONE,
     ) -> None:
-        self.name: str
-        if name:
-            self.name = name
-        else:
-            self.name = self.__class__.__name__
-        self.instance: Optional[str] = instance
+        self.name = name or self.__class__.__name__
+        self.instance = instance
 
         # Those are default values for properties if they are not overrided
-        self._color: Optional[str] = color
-        self._background: Optional[str] = background
-        self._border: Optional[str] = border
-        self._border_top: Optional[str] = border_top
-        self._border_right: Optional[str] = border_right
-        self._border_bottom: Optional[str] = border_bottom
-        self._border_left: Optional[str] = border_left
-        self._min_width: Optional[int] = min_width
-        self._align: Optional[str] = align
-        self._urgent: Optional[bool] = urgent
-        self._separator: Optional[bool] = separator
-        self._separator_block_width: Optional[int] = separator_block_width
-        self._markup: Optional[str] = markup
-        self._short_text: Optional[str] = None
-        self._full_text: str = ""
+        self._color = color
+        self._background = background
+        self._border = border
+        self._border_top = border_top
+        self._border_right = border_right
+        self._border_bottom = border_bottom
+        self._border_left = border_left
+        self._min_width = min_width
+        self._align = align
+        self._urgent = urgent
+        self._separator = separator
+        self._separator_block_width = separator_block_width
+        self._markup = markup
+        self._short_text = None
+        self._full_text = ""
 
         self._state: Dict[str, Optional[Union[str, int, bool]]]
         self.update()
@@ -178,7 +174,7 @@ class PollingModule(Module):
 
 class Runner:
     def __init__(self, sleep: int = 1, loop=None) -> None:
-        self.sleep: int = sleep
+        self.sleep = sleep
         self.modules: Dict[str, Module] = {}
         self.tasks: List[asyncio.Future] = []
 
