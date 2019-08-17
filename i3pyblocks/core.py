@@ -223,10 +223,7 @@ class Runner:
             self.register_signal(module, signals)
 
     def write_result(self) -> None:
-        output: List[str] = []
-
-        for module in self.modules.values():
-            output.append(json.dumps(module.result()))
+        output = [json.dumps(module.result()) for module in self.modules.values()]
 
         sys.stdout.write("[" + ",".join(output) + "],\n")
         sys.stdout.flush()
@@ -258,7 +255,7 @@ class Runner:
 
         await self.loop.connect_read_pipe(lambda: protocol, sys.stdin)
 
-        await reader.readuntil(b"\n")
+        await reader.readline()
 
         try:
             while True:
