@@ -26,7 +26,7 @@ async def main(loop):
     )
     runner.register_module(
         modules.psutil.SensorsTemperaturesModule(
-            format="{icon} {temperature:.0f}°C",
+            format="{icon} {current:.0f}°C",
             icons={0: "", 25: "", 50: "", 75: ""},
             separator=False,
         )
