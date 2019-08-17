@@ -150,7 +150,7 @@ class NetworkSpeedModule(PollingModule):
 class SensorsBatteryModule(PollingModule):
     def __init__(
         self,
-        format_plugged: str = "B: {percent:.0f}%",
+        format_plugged: str = "B: PLUGGED {percent:.0f}%",
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         format_unknown: str = "B: {icon} {percent:.0f}%",
         colors: Dict[float, Optional[str]] = {
@@ -208,11 +208,11 @@ class SensorsBatteryModule(PollingModule):
 class SensorsTemperaturesModule(PollingModule):
     def __init__(
         self,
-        format: str = "T: {temperature:.0f}°C",
+        format: str = "T: {current:.0f}°C",
         colors: Dict[float, Optional[str]] = {
             0: Color.NEUTRAL,
-            50: Color.WARN,
-            75: Color.URGENT,
+            60: Color.WARN,
+            85: Color.URGENT,
         },
         icons: Dict[float, Optional[str]] = {
             0.0: "▁",
@@ -241,12 +241,21 @@ class SensorsTemperaturesModule(PollingModule):
 
     def run(self) -> None:
         temperatures = psutil.sensors_temperatures(self.fahrenheit)[self.sensor]
-        temperature = temperatures[0].current
+        temperature = temperatures[0]
 
-        color = _calculate_threshold(self.colors, temperature)
-        icon = _calculate_threshold(self.icons, temperature)
+        color = _calculate_threshold(self.colors, temperature.current)
+        icon = _calculate_threshold(self.icons, temperature.current)
 
-        self.update(self.format.format(temperature=temperature, icon=icon), color=color)
+        self.update(
+            self.format.format(
+                label=temperature.label,
+                current=temperature.current,
+                high=temperature.high,
+                critical=temperature.critical,
+                icon=icon,
+            ),
+            color=color,
+        )
 
 
 class VirtualMemoryModule(PollingModule):
