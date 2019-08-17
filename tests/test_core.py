@@ -8,6 +8,10 @@ import pytest
 from i3pyblocks.core import Align, Markup, Module, PollingModule, Runner
 
 
+def test_module():
+    assert Module.get_key("abc", "def") == "abc__def"
+
+
 def test_invalid_module():
     class InvalidModule(Module):
         pass
@@ -85,6 +89,8 @@ async def test_valid_module():
         "urgent": False,
         "markup": "none",
     }
+
+    assert module.key() == "Name__Instance"
 
 
 def test_invalid_polling_module():

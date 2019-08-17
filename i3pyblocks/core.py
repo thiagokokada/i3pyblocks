@@ -76,6 +76,13 @@ class Module(metaclass=abc.ABCMeta):
         else:
             return getattr(self, key)
 
+    @staticmethod
+    def get_key(name: str, instance: Optional[str]):
+        return f"{name}__{instance or 'none'}"
+
+    def key(self) -> str:
+        return self.get_key(self.name, self.instance)
+
     def update(
         self,
         full_text: str = "",
@@ -180,11 +187,8 @@ class Runner:
         else:
             self.loop = asyncio.get_event_loop()
 
-    def _get_module_key(self, module: Module) -> str:
-        return f"{module.name}__{module.instance or 'none'}"
-
     def _get_module_from_key(self, name: str, instance: str = None) -> Module:
-        return self.modules[f"{name}__{instance or 'none'}"]
+        return self.modules[Module.get_key(name, instance)]
 
     def _register_coroutine(self, coro) -> None:
         task = asyncio.ensure_future(coro)
@@ -202,7 +206,8 @@ class Runner:
             signal.signal(signum, _handler)
 
     def register_module(self, module: Module, signals: List[int] = []) -> None:
-        module_key = self._get_module_key(module)
+        module_key = module.key()
+
         if module_key not in self.modules.keys():
             self.modules[module_key] = module
         else:
