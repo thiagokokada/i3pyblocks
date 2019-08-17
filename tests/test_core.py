@@ -8,6 +8,10 @@ import pytest
 from i3pyblocks.core import Align, Markup, Module, PollingModule, Runner
 
 
+def test_module():
+    assert Module.get_key("abc", "def") == "abc__def"
+
+
 def test_invalid_module():
     class InvalidModule(Module):
         pass
@@ -85,6 +89,8 @@ async def test_valid_module():
         "urgent": False,
         "markup": "none",
     }
+
+    assert module.key() == "Name__Instance"
 
 
 def test_invalid_polling_module():
@@ -168,11 +174,11 @@ async def test_runner(capsys, mocker):
         == """\
 {"version": 1, "click_events": true}
 [
-[{"name": "ValidPollingModule", "instance": "default", "full_text": ""}],
 [{"name": "ValidPollingModule", "instance": "default", "full_text": "1"}],
 [{"name": "ValidPollingModule", "instance": "default", "full_text": "2"}],
 [{"name": "ValidPollingModule", "instance": "default", "full_text": "3"}],
 [{"name": "ValidPollingModule", "instance": "default", "full_text": "4"}],
+[{"name": "ValidPollingModule", "instance": "default", "full_text": "5"}],
 """
     )
 
@@ -226,11 +232,9 @@ async def test_runner_with_signal_handler(capsys, mocker):
         ValidPollingModuleWithSignalHandler(), signals=[signal.SIGUSR1, signal.SIGUSR2]
     )
 
-    task = asyncio.ensure_future(send_signal())
-    runner._register_task(task)
+    runner._register_coroutine(send_signal())
 
-    task = asyncio.ensure_future(send_another_signal())
-    runner._register_task(task)
+    runner._register_coroutine(send_another_signal())
 
     await runner.start(timeout=0.5)
 
