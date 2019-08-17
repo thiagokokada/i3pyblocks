@@ -174,7 +174,7 @@ async def test_runner(capsys):
     )
 
 
-def test_runner_with_two_equal_modules(capsys):
+def test_runner_with_two_equal_modules():
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
