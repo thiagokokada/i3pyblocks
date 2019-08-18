@@ -1,13 +1,14 @@
 import time
+from typing import Optional
 
 from i3pyblocks.core import PollingModule
 
 
 class Color:
-    GOOD = "#00FF00"
-    NEUTRAL = None
-    URGENT = "#FF0000"
-    WARN = "#FFFF00"
+    GOOD: Optional[str] = "#00FF00"
+    NEUTRAL: Optional[str] = None
+    URGENT: Optional[str] = "#FF0000"
+    WARN: Optional[str] = "#FFFF00"
 
 
 class LocalTimeModule(PollingModule):
