@@ -3,6 +3,7 @@
 .coverage
 .mypy_cache/
 __pycache__/
+coverage.xml
 htmlcov/
 pip-wheel-metadata/
 venv/
