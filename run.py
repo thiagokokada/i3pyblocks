@@ -5,7 +5,7 @@ import logging
 
 import psutil
 
-from i3pyblocks import core, modules
+from i3pyblocks import core, modules, utils
 
 logging.basicConfig(filename=f".i3pyblocks.log", level=logging.INFO)
 
@@ -55,8 +55,8 @@ async def main(loop):
             format=" {load1}",
             colors=[
                 (0, None),
-                (cpu_count // 2, modules.Color.WARN),
-                (cpu_count, modules.Color.URGENT),
+                (cpu_count // 2, utils.Color.WARN),
+                (cpu_count, utils.Color.URGENT),
             ],
             separator=False,
         )

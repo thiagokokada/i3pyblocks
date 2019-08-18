@@ -3,7 +3,7 @@ from collections import namedtuple
 
 import psutil
 
-from i3pyblocks import modules
+from i3pyblocks import modules, utils
 
 
 def test_local_time_module(mocker):
@@ -32,7 +32,7 @@ def test_cpu_percent_module(mocker):
     result = instance.result()
 
     assert result["full_text"] == "75.5"
-    assert result["color"] == modules.Color.WARN
+    assert result["color"] == utils.Color.WARN
 
 
 def test_disk_usage_module(mocker):
@@ -51,7 +51,7 @@ def test_disk_usage_module(mocker):
     result = instance.result()
 
     assert result["full_text"] == "/ 210.7 46.0 154.0 91.3"
-    assert result["color"] == modules.Color.URGENT
+    assert result["color"] == utils.Color.URGENT
 
 
 def test_load_avg_module(mocker):
@@ -64,7 +64,7 @@ def test_load_avg_module(mocker):
     result = instance.result()
 
     assert result["full_text"] == "2.5 5 15"
-    assert result["color"] == modules.Color.WARN
+    assert result["color"] == utils.Color.WARN
 
 
 def test_network_speed_module_down(mocker):
@@ -89,7 +89,7 @@ def test_network_speed_module_down(mocker):
     result = instance.result()
 
     assert result["full_text"] == "NO NETWORK"
-    assert result["color"] == modules.Color.URGENT
+    assert result["color"] == utils.Color.URGENT
 
 
 def test_network_speed_module_up(mocker):
@@ -166,7 +166,7 @@ def test_network_speed_module_up(mocker):
     result = instance.result()
 
     assert result["full_text"] == "eno1 3.4M 3.3M"
-    assert result["color"] == modules.Color.WARN
+    assert result["color"] == utils.Color.WARN
 
 
 def test_sensors_battery_module_without_battery(mocker):
@@ -205,7 +205,7 @@ def test_sensors_battery_module_with_battery(mocker):
     result = instance.result()
 
     assert result["full_text"] == "B: ▂ 23% 4:37:08"
-    assert result["color"] == modules.Color.WARN
+    assert result["color"] == utils.Color.WARN
 
     fixture = sbattery(
         percent=9, secsleft=psutil.POWER_TIME_UNKNOWN, power_plugged=False
@@ -217,7 +217,7 @@ def test_sensors_battery_module_with_battery(mocker):
     result = instance.result()
 
     assert result["full_text"] == "B: ▁ 9%"
-    assert result["color"] == modules.Color.URGENT
+    assert result["color"] == utils.Color.URGENT
 
 
 def test_sensors_temperature_module(mocker):
@@ -250,7 +250,7 @@ def test_sensors_temperature_module(mocker):
     result = instance_default.result()
 
     assert result["full_text"] == "Package id 0 78.0 82.0 100.0"
-    assert result["color"] == modules.Color.WARN
+    assert result["color"] == utils.Color.WARN
 
     instance_acpitz = modules.psutil.SensorsTemperaturesModule(sensor="acpitz")
 

@@ -1,14 +1,9 @@
 import time
-from typing import Optional
 
 from i3pyblocks.core import PollingModule
 
-
-class Color:
-    GOOD: Optional[str] = "#00FF00"
-    NEUTRAL: Optional[str] = None
-    URGENT: Optional[str] = "#FF0000"
-    WARN: Optional[str] = "#FFFF00"
+# Import sub-modules so they're available for imports
+import i3pyblocks.modules.psutil  # noqa: F401
 
 
 class LocalTimeModule(PollingModule):
@@ -31,7 +26,3 @@ class LocalTimeModule(PollingModule):
     def run(self) -> None:
         current_time = time.localtime()
         self.update(time.strftime(self.format, current_time))
-
-
-# Import sub-modules so they're available for imports
-import i3pyblocks.modules.psutil  # noqa: E402, F401
