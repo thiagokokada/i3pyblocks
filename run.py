@@ -21,7 +21,9 @@ async def main(loop):
 
     runner.register_module(
         modules.psutil.NetworkSpeedModule(
-            format=" {upload}  {download}", separator=False
+            format_up=" {iface}:  {upload}  {download}",
+            format_down="",
+            separator=False,
         )
     )
     runner.register_module(

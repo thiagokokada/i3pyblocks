@@ -67,35 +67,106 @@ def test_load_avg_module(mocker):
     assert result["color"] == modules.Color.WARN
 
 
-def test_network_speed_module(mocker):
+def test_network_speed_module_down(mocker):
+    snicstats = namedtuple("snistats", ["isup", "duplex", "speed", "mtu"])
+
+    fixture_stats = {
+        "lo": snicstats(
+            isup=True, duplex=psutil.NIC_DUPLEX_UNKNOWN, speed=0, mtu=65536
+        ),
+        "eno1": snicstats(
+            isup=False, duplex=psutil.NIC_DUPLEX_FULL, speed=1000, mtu=1500
+        ),
+    }
+    mocker.patch.object(psutil, "net_if_stats", return_value=fixture_stats)
+
+    instance = modules.psutil.NetworkSpeedModule(
+        format_up="{iface} {upload} {download}"
+    )
+
+    instance.run()
+
+    result = instance.result()
+
+    assert result["full_text"] == "NO NETWORK"
+    assert result["color"] == modules.Color.URGENT
+
+
+def test_network_speed_module_up(mocker):
+    snicstats = namedtuple("snistats", ["isup", "duplex", "speed", "mtu"])
+
+    fixture_stats = {
+        "lo": snicstats(
+            isup=True, duplex=psutil.NIC_DUPLEX_UNKNOWN, speed=0, mtu=65536
+        ),
+        "br0": snicstats(
+            isup=True, duplex=psutil.NIC_DUPLEX_UNKNOWN, speed=0, mtu=1500
+        ),
+        "eno1": snicstats(
+            isup=True, duplex=psutil.NIC_DUPLEX_FULL, speed=1000, mtu=1500
+        ),
+    }
+    mocker.patch.object(psutil, "net_if_stats", return_value=fixture_stats)
+
     snetio = namedtuple(
         "snetio", ["bytes_sent", "bytes_recv", "packets_sent", "packets_recv"]
     )
 
-    fixture_previous = snetio(
-        bytes_sent=126319505,
-        bytes_recv=287430199,
-        packets_sent=446126,
-        packets_recv=353819,
-    )
+    fixture_previous = {
+        "lo": snetio(
+            bytes_sent=35052252,
+            bytes_recv=35052252,
+            packets_sent=72139,
+            packets_recv=72139,
+        ),
+        "virbr0": snetio(bytes_sent=0, bytes_recv=0, packets_sent=0, packets_recv=0),
+        "br0": snetio(
+            bytes_sent=1058032294,
+            bytes_recv=2731067023,
+            packets_sent=1939233,
+            packets_recv=2579183,
+        ),
+        "eno1": snetio(
+            bytes_sent=1082551675,
+            bytes_recv=2778549399,
+            packets_sent=2198791,
+            packets_recv=2589939,
+        ),
+    }
     mocker.patch.object(psutil, "net_io_counters", return_value=fixture_previous)
 
-    instance = modules.psutil.NetworkSpeedModule(format="{upload} {download}")
-
-    fixture_after = snetio(
-        bytes_sent=206286230,
-        bytes_recv=413449476,
-        packets_sent=552777,
-        packets_recv=475162,
+    instance = modules.psutil.NetworkSpeedModule(
+        format_up="{iface} {upload} {download}"
     )
+
+    fixture_after = {
+        "lo": snetio(
+            bytes_sent=35498316,
+            bytes_recv=35498316,
+            packets_sent=72619,
+            packets_recv=72619,
+        ),
+        "br0": snetio(
+            bytes_sent=1068588784,
+            bytes_recv=2741492306,
+            packets_sent=1944351,
+            packets_recv=2581528,
+        ),
+        "eno1": snetio(
+            bytes_sent=1093133039,
+            bytes_recv=2789019792,
+            packets_sent=2203911,
+            packets_recv=2592307,
+        ),
+    }
     mocker.patch.object(psutil, "net_io_counters", return_value=fixture_after)
 
     instance.run()
 
     result = instance.result()
 
-    assert result["full_text"] == "25.4M 40.1M"
-    assert result["color"] == modules.Color.URGENT
+    assert result["full_text"] == "eno1 3.4M 3.3M"
+    assert result["color"] == modules.Color.WARN
 
 
 def test_sensors_battery_module_without_battery(mocker):
