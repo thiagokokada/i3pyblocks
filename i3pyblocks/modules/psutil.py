@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import psutil
 from psutil._common import bytes2human
@@ -126,8 +126,9 @@ class NetworkSpeedModule(core.PollingModule):
         self.ignored_interfaces = ignored_interfaces
         self.previous = psutil.net_io_counters(pernic=True)
 
-    def _detect_active_iface(self):
+    def _detect_active_iface(self) -> Optional[str]:
         if_stats = psutil.net_if_stats()
+
         for iface, stats in if_stats.items():
             if iface in self.ignored_interfaces:
                 continue
@@ -138,6 +139,8 @@ class NetworkSpeedModule(core.PollingModule):
                 and stats.duplex is not psutil.NIC_DUPLEX_UNKNOWN
             ):
                 return iface
+
+        return None
 
     def _calculate_speed(self, previous, now) -> Tuple[float, float]:
         upload = (now.bytes_sent - previous.bytes_sent) / self.sleep
