@@ -1,4 +1,7 @@
-from typing import Dict, Optional
+from typing import List, Optional, Tuple
+
+
+Items = List[Tuple[float, Optional[str]]]
 
 
 class IECUnits:
@@ -10,12 +13,10 @@ class IECUnits:
     EiB = 1024 * PiB
 
 
-def _calculate_threshold(
-    items: Dict[float, Optional[str]], value: float
-) -> Optional[str]:
+def _calculate_threshold(items: Items, value: float) -> Optional[str]:
     selected_item = None
 
-    for threshold, item in items.items():
+    for threshold, item in items:
         if value >= threshold:
             selected_item = item
         else:

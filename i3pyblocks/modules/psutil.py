@@ -1,23 +1,21 @@
 import datetime
-from typing import Dict, Optional, Tuple
+from typing import Tuple
 
 import psutil
 from psutil._common import bytes2human
 
-from i3pyblocks.core import PollingModule
-from i3pyblocks.utils import _calculate_threshold, IECUnits
-from i3pyblocks.modules import Color
+from i3pyblocks import core, modules, utils
 
 
-class CpuPercentModule(PollingModule):
+class CpuPercentModule(core.PollingModule):
     def __init__(
         self,
         format: str = "C: {percent}%",
-        colors: Dict[float, Optional[str]] = {
-            0: Color.NEUTRAL,
-            75: Color.WARN,
-            90: Color.URGENT,
-        },
+        colors: utils.Items = [
+            (0, modules.Color.NEUTRAL),
+            (75, modules.Color.WARN),
+            (90, modules.Color.URGENT),
+        ],
         sleep: int = 5,
         **kwargs,
     ) -> None:
@@ -28,21 +26,21 @@ class CpuPercentModule(PollingModule):
     def run(self) -> None:
         percent = psutil.cpu_percent(interval=None)
 
-        color = _calculate_threshold(self.colors, percent)
+        color = utils._calculate_threshold(self.colors, percent)
 
         self.update(self.format.format(percent=percent), color=color)
 
 
-class DiskUsageModule(PollingModule):
+class DiskUsageModule(core.PollingModule):
     def __init__(
         self,
         format: str = "{label}: {free:.1f}GiB",
-        colors: Dict[float, Optional[str]] = {
-            0: Color.NEUTRAL,
-            75: Color.WARN,
-            90: Color.URGENT,
-        },
-        divisor: int = IECUnits.GiB,
+        colors: utils.Items = [
+            (0, modules.Color.NEUTRAL),
+            (75, modules.Color.WARN),
+            (90, modules.Color.URGENT),
+        ],
+        divisor: int = utils.IECUnits.GiB,
         sleep: int = 5,
         path: str = "/",
         short_label: bool = False,
@@ -67,7 +65,7 @@ class DiskUsageModule(PollingModule):
     def run(self) -> None:
         disk = psutil.disk_usage(self.path)
 
-        color = _calculate_threshold(self.colors, disk.percent)
+        color = utils._calculate_threshold(self.colors, disk.percent)
 
         self.update(
             self.format.format(
@@ -81,15 +79,15 @@ class DiskUsageModule(PollingModule):
         )
 
 
-class LoadAvgModule(PollingModule):
+class LoadAvgModule(core.PollingModule):
     def __init__(
         self,
         format: str = "L: {load1}",
-        colors: Dict[float, Optional[str]] = {
-            0: Color.NEUTRAL,
-            2: Color.WARN,
-            4: Color.URGENT,
-        },
+        colors: utils.Items = [
+            (0, modules.Color.NEUTRAL),
+            (2, modules.Color.WARN),
+            (4, modules.Color.URGENT),
+        ],
         sleep: int = 5,
         **kwargs,
     ) -> None:
@@ -100,22 +98,22 @@ class LoadAvgModule(PollingModule):
     def run(self) -> None:
         load1, load5, load15 = psutil.getloadavg()
 
-        color = _calculate_threshold(self.colors, load1)
+        color = utils._calculate_threshold(self.colors, load1)
 
         self.update(
             self.format.format(load1=load1, load5=load5, load15=load15), color=color
         )
 
 
-class NetworkSpeedModule(PollingModule):
+class NetworkSpeedModule(core.PollingModule):
     def __init__(
         self,
         format: str = "U: {upload} D: {download}",
-        colors: Dict[float, Optional[str]] = {
-            0: Color.NEUTRAL,
-            2 * IECUnits.MiB: Color.WARN,
-            5 * IECUnits.MiB: Color.URGENT,
-        },
+        colors: utils.Items = [
+            (0, modules.Color.NEUTRAL),
+            (2 * utils.IECUnits.MiB, modules.Color.WARN),
+            (5 * utils.IECUnits.MiB, modules.Color.URGENT),
+        ],
         sleep: int = 3,
         **kwargs,
     ) -> None:
@@ -135,7 +133,7 @@ class NetworkSpeedModule(PollingModule):
 
         upload, download = self._calculate_speed(self.previous, now)
 
-        color = _calculate_threshold(self.colors, max(upload, download))
+        color = utils._calculate_threshold(self.colors, max(upload, download))
 
         self.update(
             self.format.format(
@@ -147,27 +145,27 @@ class NetworkSpeedModule(PollingModule):
         self.previous = now
 
 
-class SensorsBatteryModule(PollingModule):
+class SensorsBatteryModule(core.PollingModule):
     def __init__(
         self,
         format_plugged: str = "B: PLUGGED {percent:.0f}%",
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         format_unknown: str = "B: {icon} {percent:.0f}%",
-        colors: Dict[float, Optional[str]] = {
-            0: Color.URGENT,
-            10: Color.WARN,
-            25: Color.NEUTRAL,
-        },
-        icons: Dict[float, Optional[str]] = {
-            0.0: "▁",
-            12.5: "▂",
-            25.0: "▃",
-            37.5: "▄",
-            50.0: "▅",
-            62.5: "▆",
-            75.0: "▇",
-            87.5: "█",
-        },
+        colors: utils.Items = [
+            (0, modules.Color.URGENT),
+            (10, modules.Color.WARN),
+            (25, modules.Color.NEUTRAL),
+        ],
+        icons: utils.Items = [
+            (0.0, "▁"),
+            (12.5, "▂"),
+            (25.0, "▃"),
+            (37.5, "▄"),
+            (50.0, "▅"),
+            (62.5, "▆"),
+            (75.0, "▇"),
+            (87.5, "█"),
+        ],
         sleep=5,
         **kwargs,
     ):
@@ -184,8 +182,8 @@ class SensorsBatteryModule(PollingModule):
         if not battery:
             return
 
-        color = _calculate_threshold(self.colors, battery.percent)
-        icon = _calculate_threshold(self.icons, battery.percent)
+        color = utils._calculate_threshold(self.colors, battery.percent)
+        icon = utils._calculate_threshold(self.icons, battery.percent)
 
         if battery.power_plugged or battery.secsleft == psutil.POWER_TIME_UNLIMITED:
             self.format = self.format_plugged
@@ -205,25 +203,25 @@ class SensorsBatteryModule(PollingModule):
         )
 
 
-class SensorsTemperaturesModule(PollingModule):
+class SensorsTemperaturesModule(core.PollingModule):
     def __init__(
         self,
         format: str = "T: {current:.0f}°C",
-        colors: Dict[float, Optional[str]] = {
-            0: Color.NEUTRAL,
-            60: Color.WARN,
-            85: Color.URGENT,
-        },
-        icons: Dict[float, Optional[str]] = {
-            0.0: "▁",
-            12.5: "▂",
-            25.0: "▃",
-            37.5: "▄",
-            50.0: "▅",
-            62.5: "▆",
-            75.0: "▇",
-            87.5: "█",
-        },
+        colors: utils.Items = [
+            (0, modules.Color.NEUTRAL),
+            (60, modules.Color.WARN),
+            (85, modules.Color.URGENT),
+        ],
+        icons: utils.Items = [
+            (0.0, "▁"),
+            (12.5, "▂"),
+            (25.0, "▃"),
+            (37.5, "▄"),
+            (50.0, "▅"),
+            (62.5, "▆"),
+            (75.0, "▇"),
+            (87.5, "█"),
+        ],
         fahrenheit: bool = False,
         sensor: str = None,
         sleep: int = 5,
@@ -243,8 +241,8 @@ class SensorsTemperaturesModule(PollingModule):
         temperatures = psutil.sensors_temperatures(self.fahrenheit)[self.sensor]
         temperature = temperatures[0]
 
-        color = _calculate_threshold(self.colors, temperature.current)
-        icon = _calculate_threshold(self.icons, temperature.current)
+        color = utils._calculate_threshold(self.colors, temperature.current)
+        icon = utils._calculate_threshold(self.icons, temperature.current)
 
         self.update(
             self.format.format(
@@ -258,16 +256,16 @@ class SensorsTemperaturesModule(PollingModule):
         )
 
 
-class VirtualMemoryModule(PollingModule):
+class VirtualMemoryModule(core.PollingModule):
     def __init__(
         self,
         format: str = "M: {available:.1f}GiB",
-        colors: Dict[float, Optional[str]] = {
-            0: Color.NEUTRAL,
-            75: Color.WARN,
-            90: Color.URGENT,
-        },
-        divisor: int = IECUnits.GiB,
+        colors: utils.Items = [
+            (0, modules.Color.NEUTRAL),
+            (75, modules.Color.WARN),
+            (90, modules.Color.URGENT),
+        ],
+        divisor: int = utils.IECUnits.GiB,
         sleep=3,
         **kwargs,
     ) -> None:
@@ -282,7 +280,7 @@ class VirtualMemoryModule(PollingModule):
     def run(self) -> None:
         memory = psutil.virtual_memory()
 
-        color = _calculate_threshold(self.colors, memory.percent)
+        color = utils._calculate_threshold(self.colors, memory.percent)
 
         self.update(
             self.format.format(
