@@ -2,7 +2,7 @@ from i3pyblocks.utils import _calculate_threshold
 
 
 def test_calculate_threshold():
-    fixture = {-1: "item0", 0: "item1", 5.5: "item2", 10: "item3"}
+    fixture = [(-1, "item0"), (0, "item1"), (5.5, "item2"), (10, "item3")]
 
     assert _calculate_threshold(fixture, -2) is None
     assert _calculate_threshold(fixture, -1) == "item0"
