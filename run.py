@@ -27,7 +27,7 @@ async def main(loop):
     runner.register_module(
         modules.psutil.SensorsTemperaturesModule(
             format="{icon} {current:.0f}°C",
-            icons={0: "", 25: "", 50: "", 75: ""},
+            icons=[(0, ""), (25, ""), (50, ""), (75, "")],
             separator=False,
         )
     )
@@ -51,11 +51,11 @@ async def main(loop):
     runner.register_module(
         modules.psutil.LoadAvgModule(
             format=" {load1}",
-            colors={
-                0: None,
-                cpu_count // 2: modules.Color.WARN,
-                cpu_count: modules.Color.URGENT,
-            },
+            colors=[
+                (0, None),
+                (cpu_count // 2, modules.Color.WARN),
+                (cpu_count, modules.Color.URGENT),
+            ],
             separator=False,
         )
     )
@@ -64,7 +64,7 @@ async def main(loop):
             format_plugged=" {percent:.0f}%",
             format_unplugged="{icon} {percent:.0f}% {remaining_time}",
             format_unknown="{icon} {percent:.0f}%",
-            icons={0: "", 10: "", 25: "", 50: "", 75: ""},
+            icons=[(0, ""), (10, ""), (25, ""), (50, ""), (75, "")],
             separator=False,
         )
     )
