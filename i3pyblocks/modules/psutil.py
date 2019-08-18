@@ -1,5 +1,5 @@
 import datetime
-from typing import Tuple
+from typing import List, Tuple
 
 import psutil
 from psutil._common import bytes2human
@@ -108,19 +108,36 @@ class LoadAvgModule(core.PollingModule):
 class NetworkSpeedModule(core.PollingModule):
     def __init__(
         self,
-        format: str = "U: {upload} D: {download}",
+        format_up: str = "{iface}:  U {upload} D {download}",
+        format_down: str = "NO NETWORK",
         colors: utils.Items = [
             (0, modules.Color.NEUTRAL),
             (2 * utils.IECUnits.MiB, modules.Color.WARN),
             (5 * utils.IECUnits.MiB, modules.Color.URGENT),
         ],
+        ignored_interfaces: List[str] = ["lo"],
         sleep: int = 3,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
-        self.format = format
+        self.format_up = format_up
+        self.format_down = format_down
         self.colors = colors
-        self.previous = psutil.net_io_counters()
+        self.ignored_interfaces = ignored_interfaces
+        self.previous = psutil.net_io_counters(pernic=True)
+
+    def _detect_active_iface(self):
+        if_stats = psutil.net_if_stats()
+        for iface, stats in if_stats.items():
+            if iface in self.ignored_interfaces:
+                continue
+            if (
+                # This heuristic tries to avoid virtual interfaces like bridges
+                stats.isup
+                and stats.speed
+                and stats.duplex is not psutil.NIC_DUPLEX_UNKNOWN
+            ):
+                return iface
 
     def _calculate_speed(self, previous, now) -> Tuple[float, float]:
         upload = (now.bytes_sent - previous.bytes_sent) / self.sleep
@@ -129,15 +146,21 @@ class NetworkSpeedModule(core.PollingModule):
         return upload, download
 
     def run(self) -> None:
-        now = psutil.net_io_counters()
+        iface = self._detect_active_iface()
 
-        upload, download = self._calculate_speed(self.previous, now)
+        if not iface:
+            self.update(self.format_down, color=modules.Color.URGENT)
+            return
+
+        now = psutil.net_io_counters(pernic=True)
+
+        upload, download = self._calculate_speed(self.previous[iface], now[iface])
 
         color = utils._calculate_threshold(self.colors, max(upload, download))
 
         self.update(
-            self.format.format(
-                upload=bytes2human(upload), download=bytes2human(download)
+            self.format_up.format(
+                upload=bytes2human(upload), download=bytes2human(download), iface=iface
             ),
             color=color,
         )
