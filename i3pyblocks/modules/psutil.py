@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple
 import psutil
 from psutil._common import bytes2human
 
-from i3pyblocks import core, modules, utils
+from i3pyblocks import core, utils
 
 
 class CpuPercentModule(core.PollingModule):
@@ -12,9 +12,9 @@ class CpuPercentModule(core.PollingModule):
         self,
         format: str = "C: {percent}%",
         colors: utils.Items = [
-            (0, modules.Color.NEUTRAL),
-            (75, modules.Color.WARN),
-            (90, modules.Color.URGENT),
+            (0, utils.Color.NEUTRAL),
+            (75, utils.Color.WARN),
+            (90, utils.Color.URGENT),
         ],
         sleep: int = 5,
         **kwargs,
@@ -36,9 +36,9 @@ class DiskUsageModule(core.PollingModule):
         self,
         format: str = "{label}: {free:.1f}GiB",
         colors: utils.Items = [
-            (0, modules.Color.NEUTRAL),
-            (75, modules.Color.WARN),
-            (90, modules.Color.URGENT),
+            (0, utils.Color.NEUTRAL),
+            (75, utils.Color.WARN),
+            (90, utils.Color.URGENT),
         ],
         divisor: int = utils.IECUnits.GiB,
         sleep: int = 5,
@@ -84,9 +84,9 @@ class LoadAvgModule(core.PollingModule):
         self,
         format: str = "L: {load1}",
         colors: utils.Items = [
-            (0, modules.Color.NEUTRAL),
-            (2, modules.Color.WARN),
-            (4, modules.Color.URGENT),
+            (0, utils.Color.NEUTRAL),
+            (2, utils.Color.WARN),
+            (4, utils.Color.URGENT),
         ],
         sleep: int = 5,
         **kwargs,
@@ -111,9 +111,9 @@ class NetworkSpeedModule(core.PollingModule):
         format_up: str = "{iface}:  U {upload} D {download}",
         format_down: str = "NO NETWORK",
         colors: utils.Items = [
-            (0, modules.Color.NEUTRAL),
-            (2 * utils.IECUnits.MiB, modules.Color.WARN),
-            (5 * utils.IECUnits.MiB, modules.Color.URGENT),
+            (0, utils.Color.NEUTRAL),
+            (2 * utils.IECUnits.MiB, utils.Color.WARN),
+            (5 * utils.IECUnits.MiB, utils.Color.URGENT),
         ],
         ignored_interfaces: List[str] = ["lo"],
         sleep: int = 3,
@@ -152,7 +152,7 @@ class NetworkSpeedModule(core.PollingModule):
         iface = self._detect_active_iface()
 
         if not iface:
-            self.update(self.format_down, color=modules.Color.URGENT)
+            self.update(self.format_down, color=utils.Color.URGENT)
             return
 
         now = psutil.net_io_counters(pernic=True)
@@ -178,9 +178,9 @@ class SensorsBatteryModule(core.PollingModule):
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         format_unknown: str = "B: {icon} {percent:.0f}%",
         colors: utils.Items = [
-            (0, modules.Color.URGENT),
-            (10, modules.Color.WARN),
-            (25, modules.Color.NEUTRAL),
+            (0, utils.Color.URGENT),
+            (10, utils.Color.WARN),
+            (25, utils.Color.NEUTRAL),
         ],
         icons: utils.Items = [
             (0.0, "▁"),
@@ -234,9 +234,9 @@ class SensorsTemperaturesModule(core.PollingModule):
         self,
         format: str = "T: {current:.0f}°C",
         colors: utils.Items = [
-            (0, modules.Color.NEUTRAL),
-            (60, modules.Color.WARN),
-            (85, modules.Color.URGENT),
+            (0, utils.Color.NEUTRAL),
+            (60, utils.Color.WARN),
+            (85, utils.Color.URGENT),
         ],
         icons: utils.Items = [
             (0.0, "▁"),
@@ -287,9 +287,9 @@ class VirtualMemoryModule(core.PollingModule):
         self,
         format: str = "M: {available:.1f}GiB",
         colors: utils.Items = [
-            (0, modules.Color.NEUTRAL),
-            (75, modules.Color.WARN),
-            (90, modules.Color.URGENT),
+            (0, utils.Color.NEUTRAL),
+            (75, utils.Color.WARN),
+            (90, utils.Color.URGENT),
         ],
         divisor: int = utils.IECUnits.GiB,
         sleep=3,

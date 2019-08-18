@@ -4,13 +4,20 @@ from typing import List, Optional, Tuple
 Items = List[Tuple[float, Optional[str]]]
 
 
+class Color:
+    GOOD: Optional[str] = "#00FF00"
+    NEUTRAL: Optional[str] = None
+    URGENT: Optional[str] = "#FF0000"
+    WARN: Optional[str] = "#FFFF00"
+
+
 class IECUnits:
-    KiB = 1024
-    MiB = 1024 * KiB
-    GiB = 1024 * MiB
-    TiB = 1024 * GiB
-    PiB = 1024 * TiB
-    EiB = 1024 * PiB
+    KiB: int = 1024
+    MiB: int = 1024 * KiB
+    GiB: int = 1024 * MiB
+    TiB: int = 1024 * GiB
+    PiB: int = 1024 * TiB
+    EiB: int = 1024 * PiB
 
 
 def _calculate_threshold(items: Items, value: float) -> Optional[str]:
