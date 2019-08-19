@@ -21,9 +21,9 @@ async def main(loop):
 
     runner.register_module(
         modules.psutil.NetworkSpeedModule(
-            format_up=" {iface:.2s}:  {upload}  {download}",
+            format_up=" {interface:.2s}:  {upload}  {download}",
             format_down="",
-            ignored_interfaces=["lo", "vboxnet0"],
+            interface_regex="en*|wl*",
         )
     )
     for partition in partitions():
