@@ -26,13 +26,6 @@ async def main(loop):
             separator=False,
         )
     )
-    runner.register_module(
-        modules.psutil.SensorsTemperaturesModule(
-            format="{icon} {current:.0f}°C",
-            icons=[(0, ""), (25, ""), (50, ""), (75, "")],
-            separator=False,
-        )
-    )
     for partition in partitions():
         runner.register_module(
             modules.psutil.DiskUsageModule(
@@ -45,6 +38,13 @@ async def main(loop):
     runner.register_module(
         modules.psutil.VirtualMemoryModule(
             format=" {available:.1f}GiB", separator=False
+        )
+    )
+    runner.register_module(
+        modules.psutil.SensorsTemperaturesModule(
+            format="{icon} {current:.0f}°C",
+            icons=[(0, ""), (25, ""), (50, ""), (75, "")],
+            separator=False,
         )
     )
     runner.register_module(
