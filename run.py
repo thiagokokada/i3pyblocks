@@ -21,9 +21,7 @@ async def main(loop):
 
     runner.register_module(
         modules.psutil.NetworkSpeedModule(
-            format_up=" {iface}:  {upload}  {download}",
-            format_down="",
-            separator=False,
+            format_up=" {iface}:  {upload}  {download}", format_down=""
         )
     )
     for partition in partitions():
@@ -32,24 +30,18 @@ async def main(loop):
                 format=" {label}: {free:.1f}GiB",
                 path=partition.mountpoint,
                 short_label=True,
-                separator=False,
             )
         )
     runner.register_module(
-        modules.psutil.VirtualMemoryModule(
-            format=" {available:.1f}GiB", separator=False
-        )
+        modules.psutil.VirtualMemoryModule(format=" {available:.1f}GiB")
     )
     runner.register_module(
         modules.psutil.SensorsTemperaturesModule(
             format="{icon} {current:.0f}°C",
             icons=[(0, ""), (25, ""), (50, ""), (75, "")],
-            separator=False,
         )
     )
-    runner.register_module(
-        modules.psutil.CpuPercentModule(format=" {percent}%", separator=False)
-    )
+    runner.register_module(modules.psutil.CpuPercentModule(format=" {percent}%"))
     runner.register_module(
         modules.psutil.LoadAvgModule(
             format=" {load1}",
@@ -58,7 +50,6 @@ async def main(loop):
                 (cpu_count // 2, utils.Color.WARN),
                 (cpu_count, utils.Color.URGENT),
             ],
-            separator=False,
         )
     )
     runner.register_module(
@@ -67,13 +58,10 @@ async def main(loop):
             format_unplugged="{icon} {percent:.0f}% {remaining_time}",
             format_unknown="{icon} {percent:.0f}%",
             icons=[(0, ""), (10, ""), (25, ""), (50, ""), (75, "")],
-            separator=False,
         )
     )
     runner.register_module(
-        modules.LocalTimeModule(
-            format_time=" %T", format_date=" %a, %d/%m", separator=False
-        )
+        modules.LocalTimeModule(format_time=" %T", format_date=" %a, %d/%m")
     )
     await runner.start()
 
