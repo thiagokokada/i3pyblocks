@@ -63,6 +63,11 @@ async def main(loop):
         )
     )
     runner.register_module(
+        modules.pulsectl.PulseAudioModule(
+            format=" {volume:.0f}%", format_mute=" mute"
+        )
+    )
+    runner.register_module(
         modules.LocalTimeModule(format_time=" %T", format_date=" %a, %d/%m")
     )
     await runner.start()

@@ -3,6 +3,7 @@ import time
 from i3pyblocks.core import PollingModule
 
 # Import sub-modules so they're available for imports
+import i3pyblocks.modules.pulsectl  # noqa: F401
 import i3pyblocks.modules.psutil  # noqa: F401
 
 
