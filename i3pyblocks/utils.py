@@ -20,7 +20,7 @@ class IECUnits:
     EiB: int = 1024 * PiB
 
 
-def _calculate_threshold(items: Items, value: float) -> Optional[str]:
+def calculate_threshold(items: Items, value: float) -> Optional[str]:
     selected_item = None
 
     for threshold, item in items:

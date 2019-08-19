@@ -26,7 +26,7 @@ class CpuPercentModule(core.PollingModule):
     def run(self) -> None:
         percent = psutil.cpu_percent(interval=None)
 
-        color = utils._calculate_threshold(self.colors, percent)
+        color = utils.calculate_threshold(self.colors, percent)
 
         self.update(self.format.format(percent=percent), color=color)
 
@@ -76,8 +76,8 @@ class DiskUsageModule(core.PollingModule):
     def run(self) -> None:
         disk = psutil.disk_usage(self.path)
 
-        color = utils._calculate_threshold(self.colors, disk.percent)
-        icon = utils._calculate_threshold(self.icons, disk.percent)
+        color = utils.calculate_threshold(self.colors, disk.percent)
+        icon = utils.calculate_threshold(self.icons, disk.percent)
 
         self.update(
             self.format.format(
@@ -111,7 +111,7 @@ class LoadAvgModule(core.PollingModule):
     def run(self) -> None:
         load1, load5, load15 = psutil.getloadavg()
 
-        color = utils._calculate_threshold(self.colors, load1)
+        color = utils.calculate_threshold(self.colors, load1)
 
         self.update(
             self.format.format(load1=load1, load5=load5, load15=load15), color=color
@@ -172,7 +172,7 @@ class NetworkSpeedModule(core.PollingModule):
 
         upload, download = self._calculate_speed(self.previous[iface], now[iface])
 
-        color = utils._calculate_threshold(self.colors, max(upload, download))
+        color = utils.calculate_threshold(self.colors, max(upload, download))
 
         self.update(
             self.format_up.format(
@@ -221,8 +221,8 @@ class SensorsBatteryModule(core.PollingModule):
         if not battery:
             return
 
-        color = utils._calculate_threshold(self.colors, battery.percent)
-        icon = utils._calculate_threshold(self.icons, battery.percent)
+        color = utils.calculate_threshold(self.colors, battery.percent)
+        icon = utils.calculate_threshold(self.icons, battery.percent)
 
         if battery.power_plugged or battery.secsleft == psutil.POWER_TIME_UNLIMITED:
             self.format = self.format_plugged
@@ -280,8 +280,8 @@ class SensorsTemperaturesModule(core.PollingModule):
         temperatures = psutil.sensors_temperatures(self.fahrenheit)[self.sensor]
         temperature = temperatures[0]
 
-        color = utils._calculate_threshold(self.colors, temperature.current)
-        icon = utils._calculate_threshold(self.icons, temperature.current)
+        color = utils.calculate_threshold(self.colors, temperature.current)
+        icon = utils.calculate_threshold(self.icons, temperature.current)
 
         self.update(
             self.format.format(
@@ -330,8 +330,8 @@ class VirtualMemoryModule(core.PollingModule):
     def run(self) -> None:
         memory = psutil.virtual_memory()
 
-        color = utils._calculate_threshold(self.colors, memory.percent)
-        icon = utils._calculate_threshold(self.icons, memory.percent)
+        color = utils.calculate_threshold(self.colors, memory.percent)
+        icon = utils.calculate_threshold(self.icons, memory.percent)
 
         self.update(
             self.format.format(
