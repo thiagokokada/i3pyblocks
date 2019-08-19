@@ -170,7 +170,12 @@ class NetworkSpeedModule(core.PollingModule):
 
         now = psutil.net_io_counters(pernic=True)
 
-        upload, download = self._calculate_speed(self.previous[iface], now[iface])
+        try:
+            upload, download = self._calculate_speed(self.previous[iface], now[iface])
+        except KeyError:
+            # When the interface does not exist in self.previous, we will get a
+            # KeyError. In this case, just set upload and download to 0.
+            upload, download = 0, 0
 
         color = utils.calculate_threshold(self.colors, max(upload, download))
 
