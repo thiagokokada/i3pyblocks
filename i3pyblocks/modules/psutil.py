@@ -1,5 +1,6 @@
 import datetime
-from typing import List, Optional, Tuple
+import re
+from typing import Tuple
 
 import psutil
 from psutil._common import bytes2human
@@ -121,14 +122,14 @@ class LoadAvgModule(core.PollingModule):
 class NetworkSpeedModule(core.PollingModule):
     def __init__(
         self,
-        format_up: str = "{iface}:  U {upload} D {download}",
+        format_up: str = "{interface}:  U {upload} D {download}",
         format_down: str = "NO NETWORK",
         colors: utils.Items = [
             (0, utils.Color.NEUTRAL),
             (2 * utils.IECUnits.MiB, utils.Color.WARN),
             (5 * utils.IECUnits.MiB, utils.Color.URGENT),
         ],
-        ignored_interfaces: List[str] = ["lo"],
+        interface_regex: str = "en*|eth*|ppp*|sl*|wl*|ww*",
         sleep: int = 3,
         **kwargs,
     ) -> None:
@@ -136,24 +137,15 @@ class NetworkSpeedModule(core.PollingModule):
         self.format_up = format_up
         self.format_down = format_down
         self.colors = colors
-        self.ignored_interfaces = ignored_interfaces
+        self.interface_regex = re.compile(interface_regex)
         self.previous = psutil.net_io_counters(pernic=True)
 
-    def _detect_active_iface(self) -> Optional[str]:
-        if_stats = psutil.net_if_stats()
+    def _find_interface(self) -> str:
+        interfaces = psutil.net_if_stats()
 
-        for iface, stats in if_stats.items():
-            if iface in self.ignored_interfaces:
-                continue
-            if (
-                # This heuristic tries to avoid virtual interfaces like bridges
-                stats.isup
-                and stats.speed
-                and stats.duplex is not psutil.NIC_DUPLEX_UNKNOWN
-            ):
-                return iface
-
-        return None
+        for interface, stats in interfaces.items():
+            if stats.isup and self.interface_regex.match(interface):
+                return interface
 
     def _calculate_speed(self, previous, now) -> Tuple[float, float]:
         upload = (now.bytes_sent - previous.bytes_sent) / self.sleep
@@ -162,16 +154,18 @@ class NetworkSpeedModule(core.PollingModule):
         return upload, download
 
     def run(self) -> None:
-        iface = self._detect_active_iface()
+        interface = self._find_interface()
 
-        if not iface:
+        if not interface:
             self.update(self.format_down, color=utils.Color.URGENT)
             return
 
         now = psutil.net_io_counters(pernic=True)
 
         try:
-            upload, download = self._calculate_speed(self.previous[iface], now[iface])
+            upload, download = self._calculate_speed(
+                self.previous[interface], now[interface]
+            )
         except KeyError:
             # When the interface does not exist in self.previous, we will get a
             # KeyError. In this case, just set upload and download to 0.
@@ -181,7 +175,9 @@ class NetworkSpeedModule(core.PollingModule):
 
         self.update(
             self.format_up.format(
-                upload=bytes2human(upload), download=bytes2human(download), iface=iface
+                upload=bytes2human(upload),
+                download=bytes2human(download),
+                interface=interface,
             ),
             color=color,
         )

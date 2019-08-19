@@ -81,7 +81,7 @@ def test_network_speed_module_down(mocker):
     mocker.patch.object(psutil, "net_if_stats", return_value=fixture_stats)
 
     instance = modules.psutil.NetworkSpeedModule(
-        format_up="{iface} {upload} {download}"
+        format_up="{interface} {upload} {download}"
     )
 
     instance.run()
@@ -98,9 +98,6 @@ def test_network_speed_module_up(mocker):
     fixture_stats = {
         "lo": snicstats(
             isup=True, duplex=psutil.NIC_DUPLEX_UNKNOWN, speed=0, mtu=65536
-        ),
-        "br0": snicstats(
-            isup=True, duplex=psutil.NIC_DUPLEX_UNKNOWN, speed=0, mtu=1500
         ),
         "eno1": snicstats(
             isup=True, duplex=psutil.NIC_DUPLEX_FULL, speed=1000, mtu=1500
@@ -119,13 +116,6 @@ def test_network_speed_module_up(mocker):
             packets_sent=72139,
             packets_recv=72139,
         ),
-        "virbr0": snetio(bytes_sent=0, bytes_recv=0, packets_sent=0, packets_recv=0),
-        "br0": snetio(
-            bytes_sent=1058032294,
-            bytes_recv=2731067023,
-            packets_sent=1939233,
-            packets_recv=2579183,
-        ),
         "eno1": snetio(
             bytes_sent=1082551675,
             bytes_recv=2778549399,
@@ -136,7 +126,7 @@ def test_network_speed_module_up(mocker):
     mocker.patch.object(psutil, "net_io_counters", return_value=fixture_previous)
 
     instance = modules.psutil.NetworkSpeedModule(
-        format_up="{iface} {upload} {download}"
+        format_up="{interface} {upload} {download}"
     )
 
     fixture_after = {
@@ -145,12 +135,6 @@ def test_network_speed_module_up(mocker):
             bytes_recv=35498316,
             packets_sent=72619,
             packets_recv=72619,
-        ),
-        "br0": snetio(
-            bytes_sent=1068588784,
-            bytes_recv=2741492306,
-            packets_sent=1944351,
-            packets_recv=2581528,
         ),
         "eno1": snetio(
             bytes_sent=1093133039,
