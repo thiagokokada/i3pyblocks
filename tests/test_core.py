@@ -183,6 +183,42 @@ async def test_runner(capsys, mocker):
     )
 
 
+@pytest.mark.asyncio
+async def test_runner_with_fault_module(capsys, mocker):
+    mocker.patch.object(sys, "stdin")
+
+    class FaultPollingModule(PollingModule):
+        def __init__(self, sleep=0.1):
+            self.state = 0
+            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
+
+        def run(self):
+            self.state += 1
+            if self.state > 4:
+                raise Exception("Boom!")
+            self.update(str(self.state))
+
+    runner = Runner(sleep=0.1)
+    runner.register_module(FaultPollingModule())
+
+    await runner.start(timeout=0.5)
+
+    captured = capsys.readouterr()
+
+    assert (
+        captured.out
+        == """\
+{"version": 1, "click_events": true}
+[
+[{"name": "FaultPollingModule", "instance": "default", "full_text": "1"}],
+[{"name": "FaultPollingModule", "instance": "default", "full_text": "2"}],
+[{"name": "FaultPollingModule", "instance": "default", "full_text": "3"}],
+[{"name": "FaultPollingModule", "instance": "default", "full_text": "4"}],
+[{"name": "FaultPollingModule", "instance": "default", "full_text": "Exception in FaultPollingModule: Boom!", "urgent": true}],
+"""
+    )
+
+
 def test_runner_with_two_equal_modules():
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):

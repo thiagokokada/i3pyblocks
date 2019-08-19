@@ -1,4 +1,8 @@
+import logging
 from typing import List, Optional, Tuple
+
+Log = logging.getLogger("i3pyblocks")
+Log.addHandler(logging.NullHandler())
 
 
 Items = List[Tuple[float, Optional[str]]]
