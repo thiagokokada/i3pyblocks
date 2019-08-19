@@ -1,13 +1,11 @@
 import abc
 import asyncio
 import json
-import logging
 import signal
 import sys
 from typing import Dict, Optional, List, Union
 
-log = logging.getLogger(__name__)
-log.addHandler(logging.NullHandler())
+from i3pyblocks import utils
 
 
 class Align:
@@ -168,7 +166,7 @@ class PollingModule(Module):
                 self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:
-            log.exception(f"Exception in {self.name}")
+            utils.Log.exception(f"Exception in {self.name}")
             self.update(f"Exception in {self.name}: {e}", urgent=True)
 
 
@@ -196,7 +194,7 @@ class Runner:
                 module.signal_handler(signum=signum, frame=frame)
                 self.write_result()
             except Exception:
-                log.exception("Exception in signal handler")
+                utils.Log.exception("Exception in signal handler")
 
         for signum in signums:
             signal.signal(signum, _handler)
@@ -258,7 +256,7 @@ class Runner:
                 self.click_event(raw)
                 await reader.readuntil(b",")
         except Exception:
-            log.exception("Error in click handler")
+            utils.Log.exception("Error in click handler")
 
     def _setup(self) -> None:
         self._register_coroutine(self.click_events())
