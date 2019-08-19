@@ -44,13 +44,13 @@ def test_disk_usage_module(mocker):
     mocker.patch.object(psutil, "disk_usage", return_value=fixture)
 
     instance = modules.psutil.DiskUsageModule(
-        format="{label} {total:.1f} {used:.1f} {free:.1f} {percent}"
+        format="{icon} {label} {total:.1f} {used:.1f} {free:.1f} {percent}"
     )
     instance.run()
 
     result = instance.result()
 
-    assert result["full_text"] == "/ 210.7 46.0 154.0 91.3"
+    assert result["full_text"] == "█ / 210.7 46.0 154.0 91.3"
     assert result["color"] == utils.Color.URGENT
 
 
@@ -242,14 +242,14 @@ def test_sensors_temperature_module(mocker):
     mocker.patch.object(psutil, "sensors_temperatures", return_value=fixture)
 
     instance_default = modules.psutil.SensorsTemperaturesModule(
-        format="{label} {current} {high} {critical}"
+        format="{icon} {label} {current} {high} {critical}"
     )
 
     instance_default.run()
 
     result = instance_default.result()
 
-    assert result["full_text"] == "Package id 0 78.0 82.0 100.0"
+    assert result["full_text"] == "▇ Package id 0 78.0 82.0 100.0"
     assert result["color"] == utils.Color.WARN
 
     instance_acpitz = modules.psutil.SensorsTemperaturesModule(sensor="acpitz")
@@ -275,11 +275,11 @@ def test_virtual_memory_module(mocker):
     mocker.patch.object(psutil, "virtual_memory", return_value=fixture)
 
     instance = modules.psutil.VirtualMemoryModule(
-        format="{total:.1f} {available:.1f} {used:.1f} {free:.1f} {percent}"
+        format="{icon} {total:.1f} {available:.1f} {used:.1f} {free:.1f} {percent}"
     )
 
     instance.run()
 
     result = instance.result()
 
-    assert result["full_text"] == "15.6 12.4 2.5 9.8 95.6"
+    assert result["full_text"] == "█ 15.6 12.4 2.5 9.8 95.6"

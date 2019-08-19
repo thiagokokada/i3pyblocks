@@ -40,6 +40,16 @@ class DiskUsageModule(core.PollingModule):
             (75, utils.Color.WARN),
             (90, utils.Color.URGENT),
         ],
+        icons: utils.Items = [
+            (0.0, "▁"),
+            (12.5, "▂"),
+            (25.0, "▃"),
+            (37.5, "▄"),
+            (50.0, "▅"),
+            (62.5, "▆"),
+            (75.0, "▇"),
+            (87.5, "█"),
+        ],
         divisor: int = utils.IECUnits.GiB,
         sleep: int = 5,
         path: str = "/",
@@ -49,6 +59,7 @@ class DiskUsageModule(core.PollingModule):
         super().__init__(sleep=sleep, instance=path, **kwargs)
         self.format = format
         self.colors = colors
+        self.icons = icons
         self.divisor = divisor
         self.path = path
         if short_label:
@@ -66,6 +77,7 @@ class DiskUsageModule(core.PollingModule):
         disk = psutil.disk_usage(self.path)
 
         color = utils._calculate_threshold(self.colors, disk.percent)
+        icon = utils._calculate_threshold(self.icons, disk.percent)
 
         self.update(
             self.format.format(
@@ -74,6 +86,7 @@ class DiskUsageModule(core.PollingModule):
                 used=self._convert(disk.used),
                 free=self._convert(disk.free),
                 percent=disk.percent,
+                icon=icon,
             ),
             color=color,
         )
@@ -291,6 +304,16 @@ class VirtualMemoryModule(core.PollingModule):
             (75, utils.Color.WARN),
             (90, utils.Color.URGENT),
         ],
+        icons: utils.Items = [
+            (0.0, "▁"),
+            (12.5, "▂"),
+            (25.0, "▃"),
+            (37.5, "▄"),
+            (50.0, "▅"),
+            (62.5, "▆"),
+            (75.0, "▇"),
+            (87.5, "█"),
+        ],
         divisor: int = utils.IECUnits.GiB,
         sleep=3,
         **kwargs,
@@ -298,6 +321,7 @@ class VirtualMemoryModule(core.PollingModule):
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = colors
+        self.icons = icons
         self.divisor = divisor
 
     def _convert(self, dividend: float) -> float:
@@ -307,6 +331,7 @@ class VirtualMemoryModule(core.PollingModule):
         memory = psutil.virtual_memory()
 
         color = utils._calculate_threshold(self.colors, memory.percent)
+        icon = utils._calculate_threshold(self.icons, memory.percent)
 
         self.update(
             self.format.format(
@@ -315,6 +340,7 @@ class VirtualMemoryModule(core.PollingModule):
                 used=self._convert(memory.used),
                 free=self._convert(memory.free),
                 percent=memory.percent,
+                icon=icon,
             ),
             color=color,
         )
