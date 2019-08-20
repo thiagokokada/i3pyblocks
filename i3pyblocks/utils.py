@@ -15,7 +15,7 @@ class Color:
     WARN: Optional[str] = "#FFFF00"
 
 
-class IECUnits:
+class IECUnit:
     KiB: int = 1024
     MiB: int = 1024 * KiB
     GiB: int = 1024 * MiB

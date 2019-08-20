@@ -51,7 +51,7 @@ class DiskUsageModule(core.PollingModule):
             (75.0, "▇"),
             (87.5, "█"),
         ],
-        divisor: int = utils.IECUnits.GiB,
+        divisor: int = utils.IECUnit.GiB,
         sleep: int = 5,
         path: str = "/",
         short_label: bool = False,
@@ -126,8 +126,8 @@ class NetworkSpeedModule(core.PollingModule):
         format_down: str = "NO NETWORK",
         colors: utils.Items = [
             (0, utils.Color.NEUTRAL),
-            (2 * utils.IECUnits.MiB, utils.Color.WARN),
-            (5 * utils.IECUnits.MiB, utils.Color.URGENT),
+            (2 * utils.IECUnit.MiB, utils.Color.WARN),
+            (5 * utils.IECUnit.MiB, utils.Color.URGENT),
         ],
         interface_regex: str = "en*|eth*|ppp*|sl*|wl*|ww*",
         sleep: int = 3,
@@ -315,7 +315,7 @@ class VirtualMemoryModule(core.PollingModule):
             (75.0, "▇"),
             (87.5, "█"),
         ],
-        divisor: int = utils.IECUnits.GiB,
+        divisor: int = utils.IECUnit.GiB,
         sleep=3,
         **kwargs,
     ) -> None:
