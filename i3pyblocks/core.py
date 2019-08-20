@@ -194,7 +194,7 @@ class Runner:
                 module.signal_handler(signum=signum, frame=frame)
                 self.write_result()
             except Exception:
-                utils.Log.exception("Exception in signal handler")
+                utils.Log.exception(f"Exception in {module.name} signal handler")
 
         for signum in signums:
             signal.signal(signum, _handler)
@@ -226,21 +226,24 @@ class Runner:
             await asyncio.sleep(self.sleep)
 
     def click_event(self, raw: Union[str, bytes, bytearray]) -> None:
-        click_event = json.loads(raw)
-        module = self._get_module_from_key(
-            click_event.get("name"), click_event.get("instance")
-        )
-        module.click_handler(
-            x=click_event.get("x"),
-            y=click_event.get("y"),
-            button=click_event.get("button"),
-            relative_x=click_event.get("relative_x"),
-            relative_y=click_event.get("relative_y"),
-            width=click_event.get("width"),
-            height=click_event.get("height"),
-            modifiers=click_event.get("modifiers"),
-        )
-        self.write_result()
+        try:
+            click_event = json.loads(raw)
+            module = self._get_module_from_key(
+                click_event.get("name"), click_event.get("instance")
+            )
+            module.click_handler(
+                x=click_event.get("x"),
+                y=click_event.get("y"),
+                button=click_event.get("button"),
+                relative_x=click_event.get("relative_x"),
+                relative_y=click_event.get("relative_y"),
+                width=click_event.get("width"),
+                height=click_event.get("height"),
+                modifiers=click_event.get("modifiers"),
+            )
+            self.write_result()
+        except Exception:
+            utils.Log.exception(f"Error in {module.name} click handler")
 
     async def click_events(self) -> None:
         reader = asyncio.StreamReader(loop=self.loop)
@@ -250,13 +253,10 @@ class Runner:
 
         await reader.readline()
 
-        try:
-            while True:
-                raw = await reader.readuntil(b"}")
-                self.click_event(raw)
-                await reader.readuntil(b",")
-        except Exception:
-            utils.Log.exception("Error in click handler")
+        while True:
+            raw = await reader.readuntil(b"}")
+            self.click_event(raw)
+            await reader.readuntil(b",")
 
     def _setup(self) -> None:
         self._register_coroutine(self.click_events())

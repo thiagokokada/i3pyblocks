@@ -1,6 +1,6 @@
 import datetime
 import re
-from typing import Tuple
+from typing import Optional, Tuple
 
 import psutil
 from psutil._common import bytes2human
@@ -140,12 +140,14 @@ class NetworkSpeedModule(core.PollingModule):
         self.interface_regex = re.compile(interface_regex)
         self.previous = psutil.net_io_counters(pernic=True)
 
-    def _find_interface(self) -> str:
+    def _find_interface(self) -> Optional[str]:
         interfaces = psutil.net_if_stats()
 
         for interface, stats in interfaces.items():
             if stats.isup and self.interface_regex.match(interface):
                 return interface
+
+        return None
 
     def _calculate_speed(self, previous, now) -> Tuple[float, float]:
         upload = (now.bytes_sent - previous.bytes_sent) / self.sleep
