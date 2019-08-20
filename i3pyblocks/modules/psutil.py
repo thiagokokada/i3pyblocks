@@ -20,9 +20,9 @@ class CpuPercentModule(core.PollingModule):
         sleep: int = 5,
         **kwargs,
     ) -> None:
+        super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = colors
-        super().__init__(sleep=sleep, **kwargs)
 
     def run(self) -> None:
         percent = psutil.cpu_percent(interval=None)
@@ -105,9 +105,9 @@ class LoadAvgModule(core.PollingModule):
         sleep: int = 5,
         **kwargs,
     ) -> None:
+        super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = colors
-        super().__init__(sleep=sleep, **kwargs)
 
     def run(self) -> None:
         load1, load5, load15 = psutil.getloadavg()
