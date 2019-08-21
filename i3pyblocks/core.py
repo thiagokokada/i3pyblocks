@@ -1,7 +1,6 @@
 import abc
 import asyncio
 import json
-import signal
 import sys
 from typing import Dict, Optional, List, Union
 
