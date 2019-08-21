@@ -232,14 +232,14 @@ class Runner:
                 click_event.get("name"), click_event.get("instance")
             )
             module.click_handler(
-                x=click_event.get("x"),
-                y=click_event.get("y"),
-                button=click_event.get("button"),
-                relative_x=click_event.get("relative_x"),
-                relative_y=click_event.get("relative_y"),
-                width=click_event.get("width"),
-                height=click_event.get("height"),
-                modifiers=click_event.get("modifiers"),
+                click_event.get("x"),
+                click_event.get("y"),
+                click_event.get("button"),
+                click_event.get("relative_x"),
+                click_event.get("relative_y"),
+                click_event.get("width"),
+                click_event.get("height"),
+                click_event.get("modifiers"),
             )
             self.write_result()
         except Exception:
