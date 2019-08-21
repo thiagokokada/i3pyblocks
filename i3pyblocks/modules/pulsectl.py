@@ -1,11 +1,12 @@
 import asyncio
+import subprocess
+from typing import List
 
 import pulsectl
 
 from i3pyblocks import core, utils
 
-# Based on:
-# https://github.com/lf-/aiopanel/blob/2786f1116aa2ea0dfe7f331b174104843972fec2/aiopanel.py#L437
+# Based on: https://git.io/fjbHp
 class PulseAudioModule(core.Module):
     def __init__(
         self,
@@ -26,6 +27,7 @@ class PulseAudioModule(core.Module):
             (75.0, "▇"),
             (87.5, "█"),
         ],
+        command: List["str"] = ["pavucontrol"],
         **kwargs
     ) -> None:
         super().__init__(**kwargs)
@@ -33,12 +35,14 @@ class PulseAudioModule(core.Module):
         self.format_mute = format_mute
         self.colors = colors
         self.icons = icons
+        self.command = command
+
         # https://pypi.org/project/pulsectl/#event-handling-code-threads
         self.pulse = pulsectl.Pulse(__name__, threading_lock=True)
         self._find_default_sink()
         self._update_sink_info()
 
-    def __exit__(self, *args):
+    def __exit__(self, *_) -> None:
         self.pulse.close()
 
     def _find_default_sink(self) -> None:
@@ -52,14 +56,14 @@ class PulseAudioModule(core.Module):
     def _update_sink_info(self) -> None:
         self.sink = self.pulse.sink_info(self.sink.index)
 
-    def _handle_event(self, event):
+    def _handle_event(self, event) -> None:
         if event.facility == "server":
             self._find_default_sink()
             self._update_sink_info()
         elif event.facility == "sink":
             self._update_sink_info()
 
-    def _event_callback(self, event):
+    def _event_callback(self, event) -> None:
         self.event = event
         raise pulsectl.PulseLoopStop()
 
@@ -89,7 +93,9 @@ class PulseAudioModule(core.Module):
             else:
                 self.pulse.mute(self.sink, mute=True)
 
-        if button == utils.Mouse.RIGHT_BUTTON:
+        if button == utils.Mouse.LEFT_BUTTON:
+            subprocess.Popen(self.command)
+        elif button == utils.Mouse.RIGHT_BUTTON:
             toggle_mute()
         elif button == utils.Mouse.SCROLL_UP:
             self.pulse.volume_change_all_chans(self.sink, 0.05)

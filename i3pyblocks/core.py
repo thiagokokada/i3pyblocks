@@ -244,6 +244,7 @@ class Runner:
         except Exception:
             utils.Log.exception(f"Error in {module.name} click handler")
 
+    # Based on: https://git.io/fjbHx
     async def click_events(self) -> None:
         reader = asyncio.StreamReader(loop=self.loop)
         protocol = asyncio.StreamReaderProtocol(reader, loop=self.loop)
