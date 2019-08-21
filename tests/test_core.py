@@ -255,7 +255,7 @@ async def test_runner_with_signal_handler(capsys, mocker):
         def run(self):
             pass
 
-        def signal_handler(self, signum, frame):
+        def signal_handler(self, signum):
             if signum == signal.SIGUSR1:
                 self.update("received_signal")
             elif signum == signal.SIGUSR2:

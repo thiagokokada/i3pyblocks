@@ -1,7 +1,6 @@
 import abc
 import asyncio
 import json
-import signal
 import sys
 from typing import Dict, Optional, List, Union
 
@@ -137,7 +136,7 @@ class Module(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def signal_handler(self, signum: int, frame: Optional[object]) -> None:
+    def signal_handler(self, signum: int) -> None:
         pass
 
     @abc.abstractmethod
@@ -189,15 +188,15 @@ class Runner:
         self.tasks.append(task)
 
     def register_signal(self, module: Module, signums: List[int] = []) -> None:
-        def _handler(signum, frame):
+        def _handler(signum: int):
             try:
-                module.signal_handler(signum=signum, frame=frame)
+                module.signal_handler(signum)
                 self.write_result()
             except Exception:
                 utils.Log.exception(f"Exception in {module.name} signal handler")
 
         for signum in signums:
-            signal.signal(signum, _handler)
+            self.loop.add_signal_handler(signum, _handler, signum)
 
     def register_module(self, module: Module, signals: List[int] = []) -> None:
         module_key = module.key()
@@ -232,14 +231,14 @@ class Runner:
                 click_event.get("name"), click_event.get("instance")
             )
             module.click_handler(
-                x=click_event.get("x"),
-                y=click_event.get("y"),
-                button=click_event.get("button"),
-                relative_x=click_event.get("relative_x"),
-                relative_y=click_event.get("relative_y"),
-                width=click_event.get("width"),
-                height=click_event.get("height"),
-                modifiers=click_event.get("modifiers"),
+                click_event.get("x"),
+                click_event.get("y"),
+                click_event.get("button"),
+                click_event.get("relative_x"),
+                click_event.get("relative_y"),
+                click_event.get("width"),
+                click_event.get("height"),
+                click_event.get("modifiers"),
             )
             self.write_result()
         except Exception:
