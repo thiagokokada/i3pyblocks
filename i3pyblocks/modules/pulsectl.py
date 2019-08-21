@@ -29,7 +29,7 @@ class PulseAudioModule(core.Module):
             (87.5, "█"),
         ],
         command: List["str"] = ["pavucontrol"],
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.format = format
@@ -40,11 +40,21 @@ class PulseAudioModule(core.Module):
 
         # https://pypi.org/project/pulsectl/#event-handling-code-threads
         self.pulse = pulsectl.Pulse(__name__, threading_lock=True)
+
         self._find_default_sink()
         self._update_sink_info()
+        self._setup_event_callback()
 
     def __exit__(self, *_) -> None:
         self.pulse.close()
+
+    def _setup_event_callback(self) -> None:
+        def event_callback(event):
+            self.event = event
+            raise pulsectl.PulseLoopStop()
+
+        self.pulse.event_mask_set("sink", "server")
+        self.pulse.event_callback_set(event_callback)
 
     def _find_default_sink(self) -> None:
         server_info = self.pulse.server_info()
@@ -64,15 +74,7 @@ class PulseAudioModule(core.Module):
         elif event.facility == "sink":
             self._update_sink_info()
 
-    def _event_callback(self, event) -> None:
-        self.event = event
-        raise pulsectl.PulseLoopStop()
-
     def _loop(self) -> None:
-        self.run()
-        self.pulse.event_mask_set("sink", "server")
-        self.pulse.event_callback_set(self._event_callback)
-
         while True:
             self.run()
 
@@ -81,8 +83,12 @@ class PulseAudioModule(core.Module):
             self._handle_event(self.event)
 
     async def loop(self) -> None:
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, self._loop)
+        try:
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, self._loop)
+        except Exception as e:
+            utils.Log.exception(f"Exception in {self.name}")
+            self.update(f"Exception in {self.name}: {e}", urgent=True)
 
     def signal_handler(self, *_, **__) -> None:
         self.run()
