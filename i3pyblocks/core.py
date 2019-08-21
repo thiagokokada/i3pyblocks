@@ -137,7 +137,7 @@ class Module(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def signal_handler(self, signum: int, frame: Optional[object]) -> None:
+    def signal_handler(self, signum: int) -> None:
         pass
 
     @abc.abstractmethod
@@ -189,15 +189,15 @@ class Runner:
         self.tasks.append(task)
 
     def register_signal(self, module: Module, signums: List[int] = []) -> None:
-        def _handler(signum, frame):
+        def _handler(signum: int):
             try:
-                module.signal_handler(signum=signum, frame=frame)
+                module.signal_handler(signum)
                 self.write_result()
             except Exception:
                 utils.Log.exception(f"Exception in {module.name} signal handler")
 
         for signum in signums:
-            signal.signal(signum, _handler)
+            self.loop.add_signal_handler(signum, _handler, signum)
 
     def register_module(self, module: Module, signals: List[int] = []) -> None:
         module_key = module.key()
