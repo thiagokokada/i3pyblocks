@@ -9,11 +9,11 @@ Items = List[Tuple[float, Optional[str]]]
 
 
 class Mouse:
-    LEFT_BUTTON: str = 1
-    MIDDLE_BUTTON: str = 2
-    RIGHT_BUTTON: str = 3
-    SCROLL_UP: str = 4
-    SCROLL_DOWN: str = 5
+    LEFT_BUTTON: int = 1
+    MIDDLE_BUTTON: int = 2
+    RIGHT_BUTTON: int = 3
+    SCROLL_UP: int = 4
+    SCROLL_DOWN: int = 5
 
 
 class Color:

@@ -6,6 +6,7 @@ import pulsectl
 
 from i3pyblocks import core, utils
 
+
 # Based on: https://git.io/fjbHp
 class PulseAudioModule(core.Module):
     def __init__(
@@ -83,10 +84,20 @@ class PulseAudioModule(core.Module):
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, self._loop)
 
-    def signal_handler(self, *_, **__):
+    def signal_handler(self, *_, **__) -> None:
         self.run()
 
-    def click_handler(self, button: int, **kwargs):
+    def click_handler(
+        self,
+        x: int,
+        y: int,
+        button: int,
+        relative_x: int,
+        relative_y: int,
+        width: int,
+        height: int,
+        modifiers: List[str],
+    ) -> None:
         def toggle_mute():
             if self.sink.mute:
                 self.pulse.mute(self.sink, mute=False)
