@@ -93,17 +93,7 @@ class PulseAudioModule(core.Module):
     def signal_handler(self, *_, **__) -> None:
         self.run()
 
-    def click_handler(
-        self,
-        x: int,
-        y: int,
-        button: int,
-        relative_x: int,
-        relative_y: int,
-        width: int,
-        height: int,
-        modifiers: List[str],
-    ) -> None:
+    def click_handler(self, button: int, *_, **__) -> None:  # type: ignore
         def toggle_mute():
             if self.sink.mute:
                 self.pulse.mute(self.sink, mute=False)
