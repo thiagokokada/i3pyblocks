@@ -64,8 +64,11 @@ class PulseAudioModule(core.Module):
                 self.sink = sink
                 return
 
+        self.sink = None
+
     def _update_sink_info(self) -> None:
-        self.sink = self.pulse.sink_info(self.sink.index)
+        if self.sink:
+            self.sink = self.pulse.sink_info(self.sink.index)
 
     def _handle_event(self, event) -> None:
         if event.facility == "server":
@@ -112,6 +115,9 @@ class PulseAudioModule(core.Module):
         self.run()
 
     def run(self) -> None:
+        if not self.sink:
+            return
+
         if self.sink.mute:
             self.update(self.format_mute.format(), color=utils.Color.URGENT)
         else:

@@ -2,6 +2,7 @@ import time
 from collections import namedtuple
 
 import psutil
+import pulsectl
 
 from i3pyblocks import modules, utils
 
@@ -151,6 +152,18 @@ def test_network_speed_module_up(mocker):
 
     assert result["full_text"] == "eno1 3.4M 3.3M"
     assert result["color"] == utils.Color.WARN
+
+
+def test_pulse_audio_module(mocker):
+    mocker.patch.object(pulsectl, "Pulse")
+
+    instance = modules.pulsectl.PulseAudioModule()
+
+    instance.run()
+
+    result = instance.result()
+
+    assert result["full_text"] == ""  # TODO: improve this test
 
 
 def test_sensors_battery_module_without_battery(mocker):
