@@ -8,6 +8,14 @@ Log.addHandler(logging.NullHandler())
 Items = List[Tuple[float, Optional[str]]]
 
 
+class Mouse:
+    LEFT_BUTTON: int = 1
+    MIDDLE_BUTTON: int = 2
+    RIGHT_BUTTON: int = 3
+    SCROLL_UP: int = 4
+    SCROLL_DOWN: int = 5
+
+
 class Color:
     GOOD: Optional[str] = "#00FF00"
     NEUTRAL: Optional[str] = None

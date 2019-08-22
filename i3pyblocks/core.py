@@ -190,7 +190,7 @@ class Runner:
     def register_signal(self, module: Module, signums: List[int] = []) -> None:
         def _handler(signum: int):
             try:
-                module.signal_handler(signum)
+                module.signal_handler(signum=signum)
                 self.write_result()
             except Exception:
                 utils.Log.exception(f"Exception in {module.name} signal handler")
@@ -231,19 +231,20 @@ class Runner:
                 click_event.get("name"), click_event.get("instance")
             )
             module.click_handler(
-                click_event.get("x"),
-                click_event.get("y"),
-                click_event.get("button"),
-                click_event.get("relative_x"),
-                click_event.get("relative_y"),
-                click_event.get("width"),
-                click_event.get("height"),
-                click_event.get("modifiers"),
+                x=click_event.get("x"),
+                y=click_event.get("y"),
+                button=click_event.get("button"),
+                relative_x=click_event.get("relative_x"),
+                relative_y=click_event.get("relative_y"),
+                width=click_event.get("width"),
+                height=click_event.get("height"),
+                modifiers=click_event.get("modifiers"),
             )
             self.write_result()
         except Exception:
             utils.Log.exception(f"Error in {module.name} click handler")
 
+    # Based on: https://git.io/fjbHx
     async def click_events(self) -> None:
         reader = asyncio.StreamReader(loop=self.loop)
         protocol = asyncio.StreamReaderProtocol(reader, loop=self.loop)
