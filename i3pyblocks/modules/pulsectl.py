@@ -1,6 +1,6 @@
 import asyncio
 import subprocess
-from typing import List
+from typing import Iterator
 
 import pulsectl
 
@@ -13,12 +13,12 @@ class PulseAudioModule(core.Module):
         self,
         format: str = "V: {volume:.0f}%",
         format_mute: str = "V: MUTE",
-        colors: utils.Items = [
+        colors: utils.Items = (
             (0, utils.Color.URGENT),
             (10, utils.Color.WARN),
             (25, utils.Color.NEUTRAL),
-        ],
-        icons: utils.Items = [
+        ),
+        icons: utils.Items = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -27,8 +27,8 @@ class PulseAudioModule(core.Module):
             (62.5, "▆"),
             (75.0, "▇"),
             (87.5, "█"),
-        ],
-        command: List["str"] = ["pavucontrol"],
+        ),
+        command: Iterator[str] = ("pavucontrol",),
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)

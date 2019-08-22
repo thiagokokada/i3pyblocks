@@ -12,11 +12,11 @@ class CpuPercentModule(core.PollingModule):
     def __init__(
         self,
         format: str = "C: {percent}%",
-        colors: utils.Items = [
+        colors: utils.Items = (
             (0, utils.Color.NEUTRAL),
             (75, utils.Color.WARN),
             (90, utils.Color.URGENT),
-        ],
+        ),
         sleep: int = 5,
         **kwargs,
     ) -> None:
@@ -36,12 +36,12 @@ class DiskUsageModule(core.PollingModule):
     def __init__(
         self,
         format: str = "{label}: {free:.1f}GiB",
-        colors: utils.Items = [
+        colors: utils.Items = (
             (0, utils.Color.NEUTRAL),
             (75, utils.Color.WARN),
             (90, utils.Color.URGENT),
-        ],
-        icons: utils.Items = [
+        ),
+        icons: utils.Items = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -50,7 +50,7 @@ class DiskUsageModule(core.PollingModule):
             (62.5, "▆"),
             (75.0, "▇"),
             (87.5, "█"),
-        ],
+        ),
         divisor: int = utils.IECUnit.GiB,
         sleep: int = 5,
         path: str = "/",
@@ -97,11 +97,11 @@ class LoadAvgModule(core.PollingModule):
     def __init__(
         self,
         format: str = "L: {load1}",
-        colors: utils.Items = [
+        colors: utils.Items = (
             (0, utils.Color.NEUTRAL),
             (2, utils.Color.WARN),
             (4, utils.Color.URGENT),
-        ],
+        ),
         sleep: int = 5,
         **kwargs,
     ) -> None:
@@ -124,11 +124,11 @@ class NetworkSpeedModule(core.PollingModule):
         self,
         format_up: str = "{interface}:  U {upload} D {download}",
         format_down: str = "NO NETWORK",
-        colors: utils.Items = [
+        colors: utils.Items = (
             (0, utils.Color.NEUTRAL),
             (2 * utils.IECUnit.MiB, utils.Color.WARN),
             (5 * utils.IECUnit.MiB, utils.Color.URGENT),
-        ],
+        ),
         interface_regex: str = "en*|eth*|ppp*|sl*|wl*|ww*",
         sleep: int = 3,
         **kwargs,
@@ -193,12 +193,12 @@ class SensorsBatteryModule(core.PollingModule):
         format_plugged: str = "B: PLUGGED {percent:.0f}%",
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         format_unknown: str = "B: {icon} {percent:.0f}%",
-        colors: utils.Items = [
+        colors: utils.Items = (
             (0, utils.Color.URGENT),
             (10, utils.Color.WARN),
             (25, utils.Color.NEUTRAL),
-        ],
-        icons: utils.Items = [
+        ),
+        icons: utils.Items = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -207,7 +207,7 @@ class SensorsBatteryModule(core.PollingModule):
             (62.5, "▆"),
             (75.0, "▇"),
             (87.5, "█"),
-        ],
+        ),
         sleep=5,
         **kwargs,
     ):
@@ -249,12 +249,12 @@ class SensorsTemperaturesModule(core.PollingModule):
     def __init__(
         self,
         format: str = "T: {current:.0f}°C",
-        colors: utils.Items = [
+        colors: utils.Items = (
             (0, utils.Color.NEUTRAL),
             (60, utils.Color.WARN),
             (85, utils.Color.URGENT),
-        ],
-        icons: utils.Items = [
+        ),
+        icons: utils.Items = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -263,7 +263,7 @@ class SensorsTemperaturesModule(core.PollingModule):
             (62.5, "▆"),
             (75.0, "▇"),
             (87.5, "█"),
-        ],
+        ),
         fahrenheit: bool = False,
         sensor: str = None,
         sleep: int = 5,
@@ -302,12 +302,12 @@ class VirtualMemoryModule(core.PollingModule):
     def __init__(
         self,
         format: str = "M: {available:.1f}GiB",
-        colors: utils.Items = [
+        colors: utils.Items = (
             (0, utils.Color.NEUTRAL),
             (75, utils.Color.WARN),
             (90, utils.Color.URGENT),
-        ],
-        icons: utils.Items = [
+        ),
+        icons: utils.Items = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -316,7 +316,7 @@ class VirtualMemoryModule(core.PollingModule):
             (62.5, "▆"),
             (75.0, "▇"),
             (87.5, "█"),
-        ],
+        ),
         divisor: int = utils.IECUnit.GiB,
         sleep=3,
         **kwargs,

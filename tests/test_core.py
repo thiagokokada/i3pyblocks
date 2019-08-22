@@ -214,7 +214,8 @@ async def test_runner_with_fault_module(capsys, mocker):
 [{"name": "FaultPollingModule", "instance": "default", "full_text": "2"}],
 [{"name": "FaultPollingModule", "instance": "default", "full_text": "3"}],
 [{"name": "FaultPollingModule", "instance": "default", "full_text": "4"}],
-[{"name": "FaultPollingModule", "instance": "default", "full_text": "Exception in FaultPollingModule: Boom!", "urgent": true}],
+[{"name": "FaultPollingModule", "instance": "default", \
+"full_text": "Exception in FaultPollingModule: Boom!", "urgent": true}],
 """
     )
 
@@ -282,7 +283,18 @@ async def test_runner_with_signal_handler(capsys, mocker):
 
 # TODO: Test with mocked sys.stdin instead of calling functions directly
 def test_runner_with_click_handler(capsys):
-    click_event = b'{"name":"ValidPollingModuleWithClickHandler","instance":"default","button":1,"modifiers":["Mod1"],"x":123,"y":456,"relative_x":12,"relative_y":34,"width":20,"height":40}'
+    click_event = (
+        b'{"name":"ValidPollingModuleWithClickHandler",'
+        + b'"instance":"default",'
+        + b'"button":1,'
+        + b'"modifiers":["Mod1"],'
+        + b'"x":123,'
+        + b'"y":456,'
+        + b'"relative_x":12,'
+        + b'"relative_y":34,'
+        + b'"width":20,'
+        + b'"height":40}'
+    )
 
     class ValidPollingModuleWithClickHandler(PollingModule):
         def __init__(self, sleep=0.1):

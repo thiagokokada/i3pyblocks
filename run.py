@@ -10,7 +10,7 @@ from i3pyblocks import core, modules, utils
 logging.basicConfig(filename=f".i3pyblocks.log", level=logging.INFO)
 
 
-def partitions(excludes=["/boot", "/nix/store"]):
+def partitions(excludes=("/boot", "/nix/store")):
     partitions = psutil.disk_partitions()
     return [p for p in partitions if p.mountpoint not in excludes]
 
