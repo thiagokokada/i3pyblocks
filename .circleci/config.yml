@@ -51,7 +51,7 @@ jobs:
       - run:
           name : Run lint
           command: |
-            poetry run flake8 --ignore=E501,W503 .
+            poetry run flake8 .
 
   build-python36:
     docker:

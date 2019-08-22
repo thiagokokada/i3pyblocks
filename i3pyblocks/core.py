@@ -2,7 +2,7 @@ import abc
 import asyncio
 import json
 import sys
-from typing import Dict, Optional, List, Union
+from typing import Dict, Iterator, List, Optional, Union
 
 from i3pyblocks import utils
 
@@ -187,7 +187,7 @@ class Runner:
         task = asyncio.ensure_future(coro)
         self.tasks.append(task)
 
-    def register_signal(self, module: Module, signums: List[int] = []) -> None:
+    def register_signal(self, module: Module, signums: Iterator[int]) -> None:
         def _handler(signum: int):
             try:
                 module.signal_handler(signum=signum)
@@ -198,7 +198,7 @@ class Runner:
         for signum in signums:
             self.loop.add_signal_handler(signum, _handler, signum)
 
-    def register_module(self, module: Module, signals: List[int] = []) -> None:
+    def register_module(self, module: Module, signals: Iterator[int] = ()) -> None:
         module_key = module.key()
 
         if module_key not in self.modules.keys():
