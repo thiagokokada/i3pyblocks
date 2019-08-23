@@ -1,6 +1,6 @@
 import asyncio
 import subprocess
-from typing import Iterable, Sequence
+from typing import Sequence
 
 import pulsectl
 
