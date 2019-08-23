@@ -1,6 +1,6 @@
 import asyncio
 import subprocess
-from typing import Iterator
+from typing import Iterable, Sequence
 
 import pulsectl
 
@@ -28,7 +28,7 @@ class PulseAudioModule(core.Module):
             (75.0, "▇"),
             (87.5, "█"),
         ),
-        command: Iterator[str] = ("pavucontrol",),
+        command: Sequence[str] = ("pavucontrol",),
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)

@@ -1,11 +1,11 @@
 import logging
-from typing import Iterator, Optional, Tuple
+from typing import Iterable, Optional, Tuple
 
 Log = logging.getLogger("i3pyblocks")
 Log.addHandler(logging.NullHandler())
 
 
-Items = Iterator[Tuple[float, Optional[str]]]
+Items = Iterable[Tuple[float, Optional[str]]]
 
 
 class Mouse:
