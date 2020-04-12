@@ -3,15 +3,16 @@
 import asyncio
 import logging
 
-import psutil
+import psutil as ps
 
-from i3pyblocks import core, modules, utils
+from i3pyblocks import core, utils
+from i3pyblocks.modules import psutil, pulsectl, time
 
 logging.basicConfig(filename=f".i3pyblocks.log", level=logging.INFO)
 
 
 def partitions(excludes=("/boot", "/nix/store")):
-    partitions = psutil.disk_partitions()
+    partitions = ps.disk_partitions()
     return [p for p in partitions if p.mountpoint not in excludes]
 
 
@@ -20,7 +21,7 @@ async def main(loop):
     runner = core.Runner(loop=loop)
 
     runner.register_module(
-        modules.psutil.NetworkSpeedModule(
+        psutil.NetworkSpeedModule(
             format_up=" {interface:.2s}:  {upload}  {download}",
             format_down="",
             interface_regex="en*|wl*",
@@ -28,24 +29,22 @@ async def main(loop):
     )
     for partition in partitions():
         runner.register_module(
-            modules.psutil.DiskUsageModule(
+            psutil.DiskUsageModule(
                 format=" {label}: {free:.1f}GiB",
                 path=partition.mountpoint,
                 short_label=True,
             )
         )
+    runner.register_module(psutil.VirtualMemoryModule(format=" {available:.1f}GiB"))
     runner.register_module(
-        modules.psutil.VirtualMemoryModule(format=" {available:.1f}GiB")
-    )
-    runner.register_module(
-        modules.psutil.SensorsTemperaturesModule(
+        psutil.SensorsTemperaturesModule(
             format="{icon} {current:.0f}°C",
             icons=[(0, ""), (25, ""), (50, ""), (75, "")],
         )
     )
-    runner.register_module(modules.psutil.CpuPercentModule(format=" {percent}%"))
+    runner.register_module(psutil.CpuPercentModule(format=" {percent}%"))
     runner.register_module(
-        modules.psutil.LoadAvgModule(
+        psutil.LoadAvgModule(
             format=" {load1}",
             colors=[
                 (0, None),
@@ -55,7 +54,7 @@ async def main(loop):
         )
     )
     runner.register_module(
-        modules.psutil.SensorsBatteryModule(
+        psutil.SensorsBatteryModule(
             format_plugged=" {percent:.0f}%",
             format_unplugged="{icon} {percent:.0f}% {remaining_time}",
             format_unknown="{icon} {percent:.0f}%",
@@ -63,12 +62,10 @@ async def main(loop):
         )
     )
     runner.register_module(
-        modules.pulsectl.PulseAudioModule(
-            format=" {volume:.0f}%", format_mute=" mute"
-        )
+        pulsectl.PulseAudioModule(format=" {volume:.0f}%", format_mute=" mute")
     )
     runner.register_module(
-        modules.LocalTimeModule(format_time=" %T", format_date=" %a, %d/%m")
+        time.LocalTimeModule(format_time=" %T", format_date=" %a, %d/%m")
     )
     await runner.start()
 

@@ -1,33 +1,15 @@
-import time
 from collections import namedtuple
 
 import psutil
-import pulsectl
 
-from i3pyblocks import modules, utils
-
-
-def test_local_time_module(mocker):
-    mocker.patch.object(
-        time, "localtime", return_value=time.strptime("Fri Aug 16 21:00:00 2019")
-    )
-
-    # Use a non locale dependent format
-    instance = modules.LocalTimeModule(format_time="%H:%M:%S", format_date="%y-%m-%d")
-    instance.run()
-
-    assert instance.result()["full_text"] == "21:00:00"
-
-    # Simulate click
-    instance.click_handler()
-
-    assert instance.result()["full_text"] == "19-08-16"
+from i3pyblocks import utils
+from i3pyblocks.modules import psutil as m_psutil
 
 
 def test_cpu_percent_module(mocker):
     mocker.patch.object(psutil, "cpu_percent", return_value=75.5)
 
-    instance = modules.psutil.CpuPercentModule(format="{percent}")
+    instance = m_psutil.CpuPercentModule(format="{percent}")
     instance.run()
 
     result = instance.result()
@@ -44,7 +26,7 @@ def test_disk_usage_module(mocker):
     )
     mocker.patch.object(psutil, "disk_usage", return_value=fixture)
 
-    instance = modules.psutil.DiskUsageModule(
+    instance = m_psutil.DiskUsageModule(
         format="{icon} {label} {total:.1f} {used:.1f} {free:.1f} {percent}"
     )
     instance.run()
@@ -58,7 +40,7 @@ def test_disk_usage_module(mocker):
 def test_load_avg_module(mocker):
     mocker.patch.object(psutil, "getloadavg", return_value=(2.5, 5, 15))
 
-    instance = modules.psutil.LoadAvgModule(format="{load1} {load5} {load15}")
+    instance = m_psutil.LoadAvgModule(format="{load1} {load5} {load15}")
 
     instance.run()
 
@@ -81,9 +63,7 @@ def test_network_speed_module_down(mocker):
     }
     mocker.patch.object(psutil, "net_if_stats", return_value=fixture_stats)
 
-    instance = modules.psutil.NetworkSpeedModule(
-        format_up="{interface} {upload} {download}"
-    )
+    instance = m_psutil.NetworkSpeedModule(format_up="{interface} {upload} {download}")
 
     instance.run()
 
@@ -126,9 +106,7 @@ def test_network_speed_module_up(mocker):
     }
     mocker.patch.object(psutil, "net_io_counters", return_value=fixture_previous)
 
-    instance = modules.psutil.NetworkSpeedModule(
-        format_up="{interface} {upload} {download}"
-    )
+    instance = m_psutil.NetworkSpeedModule(format_up="{interface} {upload} {download}")
 
     fixture_after = {
         "lo": snetio(
@@ -154,22 +132,10 @@ def test_network_speed_module_up(mocker):
     assert result["color"] == utils.Color.WARN
 
 
-def test_pulse_audio_module(mocker):
-    mocker.patch.object(pulsectl, "Pulse")
-
-    instance = modules.pulsectl.PulseAudioModule()
-
-    instance.run()
-
-    result = instance.result()
-
-    assert result["full_text"] == ""  # TODO: improve this test
-
-
 def test_sensors_battery_module_without_battery(mocker):
     mocker.patch.object(psutil, "sensors_battery", return_value=None)
 
-    instance = modules.psutil.SensorsBatteryModule()
+    instance = m_psutil.SensorsBatteryModule()
 
     instance.run()
 
@@ -186,7 +152,7 @@ def test_sensors_battery_module_with_battery(mocker):
     )
     mocker.patch.object(psutil, "sensors_battery", return_value=fixture)
 
-    instance = modules.psutil.SensorsBatteryModule()
+    instance = m_psutil.SensorsBatteryModule()
 
     instance.run()
 
@@ -238,7 +204,7 @@ def test_sensors_temperature_module(mocker):
     }
     mocker.patch.object(psutil, "sensors_temperatures", return_value=fixture)
 
-    instance_default = modules.psutil.SensorsTemperaturesModule(
+    instance_default = psutil.SensorsTemperaturesModule(
         format="{icon} {label} {current} {high} {critical}"
     )
 
@@ -249,7 +215,7 @@ def test_sensors_temperature_module(mocker):
     assert result["full_text"] == "▇ Package id 0 78.0 82.0 100.0"
     assert result["color"] == utils.Color.WARN
 
-    instance_acpitz = modules.psutil.SensorsTemperaturesModule(sensor="acpitz")
+    instance_acpitz = psutil.SensorsTemperaturesModule(sensor="acpitz")
 
     instance_acpitz.run()
 
@@ -271,7 +237,7 @@ def test_virtual_memory_module(mocker):
 
     mocker.patch.object(psutil, "virtual_memory", return_value=fixture)
 
-    instance = modules.psutil.VirtualMemoryModule(
+    instance = m_psutil.VirtualMemoryModule(
         format="{icon} {total:.1f} {available:.1f} {used:.1f} {free:.1f} {percent}"
     )
 
