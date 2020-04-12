@@ -5,7 +5,14 @@ import sys
 
 import pytest
 
-from i3pyblocks.core import Align, Markup, Module, PollingModule, Runner
+from i3pyblocks.core import (
+    Align,
+    Markup,
+    Module,
+    PollingModule,
+    ThreadPoolModule,
+    Runner,
+)
 
 
 def test_module():
@@ -145,6 +152,58 @@ async def test_polling_module_with_error():
         "full_text": "Exception in PollingModuleWithError: Boom!",
         "instance": "default",
         "name": "PollingModuleWithError",
+        "urgent": True,
+    }
+
+
+@pytest.mark.asyncio
+async def test_valid_thread_pool_module():
+    class ValidThreadPoolModule(ThreadPoolModule):
+        def __init__(self, max_workers=1):
+            self.state = 0
+            super().__init__(
+                max_workers=max_workers, separator=None, urgent=None, markup=None
+            )
+
+        def run(self):
+            self.state += 1
+            self.update(str(self.state))
+
+    module = ValidThreadPoolModule()
+
+    task = asyncio.ensure_future(module.loop())
+
+    await asyncio.wait([task])
+
+    assert module.result() == {
+        "full_text": "1",
+        "instance": "default",
+        "name": "ValidThreadPoolModule",
+    }
+
+
+@pytest.mark.asyncio
+async def test_thread_pool_module_with_error():
+    class ThreadPoolModuleWithError(ThreadPoolModule):
+        def __init__(self, max_workers=1):
+            self.state = 0
+            super().__init__(
+                max_workers=max_workers, separator=None, urgent=None, markup=None
+            )
+
+        def run(self):
+            raise Exception("Boom!")
+
+    module = ThreadPoolModuleWithError()
+
+    task = asyncio.ensure_future(module.loop())
+
+    await asyncio.wait([task])
+
+    assert module.result() == {
+        "full_text": "Exception in ThreadPoolModuleWithError: Boom!",
+        "instance": "default",
+        "name": "ThreadPoolModuleWithError",
         "urgent": True,
     }
 

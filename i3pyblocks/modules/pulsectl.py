@@ -1,6 +1,4 @@
-import asyncio
 import subprocess
-from concurrent.futures import ThreadPoolExecutor
 from typing import Sequence
 
 import pulsectl
@@ -9,7 +7,7 @@ from i3pyblocks import core, utils
 
 
 # Based on: https://git.io/fjbHp
-class PulseAudioModule(core.Module):
+class PulseAudioModule(core.ThreadPoolModule):
     def __init__(
         self,
         format: str = "V: {volume:.0f}%",
@@ -42,7 +40,6 @@ class PulseAudioModule(core.Module):
         # https://pypi.org/project/pulsectl/#event-handling-code-threads
         self.pulse = pulsectl.Pulse(__name__, threading_lock=True)
 
-        self._executor = ThreadPoolExecutor(max_workers=1)
         self._find_sink_index()
         self._update_sink_info()
         self._setup_event_callback()
@@ -83,30 +80,20 @@ class PulseAudioModule(core.Module):
         elif event.facility == "sink":
             self._update_sink_info()
 
-    def _loop(self) -> None:
-        while True:
-            self.run()
-
-            self.pulse.event_listen()
-
-            self._handle_event(self.event)
-
     def _toggle_mute(self):
         if self.sink.mute:
             self.pulse.mute(self.sink, mute=False)
         else:
             self.pulse.mute(self.sink, mute=True)
 
-    async def loop(self) -> None:
-        try:
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(self._executor, self._loop)
-        except Exception as e:
-            utils.Log.exception(f"Exception in {self.name}")
-            self.update(f"Exception in {self.name}: {e}", urgent=True)
-
-    def signal_handler(self, *_, **__) -> None:
-        self.run()
+    def _update_status(self):
+        if self.sink.mute:
+            self.update(self.format_mute.format(), color=utils.Color.URGENT)
+        else:
+            volume = self.pulse.volume_get_all_chans(self.sink) * 100
+            color = utils.calculate_threshold(self.colors, volume)
+            icon = utils.calculate_threshold(self.icons, volume)
+            self.update(self.format.format(volume=volume, icon=icon), color=color)
 
     def click_handler(self, button: int, *_, **__) -> None:  # type: ignore
         if button == utils.Mouse.LEFT_BUTTON:
@@ -118,13 +105,12 @@ class PulseAudioModule(core.Module):
         elif button == utils.Mouse.SCROLL_DOWN:
             self.pulse.volume_change_all_chans(self.sink, -0.05)
 
-        self.run()
+        self._update_status()
 
     def run(self) -> None:
-        if self.sink.mute:
-            self.update(self.format_mute.format(), color=utils.Color.URGENT)
-        else:
-            volume = self.pulse.volume_get_all_chans(self.sink) * 100
-            color = utils.calculate_threshold(self.colors, volume)
-            icon = utils.calculate_threshold(self.icons, volume)
-            self.update(self.format.format(volume=volume, icon=icon), color=color)
+        while True:
+            self._update_status()
+
+            self.pulse.event_listen()
+
+            self._handle_event(self.event)
