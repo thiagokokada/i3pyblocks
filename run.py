@@ -17,7 +17,7 @@ def partitions(excludes=("/boot", "/nix/store")):
 
 
 async def main(loop):
-    cpu_count = psutil.cpu_count()
+    cpu_count = ps.cpu_count()
     runner = core.Runner(loop=loop)
 
     runner.register_module(
