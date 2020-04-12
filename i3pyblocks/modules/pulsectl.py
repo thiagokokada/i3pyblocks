@@ -41,7 +41,7 @@ class PulseAudioModule(core.Module):
         # https://pypi.org/project/pulsectl/#event-handling-code-threads
         self.pulse = pulsectl.Pulse(__name__, threading_lock=True)
 
-        self._find_default_sink()
+        self._find_sink_index()
         self._update_sink_info()
         self._setup_event_callback()
 
@@ -56,24 +56,27 @@ class PulseAudioModule(core.Module):
         self.pulse.event_mask_set("sink", "server")
         self.pulse.event_callback_set(event_callback)
 
-    def _find_default_sink(self) -> None:
+    def _find_sink_index(self) -> None:
         server_info = self.pulse.server_info()
+        default_sink_name = server_info.default_sink_name
+        sink_list = self.pulse.sink_list()
 
-        for sink in self.pulse.sink_list():
-            if sink.name == server_info.default_sink_name:
-                self.sink = sink
-                return
-
-        if not self.sink:
-            raise AttributeError(f"PulseAudio sink {server_info.name} not found")
+        if len(sink_list) == 0:
+            raise ValueError("No sinks found")
+        else:
+            self.sink_index = next(
+                # Find the sink with default_sink_name
+                (sink.index for sink in sink_list if sink.name == default_sink_name),
+                # Returns the first from the list as fallback
+                0,
+            )
 
     def _update_sink_info(self) -> None:
-        if self.sink:
-            self.sink = self.pulse.sink_info(self.sink.index)
+        self.sink = self.pulse.sink_info(self.sink_index)
 
     def _handle_event(self, event) -> None:
         if event.facility == "server":
-            self._find_default_sink()
+            self._find_sink_index()
             self._update_sink_info()
         elif event.facility == "sink":
             self._update_sink_info()
@@ -85,6 +88,12 @@ class PulseAudioModule(core.Module):
             self.pulse.event_listen()
 
             self._handle_event(self.event)
+
+    def _toggle_mute(self):
+        if self.sink.mute:
+            self.pulse.mute(self.sink, mute=False)
+        else:
+            self.pulse.mute(self.sink, mute=True)
 
     async def loop(self) -> None:
         try:
@@ -98,16 +107,10 @@ class PulseAudioModule(core.Module):
         self.run()
 
     def click_handler(self, button: int, *_, **__) -> None:  # type: ignore
-        def toggle_mute():
-            if self.sink.mute:
-                self.pulse.mute(self.sink, mute=False)
-            else:
-                self.pulse.mute(self.sink, mute=True)
-
         if button == utils.Mouse.LEFT_BUTTON:
             subprocess.Popen(self.command)
         elif button == utils.Mouse.RIGHT_BUTTON:
-            toggle_mute()
+            self._toggle_mute()
         elif button == utils.Mouse.SCROLL_UP:
             self.pulse.volume_change_all_chans(self.sink, 0.05)
         elif button == utils.Mouse.SCROLL_DOWN:
@@ -116,9 +119,6 @@ class PulseAudioModule(core.Module):
         self.run()
 
     def run(self) -> None:
-        if not self.sink:
-            return
-
         if self.sink.mute:
             self.update(self.format_mute.format(), color=utils.Color.URGENT)
         else:
