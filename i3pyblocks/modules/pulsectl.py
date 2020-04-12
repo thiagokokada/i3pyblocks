@@ -64,7 +64,8 @@ class PulseAudioModule(core.Module):
                 self.sink = sink
                 return
 
-        self.sink = None
+        if not self.sink:
+            raise AttributeError(f"PulseAudio sink {server_info.name} not found")
 
     def _update_sink_info(self) -> None:
         if self.sink:
