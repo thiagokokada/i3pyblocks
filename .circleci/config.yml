@@ -24,6 +24,7 @@ commands:
       - run:
           name: Install Python deps in a venv
           command: |
+            sudo pip install --upgrade poetry
             poetry install
       - save_cache:
           paths:
