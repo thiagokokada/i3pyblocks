@@ -34,7 +34,7 @@ commands:
 jobs:
   black-lint:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.7.7
     working_directory: ~/i3pyblocks
     steps:
       - setup_python
@@ -45,7 +45,7 @@ jobs:
 
   flake8-lint:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.7.7
     working_directory: ~/i3pyblocks
     steps:
       - setup_python
@@ -54,13 +54,13 @@ jobs:
           command: |
             poetry run flake8 .
 
-  build-python36:
+  build-python37:
     docker:
-      - image: circleci/python:3.6.9
+      - image: circleci/python:3.7.7
     working_directory: ~/i3pyblocks
     steps:
       - setup_python:
-          version: "3.6"
+          version: "3.7"
       - run:
           name : Run tests
           command: |
@@ -68,13 +68,13 @@ jobs:
       - codecov/upload:
           file: coverage.xml
 
-  build-python37:
+  build-python38:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.8.2
     working_directory: ~/i3pyblocks
     steps:
       - setup_python:
-          version: "3.7"
+          version: "3.8"
       - run:
           name : Run tests
           command: |
@@ -87,5 +87,5 @@ workflows:
     jobs:
       - black-lint
       - flake8-lint
-      - build-python36
       - build-python37
+      - build-python38
