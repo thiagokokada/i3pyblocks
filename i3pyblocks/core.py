@@ -170,15 +170,10 @@ class PollingModule(Module):
 
 
 class Runner:
-    def __init__(self, sleep: int = 1, loop=None) -> None:
+    def __init__(self, sleep: int = 1) -> None:
         self.sleep = sleep
         self.modules: Dict[str, Module] = {}
         self.tasks: List[asyncio.Future] = []
-
-        if loop:
-            self.loop = loop
-        else:
-            self.loop = asyncio.get_event_loop()
 
     def _get_module_from_key(self, name: str, instance: str = None) -> Module:
         return self.modules[Module.get_key(name, instance)]
@@ -195,8 +190,9 @@ class Runner:
             except Exception:
                 utils.Log.exception(f"Exception in {module.name} signal handler")
 
+        loop = asyncio.get_event_loop()
         for signum in signums:
-            self.loop.add_signal_handler(signum, _handler, signum)
+            loop.add_signal_handler(signum, _handler, signum)
 
     def register_module(self, module: Module, signals: Iterable[int] = ()) -> None:
         module_key = module.key()
@@ -246,10 +242,12 @@ class Runner:
 
     # Based on: https://git.io/fjbHx
     async def click_events(self) -> None:
-        reader = asyncio.StreamReader(loop=self.loop)
-        protocol = asyncio.StreamReaderProtocol(reader, loop=self.loop)
+        reader = asyncio.StreamReader()
+        protocol = asyncio.StreamReaderProtocol(reader)
 
-        await self.loop.connect_read_pipe(lambda: protocol, sys.stdin)
+        loop = asyncio.get_running_loop()
+
+        await loop.connect_read_pipe(lambda: protocol, sys.stdin)
 
         await reader.readline()
 
@@ -272,6 +270,6 @@ class Runner:
         sys.stdout.write('{"version": 1, "click_events": true}\n[\n')
         sys.stdout.flush()
 
-        await asyncio.wait(self.tasks, timeout=timeout, loop=self.loop)
+        await asyncio.wait(self.tasks, timeout=timeout)
 
         self._clean_up()
