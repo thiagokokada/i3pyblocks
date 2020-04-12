@@ -2,6 +2,7 @@ import abc
 import asyncio
 import json
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Iterable, List, Optional, Union
 
 from i3pyblocks import utils
@@ -121,7 +122,6 @@ class Module(metaclass=abc.ABCMeta):
     def result(self) -> Dict[str, Union[str, int, bool]]:
         return {k: v for k, v in self._state.items() if v is not None}
 
-    @abc.abstractmethod
     def click_handler(
         self,
         x: int,
@@ -133,11 +133,10 @@ class Module(metaclass=abc.ABCMeta):
         height: int,
         modifiers: List[str],
     ) -> None:
-        pass
+        raise NotImplementedError("Should implement click_handler method")
 
-    @abc.abstractmethod
     def signal_handler(self, signum: int) -> None:
-        pass
+        raise NotImplementedError("Should implement signal_handler method")
 
     @abc.abstractmethod
     async def loop(self) -> None:
@@ -164,6 +163,24 @@ class PollingModule(Module):
             while True:
                 self.run()
                 await asyncio.sleep(self.sleep)
+        except Exception as e:
+            utils.Log.exception(f"Exception in {self.name}")
+            self.update(f"Exception in {self.name}: {e}", urgent=True)
+
+
+class ThreadPoolModule(Module):
+    def __init__(self, max_workers: int = 1, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self._executor = ThreadPoolExecutor(max_workers=max_workers)
+
+    @abc.abstractmethod
+    def run(self) -> None:
+        pass
+
+    async def loop(self) -> None:
+        try:
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(self._executor, self.run)
         except Exception as e:
             utils.Log.exception(f"Exception in {self.name}")
             self.update(f"Exception in {self.name}: {e}", urgent=True)
