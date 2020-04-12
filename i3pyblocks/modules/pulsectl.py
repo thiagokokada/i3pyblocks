@@ -1,5 +1,6 @@
 import asyncio
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 from typing import Sequence
 
 import pulsectl
@@ -41,6 +42,7 @@ class PulseAudioModule(core.Module):
         # https://pypi.org/project/pulsectl/#event-handling-code-threads
         self.pulse = pulsectl.Pulse(__name__, threading_lock=True)
 
+        self._executor = ThreadPoolExecutor(max_workers=1)
         self._find_sink_index()
         self._update_sink_info()
         self._setup_event_callback()
@@ -98,7 +100,7 @@ class PulseAudioModule(core.Module):
     async def loop(self) -> None:
         try:
             loop = asyncio.get_running_loop()
-            await loop.run_in_executor(None, self._loop)
+            await loop.run_in_executor(self._executor, self._loop)
         except Exception as e:
             utils.Log.exception(f"Exception in {self.name}")
             self.update(f"Exception in {self.name}: {e}", urgent=True)
