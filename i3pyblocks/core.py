@@ -121,7 +121,6 @@ class Module(metaclass=abc.ABCMeta):
     def result(self) -> Dict[str, Union[str, int, bool]]:
         return {k: v for k, v in self._state.items() if v is not None}
 
-    @abc.abstractmethod
     def click_handler(
         self,
         x: int,
@@ -133,11 +132,10 @@ class Module(metaclass=abc.ABCMeta):
         height: int,
         modifiers: List[str],
     ) -> None:
-        pass
+        raise NotImplementedError("Should implement click_handler method")
 
-    @abc.abstractmethod
     def signal_handler(self, signum: int) -> None:
-        pass
+        raise NotImplementedError("Should implement signal_handler method")
 
     @abc.abstractmethod
     async def loop(self) -> None:
