@@ -97,7 +97,7 @@ class PulseAudioModule(core.Module):
 
     async def loop(self) -> None:
         try:
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             await loop.run_in_executor(None, self._loop)
         except Exception as e:
             utils.Log.exception(f"Exception in {self.name}")

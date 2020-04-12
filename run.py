@@ -16,9 +16,9 @@ def partitions(excludes=("/boot", "/nix/store")):
     return [p for p in partitions if p.mountpoint not in excludes]
 
 
-async def main(loop):
+async def main():
     cpu_count = ps.cpu_count()
-    runner = core.Runner(loop=loop)
+    runner = core.Runner()
 
     runner.register_module(
         psutil.NetworkSpeedModule(
@@ -71,6 +71,4 @@ async def main(loop):
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(loop))
-    loop.close()
+    asyncio.run(main())
