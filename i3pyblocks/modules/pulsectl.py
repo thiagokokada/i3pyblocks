@@ -86,6 +86,12 @@ class PulseAudioModule(core.Module):
 
             self._handle_event(self.event)
 
+    def _toggle_mute(self):
+        if self.sink.mute:
+            self.pulse.mute(self.sink, mute=False)
+        else:
+            self.pulse.mute(self.sink, mute=True)
+
     async def loop(self) -> None:
         try:
             loop = asyncio.get_event_loop()
@@ -98,16 +104,10 @@ class PulseAudioModule(core.Module):
         self.run()
 
     def click_handler(self, button: int, *_, **__) -> None:  # type: ignore
-        def toggle_mute():
-            if self.sink.mute:
-                self.pulse.mute(self.sink, mute=False)
-            else:
-                self.pulse.mute(self.sink, mute=True)
-
         if button == utils.Mouse.LEFT_BUTTON:
             subprocess.Popen(self.command)
         elif button == utils.Mouse.RIGHT_BUTTON:
-            toggle_mute()
+            self._toggle_mute()
         elif button == utils.Mouse.SCROLL_UP:
             self.pulse.volume_change_all_chans(self.sink, 0.05)
         elif button == utils.Mouse.SCROLL_DOWN:
