@@ -204,7 +204,7 @@ def test_sensors_temperature_module(mocker):
     }
     mocker.patch.object(psutil, "sensors_temperatures", return_value=fixture)
 
-    instance_default = psutil.SensorsTemperaturesModule(
+    instance_default = m_psutil.SensorsTemperaturesModule(
         format="{icon} {label} {current} {high} {critical}"
     )
 
@@ -215,7 +215,7 @@ def test_sensors_temperature_module(mocker):
     assert result["full_text"] == "▇ Package id 0 78.0 82.0 100.0"
     assert result["color"] == utils.Color.WARN
 
-    instance_acpitz = psutil.SensorsTemperaturesModule(sensor="acpitz")
+    instance_acpitz = m_psutil.SensorsTemperaturesModule(sensor="acpitz")
 
     instance_acpitz.run()
 
