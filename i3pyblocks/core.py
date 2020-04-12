@@ -228,9 +228,7 @@ class Runner:
 
     def write_result(self) -> None:
         output = [json.dumps(module.result()) for module in self.modules.values()]
-
-        sys.stdout.write("[" + ",".join(output) + "],\n")
-        sys.stdout.flush()
+        print("[" + ",".join(output) + "],", flush=True)
 
     async def write_results(self) -> None:
         while True:
@@ -284,8 +282,7 @@ class Runner:
     async def start(self, timeout: Optional[int] = None) -> None:
         self._setup()
 
-        sys.stdout.write('{"version": 1, "click_events": true}\n[\n')
-        sys.stdout.flush()
+        print('{"version": 1, "click_events": true}\n[', flush=True)
 
         await asyncio.wait(self.tasks, timeout=timeout)
 
