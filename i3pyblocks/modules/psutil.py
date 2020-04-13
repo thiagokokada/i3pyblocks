@@ -57,7 +57,7 @@ class DiskUsageModule(core.PollingModule):
         short_label: bool = False,
         **kwargs,
     ) -> None:
-        super().__init__(sleep=sleep, instance=path, **kwargs)
+        super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = colors
         self.icons = icons

@@ -1,6 +1,7 @@
 import abc
 import asyncio
 import json
+import uuid
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Iterable, List, Optional, Union
@@ -23,7 +24,6 @@ class Module(metaclass=abc.ABCMeta):
     def __init__(
         self,
         name: Optional[str] = None,
-        instance: Optional[str] = "default",
         *,
         color: Optional[str] = None,
         background: Optional[str] = None,
@@ -39,8 +39,9 @@ class Module(metaclass=abc.ABCMeta):
         separator_block_width: Optional[int] = None,
         markup: Optional[str] = Markup.NONE,
     ) -> None:
+        self.id = uuid.uuid4()
         self.name = name or self.__class__.__name__
-        self.instance = instance
+        self.instance = str(self.id)
 
         # Those are default values for properties if they are not overrided
         self._color = color
@@ -69,13 +70,6 @@ class Module(metaclass=abc.ABCMeta):
             return value
         else:
             return getattr(self, key)
-
-    @staticmethod
-    def get_key(name: str, instance: Optional[str]):
-        return f"{name}__{instance or 'none'}"
-
-    def key(self) -> str:
-        return self.get_key(self.name, self.instance)
 
     def update(
         self,
@@ -189,15 +183,8 @@ class ThreadPoolModule(Module):
 class Runner:
     def __init__(self, sleep: int = 1) -> None:
         self.sleep = sleep
-        self.modules: Dict[str, Module] = {}
-        self.tasks: List[asyncio.Future] = []
-
-    def _get_module_from_key(self, name: str, instance: str = None) -> Module:
-        return self.modules[Module.get_key(name, instance)]
-
-    def _register_coroutine(self, coro) -> None:
-        task = asyncio.ensure_future(coro)
-        self.tasks.append(task)
+        self._modules: Dict[str, Module] = {}
+        self._tasks: List[asyncio.Future] = []
 
     def register_signal(self, module: Module, signums: Iterable[int]) -> None:
         def _handler(signum: int):
@@ -211,23 +198,19 @@ class Runner:
         for signum in signums:
             loop.add_signal_handler(signum, _handler, signum)
 
+    def register_task(self, coro) -> None:
+        task = asyncio.create_task(coro)
+        self._tasks.append(task)
+
     def register_module(self, module: Module, signals: Iterable[int] = ()) -> None:
-        module_key = module.key()
-
-        if module_key not in self.modules.keys():
-            self.modules[module_key] = module
-        else:
-            raise ValueError(
-                f"Module '{module.name}' with instance '{module.instance}' already exists"
-            )
-
-        self._register_coroutine(module.loop())
+        self._modules[module.instance] = module
+        self.register_task(module.loop())
 
         if signals:
             self.register_signal(module, signals)
 
     def write_result(self) -> None:
-        output = [json.dumps(module.result()) for module in self.modules.values()]
+        output = [json.dumps(module.result()) for module in self._modules.values()]
         print("[" + ",".join(output) + "],", flush=True)
 
     async def write_results(self) -> None:
@@ -238,9 +221,12 @@ class Runner:
     def click_event(self, raw: Union[str, bytes, bytearray]) -> None:
         try:
             click_event = json.loads(raw)
-            module = self._get_module_from_key(
-                click_event.get("name"), click_event.get("instance")
-            )
+            instance = click_event["instance"]
+            module = self._modules.get(instance)
+
+            if not module:
+                utils.Log.warn(f"Invalid instance with ID: {instance}")
+
             module.click_handler(
                 x=click_event.get("x"),
                 y=click_event.get("y"),
@@ -271,19 +257,10 @@ class Runner:
             self.click_event(raw)
             await reader.readuntil(b",")
 
-    def _setup(self) -> None:
-        self._register_coroutine(self.click_events())
-        self._register_coroutine(self.write_results())
-
-    def _clean_up(self) -> None:
-        for task in self.tasks:
-            task.cancel()
-
     async def start(self, timeout: Optional[int] = None) -> None:
-        self._setup()
+        self.register_task(self.click_events())
+        self.register_task(self.write_results())
 
         print('{"version": 1, "click_events": true}\n[', flush=True)
 
-        await asyncio.wait(self.tasks, timeout=timeout)
-
-        self._clean_up()
+        await asyncio.wait(self._tasks, timeout=timeout)
