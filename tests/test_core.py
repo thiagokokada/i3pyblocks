@@ -1,7 +1,6 @@
 import asyncio
 import os
 import signal
-import sys
 
 import pytest
 
@@ -15,10 +14,6 @@ from i3pyblocks.core import (
 )
 
 
-def test_module():
-    assert Module.get_key("abc", "def") == "abc__def"
-
-
 def test_invalid_module():
     class InvalidModule(Module):
         pass
@@ -28,7 +23,7 @@ def test_invalid_module():
 
 
 @pytest.mark.asyncio
-async def test_valid_module():
+async def test_valid_module(mock_uuid4):
     class ValidModule(Module):
         async def loop(self):
             self.update("Done!", color=None, urgent=False, markup=Markup.NONE)
@@ -41,7 +36,6 @@ async def test_valid_module():
 
     module = ValidModule(
         name="Name",
-        instance="Instance",
         color="#000000",
         background="#FFFFFF",
         border="#FF0000",
@@ -67,7 +61,7 @@ async def test_valid_module():
         "border_top": 1,
         "color": "#000000",
         "full_text": "",
-        "instance": "Instance",
+        "instance": "uuid4",
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -88,7 +82,7 @@ async def test_valid_module():
         "border_top": 1,
         "color": "#000000",
         "full_text": "Done!",
-        "instance": "Instance",
+        "instance": "uuid4",
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -96,8 +90,6 @@ async def test_valid_module():
         "urgent": False,
         "markup": "none",
     }
-
-    assert module.key() == "Name__Instance"
 
 
 def test_invalid_polling_module():
@@ -109,7 +101,7 @@ def test_invalid_polling_module():
 
 
 @pytest.mark.asyncio
-async def test_valid_polling_module():
+async def test_valid_polling_module(mock_uuid4):
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
@@ -129,13 +121,13 @@ async def test_valid_polling_module():
 
     assert module.result() == {
         "full_text": "5",
-        "instance": "default",
+        "instance": "uuid4",
         "name": "ValidPollingModule",
     }
 
 
 @pytest.mark.asyncio
-async def test_polling_module_with_error():
+async def test_polling_module_with_error(mock_uuid4):
     class PollingModuleWithError(PollingModule):
         def __init__(self, sleep=1):
             self.state = 0
@@ -150,14 +142,14 @@ async def test_polling_module_with_error():
 
     assert module.result() == {
         "full_text": "Exception in PollingModuleWithError: Boom!",
-        "instance": "default",
+        "instance": "uuid4",
         "name": "PollingModuleWithError",
         "urgent": True,
     }
 
 
 @pytest.mark.asyncio
-async def test_valid_thread_pool_module():
+async def test_valid_thread_pool_module(mock_uuid4):
     class ValidThreadPoolModule(ThreadPoolModule):
         def __init__(self, max_workers=1):
             self.state = 0
@@ -177,13 +169,13 @@ async def test_valid_thread_pool_module():
 
     assert module.result() == {
         "full_text": "1",
-        "instance": "default",
+        "instance": "uuid4",
         "name": "ValidThreadPoolModule",
     }
 
 
 @pytest.mark.asyncio
-async def test_thread_pool_module_with_error():
+async def test_thread_pool_module_with_error(mock_uuid4):
     class ThreadPoolModuleWithError(ThreadPoolModule):
         def __init__(self, max_workers=1):
             self.state = 0
@@ -202,16 +194,14 @@ async def test_thread_pool_module_with_error():
 
     assert module.result() == {
         "full_text": "Exception in ThreadPoolModuleWithError: Boom!",
-        "instance": "default",
+        "instance": "uuid4",
         "name": "ThreadPoolModuleWithError",
         "urgent": True,
     }
 
 
 @pytest.mark.asyncio
-async def test_runner(capsys, mocker):
-    mocker.patch.object(sys, "stdin")
-
+async def test_runner(capsys, mock_stdin, mock_uuid4):
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
@@ -233,19 +223,17 @@ async def test_runner(capsys, mocker):
         == """\
 {"version": 1, "click_events": true}
 [
-[{"name": "ValidPollingModule", "instance": "default", "full_text": "1"}],
-[{"name": "ValidPollingModule", "instance": "default", "full_text": "2"}],
-[{"name": "ValidPollingModule", "instance": "default", "full_text": "3"}],
-[{"name": "ValidPollingModule", "instance": "default", "full_text": "4"}],
-[{"name": "ValidPollingModule", "instance": "default", "full_text": "5"}],
+[{"name": "ValidPollingModule", "instance": "uuid4", "full_text": "1"}],
+[{"name": "ValidPollingModule", "instance": "uuid4", "full_text": "2"}],
+[{"name": "ValidPollingModule", "instance": "uuid4", "full_text": "3"}],
+[{"name": "ValidPollingModule", "instance": "uuid4", "full_text": "4"}],
+[{"name": "ValidPollingModule", "instance": "uuid4", "full_text": "5"}],
 """
     )
 
 
 @pytest.mark.asyncio
-async def test_runner_with_fault_module(capsys, mocker):
-    mocker.patch.object(sys, "stdin")
-
+async def test_runner_with_fault_module(capsys, mock_stdin, mock_uuid4):
     class FaultPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
@@ -269,36 +257,18 @@ async def test_runner_with_fault_module(capsys, mocker):
         == """\
 {"version": 1, "click_events": true}
 [
-[{"name": "FaultPollingModule", "instance": "default", "full_text": "1"}],
-[{"name": "FaultPollingModule", "instance": "default", "full_text": "2"}],
-[{"name": "FaultPollingModule", "instance": "default", "full_text": "3"}],
-[{"name": "FaultPollingModule", "instance": "default", "full_text": "4"}],
-[{"name": "FaultPollingModule", "instance": "default", \
+[{"name": "FaultPollingModule", "instance": "uuid4", "full_text": "1"}],
+[{"name": "FaultPollingModule", "instance": "uuid4", "full_text": "2"}],
+[{"name": "FaultPollingModule", "instance": "uuid4", "full_text": "3"}],
+[{"name": "FaultPollingModule", "instance": "uuid4", "full_text": "4"}],
+[{"name": "FaultPollingModule", "instance": "uuid4", \
 "full_text": "Exception in FaultPollingModule: Boom!", "urgent": true}],
 """
     )
 
 
-def test_runner_with_two_equal_modules():
-    class ValidPollingModule(PollingModule):
-        def __init__(self, sleep=0.1):
-            self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
-
-        def run(self):
-            self.state += 1
-            self.update(str(self.state))
-
-    runner = Runner(sleep=0.1)
-    runner.register_module(ValidPollingModule())
-    with pytest.raises(ValueError):
-        runner.register_module(ValidPollingModule())
-
-
 @pytest.mark.asyncio
-async def test_runner_with_signal_handler(capsys, mocker):
-    mocker.patch.object(sys, "stdin")
-
+async def test_runner_with_signal_handler(capsys, mock_stdin, mock_uuid4):
     async def send_signal():
         await asyncio.sleep(0.1)
         os.kill(os.getpid(), signal.SIGUSR1)
@@ -328,9 +298,8 @@ async def test_runner_with_signal_handler(capsys, mocker):
         ValidPollingModuleWithSignalHandler(), signals=[signal.SIGUSR1, signal.SIGUSR2]
     )
 
-    runner._register_coroutine(send_signal())
-
-    runner._register_coroutine(send_another_signal())
+    runner.register_task(send_signal())
+    runner.register_task(send_another_signal())
 
     await runner.start(timeout=0.5)
 
@@ -341,10 +310,11 @@ async def test_runner_with_signal_handler(capsys, mocker):
 
 
 # TODO: Test with mocked sys.stdin instead of calling functions directly
-def test_runner_with_click_handler(capsys):
+@pytest.mark.asyncio
+async def test_runner_with_click_handler(capsys, mock_uuid4):
     click_event = (
         b'{"name":"ValidPollingModuleWithClickHandler",'
-        + b'"instance":"default",'
+        + b'"instance":"uuid4",'
         + b'"button":1,'
         + b'"modifiers":["Mod1"],'
         + b'"x":123,'
@@ -372,6 +342,7 @@ def test_runner_with_click_handler(capsys):
 
     runner = Runner(sleep=0.1)
     module = ValidPollingModuleWithClickHandler()
+
     runner.register_module(module)
     runner.click_event(click_event)
 
