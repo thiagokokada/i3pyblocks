@@ -170,6 +170,7 @@ class ThreadPoolModule(Module):
 class Runner:
     def __init__(self, sleep: int = 1) -> None:
         self.sleep = sleep
+        self._loop = asyncio.get_running_loop()
         self._modules: Dict[str, Module] = {}
         self._tasks: List[asyncio.Future] = []
 
@@ -181,9 +182,8 @@ class Runner:
             except Exception:
                 utils.Log.exception(f"Exception in {module.name} signal handler")
 
-        loop = asyncio.get_event_loop()
         for signum in signums:
-            loop.add_signal_handler(signum, _handler, signum)
+            self._loop.add_signal_handler(signum, _handler, signum)
 
     def register_task(self, coro) -> None:
         task = asyncio.create_task(coro)
@@ -230,9 +230,7 @@ class Runner:
         reader = asyncio.StreamReader()
         protocol = asyncio.StreamReaderProtocol(reader)
 
-        loop = asyncio.get_running_loop()
-
-        await loop.connect_read_pipe(lambda: protocol, sys.stdin)
+        await self._loop.connect_read_pipe(lambda: protocol, sys.stdin)
 
         await reader.readline()
 
