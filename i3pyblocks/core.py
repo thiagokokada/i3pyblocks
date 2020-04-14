@@ -168,11 +168,14 @@ class ThreadPoolModule(Module):
 
 
 class Runner:
+    notify_event = None
+
     def __init__(self, sleep: int = 1) -> None:
         self.sleep = sleep
         self._loop = asyncio.get_running_loop()
         self._modules: Dict[str, Module] = {}
         self._tasks: List[asyncio.Future] = []
+        Runner.notify_event = asyncio.Event()
 
     def register_signal(self, module: Module, signums: Iterable[int]) -> None:
         def _handler(signum: int):
@@ -204,6 +207,23 @@ class Runner:
         while True:
             self.write_result()
             await asyncio.sleep(self.sleep)
+
+    async def write_results_from_notification(self) -> None:
+        assert Runner.notify_event
+
+        while True:
+            await Runner.notify_event.wait()
+            self.write_result()
+            utils.Log.debug(f"Write results from notification")
+            Runner.notify_event.clear()
+
+    @classmethod
+    def notify_update(cls, module: Module) -> None:
+        if cls.notify_event:
+            utils.Log.debug(
+                f"Module {module.name} with id {module.id} asked for update"
+            )
+            cls.notify_event.set()
 
     def click_event(self, raw: Union[str, bytes, bytearray]) -> None:
         try:
@@ -242,6 +262,7 @@ class Runner:
     async def start(self, timeout: Optional[int] = None) -> None:
         self.register_task(self.click_events())
         self.register_task(self.write_results())
+        self.register_task(self.write_results_from_notification())
 
         print('{"version": 1, "click_events": true}\n[', flush=True)
 

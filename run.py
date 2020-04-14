@@ -2,13 +2,14 @@
 
 import asyncio
 import logging
+from pathlib import Path
 
 import psutil as ps
 
 from i3pyblocks import core, utils
 from i3pyblocks.modules import psutil, pulsectl, time
 
-logging.basicConfig(filename=f".i3pyblocks.log", level=logging.INFO)
+logging.basicConfig(filename=Path.home() / ".i3pyblocks.log", level=logging.DEBUG)
 
 
 def partitions(excludes=("/boot", "/nix/store")):

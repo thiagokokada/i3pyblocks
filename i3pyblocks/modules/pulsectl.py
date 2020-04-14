@@ -43,6 +43,7 @@ class PulseAudioModule(core.ThreadPoolModule):
         self._find_sink_index()
         self._update_sink_info()
         self._setup_event_callback()
+        self._update_status()
 
     def __exit__(self, *_) -> None:
         self.pulse.close()
@@ -54,6 +55,15 @@ class PulseAudioModule(core.ThreadPoolModule):
 
         self.pulse.event_mask_set("sink", "server")
         self.pulse.event_callback_set(event_callback)
+
+    def _handle_event(self) -> None:
+        self.pulse.event_listen()
+
+        if self.event.facility == "server":
+            self._find_sink_index()
+            self._update_sink_info()
+        elif self.event.facility == "sink":
+            self._update_sink_info()
 
     def _find_sink_index(self) -> None:
         server_info = self.pulse.server_info()
@@ -72,13 +82,6 @@ class PulseAudioModule(core.ThreadPoolModule):
 
     def _update_sink_info(self) -> None:
         self.sink = self.pulse.sink_info(self.sink_index)
-
-    def _handle_event(self, event) -> None:
-        if event.facility == "server":
-            self._find_sink_index()
-            self._update_sink_info()
-        elif event.facility == "sink":
-            self._update_sink_info()
 
     def _toggle_mute(self):
         if self.sink.mute:
@@ -109,8 +112,8 @@ class PulseAudioModule(core.ThreadPoolModule):
 
     def run(self) -> None:
         while True:
+            self._handle_event()
+
             self._update_status()
 
-            self.pulse.event_listen()
-
-            self._handle_event(self.event)
+            core.Runner.notify_update(self)
