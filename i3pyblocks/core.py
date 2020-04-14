@@ -28,10 +28,10 @@ class Module(metaclass=abc.ABCMeta):
         color: Optional[str] = None,
         background: Optional[str] = None,
         border: Optional[str] = None,
-        border_top: Optional[str] = None,
-        border_right: Optional[str] = None,
-        border_bottom: Optional[str] = None,
-        border_left: Optional[str] = None,
+        border_top: Optional[int] = None,
+        border_right: Optional[int] = None,
+        border_bottom: Optional[int] = None,
+        border_left: Optional[int] = None,
         min_width: Optional[int] = None,
         align: Optional[str] = None,
         urgent: Optional[bool] = False,
@@ -71,10 +71,10 @@ class Module(metaclass=abc.ABCMeta):
         color: Optional[str] = None,
         background: Optional[str] = None,
         border: Optional[str] = None,
-        border_top: Optional[str] = None,
-        border_right: Optional[str] = None,
-        border_bottom: Optional[str] = None,
-        border_left: Optional[str] = None,
+        border_top: Optional[int] = None,
+        border_right: Optional[int] = None,
+        border_bottom: Optional[int] = None,
+        border_left: Optional[int] = None,
         min_width: Optional[int] = None,
         align: Optional[str] = None,
         urgent: Optional[bool] = None,
@@ -209,10 +209,7 @@ class Runner:
         try:
             click_event = json.loads(raw)
             instance = click_event["instance"]
-            module = self._modules.get(instance)
-
-            if not module:
-                utils.Log.warn(f"Invalid instance with ID: {instance}")
+            module = self._modules[instance]
 
             module.click_handler(
                 x=click_event.get("x"),
