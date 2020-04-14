@@ -10,7 +10,7 @@ from i3pyblocks.core import (
     Markup,
     Module,
     PollingModule,
-    ThreadPoolModule,
+    ThreadingModule,
     Runner,
 )
 
@@ -151,7 +151,7 @@ async def test_polling_module_with_error(mock_uuid4):
 
 @pytest.mark.asyncio
 async def test_valid_thread_pool_module(mock_uuid4):
-    class ValidThreadPoolModule(ThreadPoolModule):
+    class ValidThreadingModule(ThreadingModule):
         def __init__(self, max_workers=1):
             self.state = 0
             super().__init__(
@@ -162,7 +162,7 @@ async def test_valid_thread_pool_module(mock_uuid4):
             self.state += 1
             self.update(str(self.state))
 
-    module = ValidThreadPoolModule()
+    module = ValidThreadingModule()
 
     task = asyncio.ensure_future(module.loop())
 
@@ -171,13 +171,13 @@ async def test_valid_thread_pool_module(mock_uuid4):
     assert module.result() == {
         "full_text": "1",
         "instance": "uuid4",
-        "name": "ValidThreadPoolModule",
+        "name": "ValidThreadingModule",
     }
 
 
 @pytest.mark.asyncio
 async def test_thread_pool_module_with_error(mock_uuid4):
-    class ThreadPoolModuleWithError(ThreadPoolModule):
+    class ThreadingModuleWithError(ThreadingModule):
         def __init__(self, max_workers=1):
             self.state = 0
             super().__init__(
@@ -187,16 +187,16 @@ async def test_thread_pool_module_with_error(mock_uuid4):
         def run(self):
             raise Exception("Boom!")
 
-    module = ThreadPoolModuleWithError()
+    module = ThreadingModuleWithError()
 
     task = asyncio.ensure_future(module.loop())
 
     await asyncio.wait([task])
 
     assert module.result() == {
-        "full_text": "Exception in ThreadPoolModuleWithError: Boom!",
+        "full_text": "Exception in ThreadingModuleWithError: Boom!",
         "instance": "uuid4",
-        "name": "ThreadPoolModuleWithError",
+        "name": "ThreadingModuleWithError",
         "urgent": True,
     }
 
@@ -354,7 +354,7 @@ async def test_runner_with_click_handler(capsys, mock_uuid4):
 
 @pytest.mark.asyncio
 async def test_runner_with_notify_update(capsys, mock_stdin, mock_uuid4):
-    class ValidThreadPoolModule(ThreadPoolModule):
+    class ValidThreadingModule(ThreadingModule):
         def __init__(self):
             self.state = 0
             super().__init__(separator=None, urgent=None, markup=None)
@@ -367,7 +367,7 @@ async def test_runner_with_notify_update(capsys, mock_stdin, mock_uuid4):
                 time.sleep(0.1)
 
     runner = Runner(sleep=100)
-    runner.register_module(ValidThreadPoolModule())
+    runner.register_module(ValidThreadingModule())
 
     await runner.start(timeout=0.5)
 
@@ -379,8 +379,8 @@ async def test_runner_with_notify_update(capsys, mock_stdin, mock_uuid4):
         == """\
 {"version": 1, "click_events": true}
 [
-[{"name": "ValidThreadPoolModule", "instance": "uuid4", "full_text": "1"}],
-[{"name": "ValidThreadPoolModule", "instance": "uuid4", "full_text": "1"}],
-[{"name": "ValidThreadPoolModule", "instance": "uuid4", "full_text": "5"}],
+[{"name": "ValidThreadingModule", "instance": "uuid4", "full_text": "1"}],
+[{"name": "ValidThreadingModule", "instance": "uuid4", "full_text": "1"}],
+[{"name": "ValidThreadingModule", "instance": "uuid4", "full_text": "5"}],
 """
     )

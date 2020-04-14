@@ -149,7 +149,7 @@ class PollingModule(Module):
             self.update(f"Exception in {self.name}: {e}", urgent=True)
 
 
-class ThreadPoolModule(Module):
+class ThreadingModule(Module):
     def __init__(self, max_workers: int = 1, **kwargs) -> None:
         super().__init__(**kwargs)
         self._executor = ThreadPoolExecutor(max_workers=max_workers)

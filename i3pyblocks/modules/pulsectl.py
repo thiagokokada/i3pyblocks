@@ -7,7 +7,7 @@ from i3pyblocks import core, utils
 
 
 # Based on: https://git.io/fjbHp
-class PulseAudioModule(core.ThreadPoolModule):
+class PulseAudioModule(core.ThreadingModule):
     def __init__(
         self,
         format: str = "V: {volume:.0f}%",
