@@ -1,6 +1,7 @@
 import asyncio
 import os
 import signal
+import time
 
 import pytest
 
@@ -349,3 +350,37 @@ async def test_runner_with_click_handler(capsys, mock_uuid4):
     captured = capsys.readouterr()
 
     assert "123-456-1-12-34-20-40-['Mod1']" in captured.out
+
+
+@pytest.mark.asyncio
+async def test_runner_with_notify_update(capsys, mock_stdin, mock_uuid4):
+    class ValidThreadPoolModule(ThreadPoolModule):
+        def __init__(self):
+            self.state = 0
+            super().__init__(separator=None, urgent=None, markup=None)
+
+        def run(self):
+            for _ in range(5):
+                self.state += 1
+                self.update(str(self.state))
+                Runner.notify_update(self)
+                time.sleep(0.1)
+
+    runner = Runner(sleep=100)
+    runner.register_module(ValidThreadPoolModule())
+
+    await runner.start(timeout=0.5)
+
+    captured = capsys.readouterr()
+
+    # TODO: Understand why this is happening.
+    assert (
+        captured.out
+        == """\
+{"version": 1, "click_events": true}
+[
+[{"name": "ValidThreadPoolModule", "instance": "uuid4", "full_text": "1"}],
+[{"name": "ValidThreadPoolModule", "instance": "uuid4", "full_text": "1"}],
+[{"name": "ValidThreadPoolModule", "instance": "uuid4", "full_text": "5"}],
+"""
+    )
