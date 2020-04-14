@@ -12,3 +12,7 @@ def test_calculate_threshold():
     assert utils.calculate_threshold(fixture, 6) == "item2"
     assert utils.calculate_threshold(fixture, 10) == "item3"
     assert utils.calculate_threshold(fixture, 11) == "item3"
+
+
+def test_non_nullable_dict():
+    assert utils.non_nullable_dict(foo="bar", spams=None) == {"foo": "bar"}
