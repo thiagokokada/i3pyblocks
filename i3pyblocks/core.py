@@ -44,32 +44,25 @@ class Module(metaclass=abc.ABCMeta):
         self.instance = str(self.id)
 
         # Those are default values for properties if they are not overrided
-        self._color = color
-        self._background = background
-        self._border = border
-        self._border_top = border_top
-        self._border_right = border_right
-        self._border_bottom = border_bottom
-        self._border_left = border_left
-        self._min_width = min_width
-        self._align = align
-        self._urgent = urgent
-        self._separator = separator
-        self._separator_block_width = separator_block_width
-        self._markup = markup
-        self._short_text = None
-        self._full_text = ""
+        self._default_state = utils.non_nullable_dict(
+            name=self.name,
+            instance=self.instance,
+            color=color,
+            background=background,
+            border=border,
+            border_top=border_top,
+            border_right=border_right,
+            border_left=border_left,
+            border_bottom=border_bottom,
+            min_width=min_width,
+            align=align,
+            urgent=urgent,
+            separator=separator,
+            separator_block_width=separator_block_width,
+            markup=markup,
+        )
 
-        self._state: Dict[str, Optional[Union[str, int, bool]]]
         self.update()
-
-    def _get_value_or_default(
-        self, value: Optional[Union[str, int, bool]], key: str
-    ) -> Optional[Union[str, int, bool]]:
-        if value is not None:
-            return value
-        else:
-            return getattr(self, key)
 
     def update(
         self,
@@ -89,32 +82,26 @@ class Module(metaclass=abc.ABCMeta):
         separator_block_width: Optional[int] = None,
         markup: Optional[str] = None,
     ):
-        self._state = {
-            "name": self.name,
-            "instance": self.instance,
-            "full_text": full_text,
-            "short_text": short_text,
-            "color": self._get_value_or_default(color, "_color"),
-            "background": self._get_value_or_default(background, "_background"),
-            "border": self._get_value_or_default(border, "_border"),
-            "border_top": self._get_value_or_default(border_top, "_border_top"),
-            "border_right": self._get_value_or_default(border_right, "_border_right"),
-            "border_left": self._get_value_or_default(border_left, "_border_left"),
-            "border_bottom": self._get_value_or_default(
-                border_bottom, "_border_bottom"
-            ),
-            "min_width": self._get_value_or_default(min_width, "_min_width"),
-            "align": self._get_value_or_default(align, "_align"),
-            "urgent": self._get_value_or_default(urgent, "_urgent"),
-            "separator": self._get_value_or_default(separator, "_separator"),
-            "separator_block_width": self._get_value_or_default(
-                separator_block_width, "_separator_block_width"
-            ),
-            "markup": self._get_value_or_default(markup, "_markup"),
-        }
+        self._state = utils.non_nullable_dict(
+            full_text=full_text,
+            short_text=short_text,
+            color=color,
+            background=background,
+            border=border,
+            border_top=border_top,
+            border_right=border_right,
+            border_left=border_left,
+            border_bottom=border_bottom,
+            min_width=min_width,
+            align=align,
+            urgent=urgent,
+            separator=separator,
+            separator_block_width=separator_block_width,
+            markup=markup,
+        )
 
     def result(self) -> Dict[str, Union[str, int, bool]]:
-        return {k: v for k, v in self._state.items() if v is not None}
+        return {**self._default_state, **self._state}
 
     def click_handler(
         self,

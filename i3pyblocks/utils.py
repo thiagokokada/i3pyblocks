@@ -42,3 +42,7 @@ def calculate_threshold(items: Items, value: float) -> Optional[str]:
             break
 
     return selected_item
+
+
+def non_nullable_dict(**kwargs) -> dict:
+    return {k: v for k, v in kwargs.items() if v is not None}
