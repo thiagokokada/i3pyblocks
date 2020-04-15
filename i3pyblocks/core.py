@@ -80,7 +80,8 @@ class Runner:
             module = self._modules[instance]
 
             logger.debug(
-                f"Module {module.name} with id {module.id} received a click event: {click_event}"
+                f"Module {module.name} with id {module.id} received"
+                " a click event: {click_event}"
             )
 
             module.click_handler(
