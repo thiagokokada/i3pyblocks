@@ -9,5 +9,5 @@ from i3pyblocks.modules import pulsectl as m_pulsectl
 def test_pulse_audio_module(mocker):
     mocker.patch.object(pulsectl, "Pulse")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AssertionError):
         m_pulsectl.PulseAudioModule()

@@ -119,7 +119,7 @@ class Module(metaclass=abc.ABCMeta):
         raise NotImplementedError("Should implement signal_handler method")
 
     @abc.abstractmethod
-    async def loop(self) -> None:
+    async def start(self) -> None:
         pass
 
 
@@ -138,7 +138,7 @@ class PollingModule(Module):
     def signal_handler(self, *_, **__) -> None:
         self.run()
 
-    async def loop(self) -> None:
+    async def start(self) -> None:
         try:
             while True:
                 self.run()
@@ -157,7 +157,7 @@ class ThreadingModule(Module):
     def run(self) -> None:
         pass
 
-    async def loop(self) -> None:
+    async def start(self) -> None:
         try:
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(self._executor, self.run)
