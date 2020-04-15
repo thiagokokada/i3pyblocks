@@ -1,9 +1,9 @@
 import time
 
-from i3pyblocks.core import PollingModule
+from i3pyblocks import modules
 
 
-class LocalTimeModule(PollingModule):
+class LocalTimeModule(modules.PollingModule):
     def __init__(
         self, format_date: str = "%D", format_time: str = "%T", **kwargs
     ) -> None:

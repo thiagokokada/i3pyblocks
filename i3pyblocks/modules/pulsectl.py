@@ -3,11 +3,11 @@ from typing import Sequence
 
 import pulsectl
 
-from i3pyblocks import core, utils
+from i3pyblocks import core, modules, utils
 
 
 # Based on: https://git.io/fjbHp
-class PulseAudioModule(core.ThreadingModule):
+class PulseAudioModule(modules.ThreadingModule):
     def __init__(
         self,
         format: str = "V: {volume:.0f}%",
