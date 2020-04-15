@@ -44,7 +44,7 @@ class Runner:
         self, module: modules.Module, signals: Iterable[int] = ()
     ) -> None:
         self._modules[module.instance] = module
-        self.register_task(module.loop())
+        self.register_task(module.start())
 
         if signals:
             self.register_signal(module, signals)

@@ -70,15 +70,14 @@ class PulseAudioModule(modules.ThreadingModule):
         default_sink_name = server_info.default_sink_name
         sink_list = self.pulse.sink_list()
 
-        if len(sink_list) == 0:
-            raise ValueError("No sinks found")
-        else:
-            self.sink_index = next(
-                # Find the sink with default_sink_name
-                (sink.index for sink in sink_list if sink.name == default_sink_name),
-                # Returns the first from the list as fallback
-                0,
-            )
+        assert len(sink_list) > 0, "No sinks found"
+
+        self.sink_index = next(
+            # Find the sink with default_sink_name
+            (sink.index for sink in sink_list if sink.name == default_sink_name),
+            # Returns the first from the list as fallback
+            0,
+        )
 
     def _update_sink_info(self) -> None:
         self.sink = self.pulse.sink_info(self.sink_index)
