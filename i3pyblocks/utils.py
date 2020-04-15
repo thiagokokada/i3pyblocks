@@ -1,35 +1,6 @@
-import logging
-from typing import Iterable, Optional, Tuple
+from typing import Dict, Optional
 
-Log = logging.getLogger("i3pyblocks")
-Log.addHandler(logging.NullHandler())
-
-
-Items = Iterable[Tuple[float, Optional[str]]]
-
-
-class Mouse:
-    LEFT_BUTTON: int = 1
-    MIDDLE_BUTTON: int = 2
-    RIGHT_BUTTON: int = 3
-    SCROLL_UP: int = 4
-    SCROLL_DOWN: int = 5
-
-
-class Color:
-    GOOD: Optional[str] = "#00FF00"
-    NEUTRAL: Optional[str] = None
-    URGENT: Optional[str] = "#FF0000"
-    WARN: Optional[str] = "#FFFF00"
-
-
-class IECUnit:
-    KiB: int = 1024
-    MiB: int = 1024 * KiB
-    GiB: int = 1024 * MiB
-    TiB: int = 1024 * GiB
-    PiB: int = 1024 * TiB
-    EiB: int = 1024 * PiB
+from i3pyblocks.types import Items
 
 
 def calculate_threshold(items: Items, value: float) -> Optional[str]:
@@ -44,5 +15,5 @@ def calculate_threshold(items: Items, value: float) -> Optional[str]:
     return selected_item
 
 
-def non_nullable_dict(**kwargs) -> dict:
+def non_nullable_dict(**kwargs) -> Dict:
     return {k: v for k, v in kwargs.items() if v is not None}

@@ -2,18 +2,19 @@ import abc
 import asyncio
 import uuid
 from concurrent.futures import ThreadPoolExecutor
+from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from i3pyblocks import utils
+from i3pyblocks import core, utils
 
 
-class Align:
+class Align(Enum):
     CENTER = "center"
     RIGHT = "right"
     LEFT = "left"
 
 
-class Markup:
+class Markup(Enum):
     NONE = "none"
     PANGO = "pango"
 
@@ -31,11 +32,11 @@ class Module(metaclass=abc.ABCMeta):
         border_bottom: Optional[int] = None,
         border_left: Optional[int] = None,
         min_width: Optional[int] = None,
-        align: Optional[str] = None,
+        align: Optional[Align] = Align.LEFT,
         urgent: Optional[bool] = False,
         separator: Optional[bool] = True,
         separator_block_width: Optional[int] = None,
-        markup: Optional[str] = Markup.NONE,
+        markup: Optional[Markup] = Markup.NONE,
     ) -> None:
         self.id = uuid.uuid4()
         self.name = name or self.__class__.__name__
@@ -53,11 +54,11 @@ class Module(metaclass=abc.ABCMeta):
             border_left=border_left,
             border_bottom=border_bottom,
             min_width=min_width,
-            align=align,
+            align=align.value if align else None,
             urgent=urgent,
             separator=separator,
             separator_block_width=separator_block_width,
-            markup=markup,
+            markup=markup.value if markup else None,
         )
 
         self.update()
@@ -74,11 +75,11 @@ class Module(metaclass=abc.ABCMeta):
         border_bottom: Optional[int] = None,
         border_left: Optional[int] = None,
         min_width: Optional[int] = None,
-        align: Optional[str] = None,
+        align: Optional[Align] = None,
         urgent: Optional[bool] = None,
         separator: Optional[bool] = None,
         separator_block_width: Optional[int] = None,
-        markup: Optional[str] = None,
+        markup: Optional[Markup] = None,
     ):
         self._state = utils.non_nullable_dict(
             full_text=full_text,
@@ -91,11 +92,11 @@ class Module(metaclass=abc.ABCMeta):
             border_left=border_left,
             border_bottom=border_bottom,
             min_width=min_width,
-            align=align,
+            align=align.value if align else None,
             urgent=urgent,
             separator=separator,
             separator_block_width=separator_block_width,
-            markup=markup,
+            markup=markup.value if markup else None,
         )
 
     def result(self) -> Dict[str, Union[str, int, bool]]:
@@ -143,7 +144,7 @@ class PollingModule(Module):
                 self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:
-            utils.Log.exception(f"Exception in {self.name}")
+            core.logger.exception(f"Exception in {self.name}")
             self.update(f"Exception in {self.name}: {e}", urgent=True)
 
 
@@ -161,5 +162,5 @@ class ThreadingModule(Module):
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(self._executor, self.run)
         except Exception as e:
-            utils.Log.exception(f"Exception in {self.name}")
+            core.logger.exception(f"Exception in {self.name}")
             self.update(f"Exception in {self.name}: {e}", urgent=True)

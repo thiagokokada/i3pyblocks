@@ -5,17 +5,17 @@ from typing import Optional, Tuple
 import psutil
 from psutil._common import bytes2human
 
-from i3pyblocks import modules, utils
+from i3pyblocks import modules, utils, types
 
 
 class CpuPercentModule(modules.PollingModule):
     def __init__(
         self,
         format: str = "C: {percent}%",
-        colors: utils.Items = (
-            (0, utils.Color.NEUTRAL),
-            (75, utils.Color.WARN),
-            (90, utils.Color.URGENT),
+        colors: types.Items = (
+            (0, types.Color.NEUTRAL),
+            (75, types.Color.WARN),
+            (90, types.Color.URGENT),
         ),
         sleep: int = 5,
         **kwargs,
@@ -36,12 +36,12 @@ class DiskUsageModule(modules.PollingModule):
     def __init__(
         self,
         format: str = "{label}: {free:.1f}GiB",
-        colors: utils.Items = (
-            (0, utils.Color.NEUTRAL),
-            (75, utils.Color.WARN),
-            (90, utils.Color.URGENT),
+        colors: types.Items = (
+            (0, types.Color.NEUTRAL),
+            (75, types.Color.WARN),
+            (90, types.Color.URGENT),
         ),
-        icons: utils.Items = (
+        icons: types.Items = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -51,7 +51,7 @@ class DiskUsageModule(modules.PollingModule):
             (75.0, "▇"),
             (87.5, "█"),
         ),
-        divisor: int = utils.IECUnit.GiB,
+        divisor: int = types.IECUnit.GiB,
         sleep: int = 5,
         path: str = "/",
         short_label: bool = False,
@@ -97,10 +97,10 @@ class LoadAvgModule(modules.PollingModule):
     def __init__(
         self,
         format: str = "L: {load1}",
-        colors: utils.Items = (
-            (0, utils.Color.NEUTRAL),
-            (2, utils.Color.WARN),
-            (4, utils.Color.URGENT),
+        colors: types.Items = (
+            (0, types.Color.NEUTRAL),
+            (2, types.Color.WARN),
+            (4, types.Color.URGENT),
         ),
         sleep: int = 5,
         **kwargs,
@@ -124,10 +124,10 @@ class NetworkSpeedModule(modules.PollingModule):
         self,
         format_up: str = "{interface}:  U {upload} D {download}",
         format_down: str = "NO NETWORK",
-        colors: utils.Items = (
-            (0, utils.Color.NEUTRAL),
-            (2 * utils.IECUnit.MiB, utils.Color.WARN),
-            (5 * utils.IECUnit.MiB, utils.Color.URGENT),
+        colors: types.Items = (
+            (0, types.Color.NEUTRAL),
+            (2 * types.IECUnit.MiB, types.Color.WARN),
+            (5 * types.IECUnit.MiB, types.Color.URGENT),
         ),
         interface_regex: str = "en*|eth*|ppp*|sl*|wl*|ww*",
         sleep: int = 3,
@@ -159,7 +159,7 @@ class NetworkSpeedModule(modules.PollingModule):
         interface = self._find_interface()
 
         if not interface:
-            self.update(self.format_down, color=utils.Color.URGENT)
+            self.update(self.format_down, color=types.Color.URGENT)
             return
 
         now = psutil.net_io_counters(pernic=True)
@@ -193,12 +193,12 @@ class SensorsBatteryModule(modules.PollingModule):
         format_plugged: str = "B: PLUGGED {percent:.0f}%",
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         format_unknown: str = "B: {icon} {percent:.0f}%",
-        colors: utils.Items = (
-            (0, utils.Color.URGENT),
-            (10, utils.Color.WARN),
-            (25, utils.Color.NEUTRAL),
+        colors: types.Items = (
+            (0, types.Color.URGENT),
+            (10, types.Color.WARN),
+            (25, types.Color.NEUTRAL),
         ),
-        icons: utils.Items = (
+        icons: types.Items = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -249,12 +249,12 @@ class SensorsTemperaturesModule(modules.PollingModule):
     def __init__(
         self,
         format: str = "T: {current:.0f}°C",
-        colors: utils.Items = (
-            (0, utils.Color.NEUTRAL),
-            (60, utils.Color.WARN),
-            (85, utils.Color.URGENT),
+        colors: types.Items = (
+            (0, types.Color.NEUTRAL),
+            (60, types.Color.WARN),
+            (85, types.Color.URGENT),
         ),
-        icons: utils.Items = (
+        icons: types.Items = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -302,12 +302,12 @@ class VirtualMemoryModule(modules.PollingModule):
     def __init__(
         self,
         format: str = "M: {available:.1f}GiB",
-        colors: utils.Items = (
-            (0, utils.Color.NEUTRAL),
-            (75, utils.Color.WARN),
-            (90, utils.Color.URGENT),
+        colors: types.Items = (
+            (0, types.Color.NEUTRAL),
+            (75, types.Color.WARN),
+            (90, types.Color.URGENT),
         ),
-        icons: utils.Items = (
+        icons: types.Items = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -317,7 +317,7 @@ class VirtualMemoryModule(modules.PollingModule):
             (75.0, "▇"),
             (87.5, "█"),
         ),
-        divisor: int = utils.IECUnit.GiB,
+        divisor: int = types.IECUnit.GiB,
         sleep=3,
         **kwargs,
     ) -> None:

@@ -14,7 +14,9 @@ async def test_runner(capsys, mock_stdin, mock_uuid4):
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
+            super().__init__(
+                sleep=sleep, separator=None, urgent=None, align=None, markup=None
+            )
 
         def run(self):
             self.state += 1
@@ -46,7 +48,9 @@ async def test_runner_with_fault_module(capsys, mock_stdin, mock_uuid4):
     class FaultPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
+            super().__init__(
+                sleep=sleep, separator=None, urgent=None, align=None, markup=None
+            )
 
         def run(self):
             self.state += 1
@@ -89,7 +93,9 @@ async def test_runner_with_signal_handler(capsys, mock_stdin, mock_uuid4):
     class ValidPollingModuleWithSignalHandler(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
+            super().__init__(
+                sleep=sleep, separator=None, urgent=None, align=None, markup=None
+            )
 
         def run(self):
             pass
@@ -137,7 +143,9 @@ async def test_runner_with_click_handler(capsys, mock_uuid4):
     class ValidPollingModuleWithClickHandler(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
+            super().__init__(
+                sleep=sleep, separator=None, urgent=None, align=None, markup=None
+            )
 
         def run(self):
             pass
@@ -165,7 +173,7 @@ async def test_runner_with_notify_update(capsys, mock_stdin, mock_uuid4):
     class ValidThreadingModule(ThreadingModule):
         def __init__(self):
             self.state = 0
-            super().__init__(separator=None, urgent=None, markup=None)
+            super().__init__(separator=None, urgent=None, align=None, markup=None)
 
         def run(self):
             for _ in range(5):

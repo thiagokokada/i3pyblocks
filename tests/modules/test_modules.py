@@ -96,7 +96,9 @@ async def test_valid_polling_module(mock_uuid4):
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
+            super().__init__(
+                sleep=sleep, separator=None, urgent=None, align=None, markup=None
+            )
 
         def run(self):
             self.state += 1
@@ -122,7 +124,9 @@ async def test_polling_module_with_error(mock_uuid4):
     class PollingModuleWithError(PollingModule):
         def __init__(self, sleep=1):
             self.state = 0
-            super().__init__(sleep=sleep, separator=None, urgent=None, markup=None)
+            super().__init__(
+                sleep=sleep, separator=None, urgent=None, align=None, markup=None
+            )
 
         def run(self):
             raise Exception("Boom!")
@@ -144,7 +148,7 @@ async def test_valid_thread_pool_module(mock_uuid4):
     class ValidThreadingModule(ThreadingModule):
         def __init__(self):
             self.state = 0
-            super().__init__(separator=None, urgent=None, markup=None)
+            super().__init__(separator=None, urgent=None, align=None, markup=None)
 
         def run(self):
             self.state += 1
@@ -168,7 +172,7 @@ async def test_thread_pool_module_with_error(mock_uuid4):
     class ThreadingModuleWithError(ThreadingModule):
         def __init__(self):
             self.state = 0
-            super().__init__(separator=None, urgent=None, markup=None)
+            super().__init__(separator=None, urgent=None, align=None, markup=None)
 
         def run(self):
             raise Exception("Boom!")

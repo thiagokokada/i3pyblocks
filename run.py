@@ -6,7 +6,7 @@ from pathlib import Path
 
 import psutil as ps
 
-from i3pyblocks import core, utils
+from i3pyblocks import core, types
 from i3pyblocks.modules import psutil, pulsectl, time
 
 logging.basicConfig(filename=Path.home() / ".i3pyblocks.log", level=logging.DEBUG)
@@ -49,8 +49,8 @@ async def main():
             format=" {load1}",
             colors=[
                 (0, None),
-                (cpu_count // 2, utils.Color.WARN),
-                (cpu_count, utils.Color.URGENT),
+                (cpu_count // 2, types.Color.WARN),
+                (cpu_count, types.Color.URGENT),
             ],
         )
     )
