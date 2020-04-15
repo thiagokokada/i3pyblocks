@@ -1,9 +1,13 @@
 import asyncio
 import json
+import logging
 import sys
 from typing import Dict, Iterable, List, Optional, Union
 
-from i3pyblocks import utils, modules
+from i3pyblocks import modules
+
+logger = logging.getLogger("i3pyblocks")
+logger.addHandler(logging.NullHandler())
 
 
 class Runner:
@@ -17,19 +21,24 @@ class Runner:
         Runner.notify_event = asyncio.Event()
 
     def register_signal(self, module: modules.Module, signums: Iterable[int]) -> None:
-        def _handler(signum: int):
+        def signal_handler(signum: int):
             try:
+                logger.debug(
+                    f"Module {module.name} with id {module.id} received a signal {signum}"
+                )
                 module.signal_handler(signum=signum)
                 self.write_result()
             except Exception:
-                utils.Log.exception(f"Exception in {module.name} signal handler")
+                logger.exception(f"Exception in {module.name} signal handler")
 
         for signum in signums:
-            self._loop.add_signal_handler(signum, _handler, signum)
+            self._loop.add_signal_handler(signum, signal_handler, signum)
+            logger.debug(f"Registered signal {signum} for {module.name}")
 
     def register_task(self, coro) -> None:
         task = asyncio.create_task(coro)
         self._tasks.append(task)
+        logger.debug(f"Registered async task {coro} in {self}")
 
     def register_module(
         self, module: modules.Module, signals: Iterable[int] = ()
@@ -54,16 +63,14 @@ class Runner:
 
         while True:
             await Runner.notify_event.wait()
+            logger.debug("Write results from notification event")
             self.write_result()
-            utils.Log.debug(f"Write results from notification")
             Runner.notify_event.clear()
 
     @classmethod
     def notify_update(cls, module: modules.Module) -> None:
         if cls.notify_event:
-            utils.Log.debug(
-                f"Module {module.name} with id {module.id} asked for update"
-            )
+            logger.debug(f"Module {module.name} with id {module.id} asked for update")
             cls.notify_event.set()
 
     def click_event(self, raw: Union[str, bytes, bytearray]) -> None:
@@ -71,6 +78,10 @@ class Runner:
             click_event = json.loads(raw)
             instance = click_event["instance"]
             module = self._modules[instance]
+
+            logger.debug(
+                f"Module {module.name} with id {module.id} received a click event: {click_event}"
+            )
 
             module.click_handler(
                 x=click_event.get("x"),
@@ -84,7 +95,7 @@ class Runner:
             )
             self.write_result()
         except Exception:
-            utils.Log.exception(f"Error in {module.name} click handler")
+            logger.exception(f"Error in {module.name} click handler")
 
     # Based on: https://git.io/fjbHx
     async def click_events(self) -> None:

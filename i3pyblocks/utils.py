@@ -1,11 +1,6 @@
-import logging
-
 from typing import Dict, Optional
 
 from i3pyblocks.types import Items
-
-Log = logging.getLogger("i3pyblocks")
-Log.addHandler(logging.NullHandler())
 
 
 def calculate_threshold(items: Items, value: float) -> Optional[str]:

@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from i3pyblocks import utils
+from i3pyblocks import core, utils
 
 
 class Align(Enum):
@@ -144,7 +144,7 @@ class PollingModule(Module):
                 self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:
-            utils.Log.exception(f"Exception in {self.name}")
+            core.logger.exception(f"Exception in {self.name}")
             self.update(f"Exception in {self.name}: {e}", urgent=True)
 
 
@@ -162,5 +162,5 @@ class ThreadingModule(Module):
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(self._executor, self.run)
         except Exception as e:
-            utils.Log.exception(f"Exception in {self.name}")
+            core.logger.exception(f"Exception in {self.name}")
             self.update(f"Exception in {self.name}: {e}", urgent=True)
