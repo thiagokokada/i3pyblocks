@@ -3,7 +3,7 @@ from typing import Sequence
 
 import pulsectl
 
-from i3pyblocks import core, modules, utils
+from i3pyblocks import core, modules, utils, types
 
 
 # Based on: https://git.io/fjbHp
@@ -12,12 +12,12 @@ class PulseAudioModule(modules.ThreadingModule):
         self,
         format: str = "V: {volume:.0f}%",
         format_mute: str = "V: MUTE",
-        colors: utils.Items = (
-            (0, utils.Color.URGENT),
-            (10, utils.Color.WARN),
-            (25, utils.Color.NEUTRAL),
+        colors: types.Items = (
+            (0, types.Color.URGENT),
+            (10, types.Color.WARN),
+            (25, types.Color.NEUTRAL),
         ),
-        icons: utils.Items = (
+        icons: types.Items = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -91,7 +91,7 @@ class PulseAudioModule(modules.ThreadingModule):
 
     def _update_status(self):
         if self.sink.mute:
-            self.update(self.format_mute.format(), color=utils.Color.URGENT)
+            self.update(self.format_mute.format(), color=types.Color.URGENT)
         else:
             volume = self.pulse.volume_get_all_chans(self.sink) * 100
             color = utils.calculate_threshold(self.colors, volume)
@@ -99,13 +99,13 @@ class PulseAudioModule(modules.ThreadingModule):
             self.update(self.format.format(volume=volume, icon=icon), color=color)
 
     def click_handler(self, button: int, *_, **__) -> None:  # type: ignore
-        if button == utils.Mouse.LEFT_BUTTON:
+        if button == types.Mouse.LEFT_BUTTON:
             subprocess.Popen(self.command)
-        elif button == utils.Mouse.RIGHT_BUTTON:
+        elif button == types.Mouse.RIGHT_BUTTON:
             self._toggle_mute()
-        elif button == utils.Mouse.SCROLL_UP:
+        elif button == types.Mouse.SCROLL_UP:
             self.pulse.volume_change_all_chans(self.sink, 0.05)
-        elif button == utils.Mouse.SCROLL_DOWN:
+        elif button == types.Mouse.SCROLL_DOWN:
             self.pulse.volume_change_all_chans(self.sink, -0.05)
 
         self._update_status()
