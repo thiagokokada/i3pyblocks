@@ -5,21 +5,20 @@ import pulsectl
 from i3pyblocks import types
 from i3pyblocks.modules import pulsectl as m_pulsectl
 
-
-class AttributeDict(dict):
-    __getattr__ = dict.__getitem__  # type: ignore
-    __setattr__ = dict.__setitem__  # type: ignore
+from helpers import misc
 
 
 def test_pulse_audio_module(mocker):
     MockPulse = mocker.patch.object(pulsectl, "Pulse")
     mock_instance = MockPulse.return_value
-    mock_instance.server_info.return_value = AttributeDict(
+    mock_instance.server_info.return_value = misc.AttributeDict(
         default_source_name="source", default_sink_name="sink"
     )
-    sink = AttributeDict(description="description", index=1, name="sink", mute=0)
-    sink_mute = AttributeDict(description="description", index=1, name="sink", mute=1)
-    another_sink = AttributeDict(
+    sink = misc.AttributeDict(description="description", index=1, name="sink", mute=0)
+    sink_mute = misc.AttributeDict(
+        description="description", index=1, name="sink", mute=1
+    )
+    another_sink = misc.AttributeDict(
         description="another description", index=2, name="another_sink", mute=1
     )
     mock_instance.sink_list.return_value = [sink, another_sink]
@@ -69,10 +68,10 @@ def test_pulse_audio_module_click_handler(mocker):
     MockPulse = mocker.patch.object(pulsectl, "Pulse")
     mock_instance = MockPulse.return_value
 
-    mock_instance.server_info.return_value = AttributeDict(
+    mock_instance.server_info.return_value = misc.AttributeDict(
         default_source_name="source", default_sink_name="sink"
     )
-    sink = AttributeDict(description="description", index=1, name="sink", mute=0)
+    sink = misc.AttributeDict(description="description", index=1, name="sink", mute=0)
     mock_instance.sink_list.return_value = [sink]
     mock_instance.sink_info.return_value = sink
     mock_instance.volume_get_all_chans.return_value = 1.0
