@@ -3,7 +3,7 @@ import asyncio
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 
 from i3pyblocks import core, utils
 
@@ -99,12 +99,15 @@ class Module(metaclass=abc.ABCMeta):
             markup=markup.value if markup else None,
         )
 
+    def result(self) -> Dict[str, Union[str, int, bool]]:
+        return {**self.default_state, **self.state}
+
     def push_update(self) -> None:
         assert hasattr(
             self, "update_queue"
         ), "Cannot call push_update() method without calling start() method first"
 
-        self.update_queue.put_nowait((self.id, {**self.default_state, **self.state}))
+        self.update_queue.put_nowait((self.id, self.result()))
 
     def update(self, *args, **kwargs) -> None:
         self.update_state(*args, **kwargs)
