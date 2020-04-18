@@ -3,7 +3,7 @@ import json
 import logging
 import sys
 import uuid
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, AnyStr, Awaitable, Dict, Iterable, List, Optional
 
 from i3pyblocks import modules
 
@@ -13,10 +13,10 @@ logger.addHandler(logging.NullHandler())
 
 class Runner:
     def __init__(self) -> None:
-        self._loop = asyncio.get_running_loop()
-        self._modules: Dict[uuid.UUID, Dict[str, Any]] = {}
-        self._tasks: List[asyncio.Future] = []
-        self._queue: asyncio.Queue = asyncio.Queue()
+        self.loop = asyncio.get_running_loop()
+        self.modules: Dict[uuid.UUID, Dict[str, Any]] = {}
+        self.tasks: List[asyncio.Future] = []
+        self.queue: asyncio.Queue = asyncio.Queue()
 
     def register_signal(self, module: modules.Module, signums: Iterable[int]) -> None:
         def signal_handler(signum: int):
@@ -29,39 +29,39 @@ class Runner:
                 logger.exception(f"Exception in {module.name} signal handler")
 
         for signum in signums:
-            self._loop.add_signal_handler(signum, signal_handler, signum)
+            self.loop.add_signal_handler(signum, signal_handler, signum)
             logger.debug(f"Registered signal {signum} for {module.name}")
 
-    def register_task(self, coro) -> None:
-        task = asyncio.create_task(coro)
-        self._tasks.append(task)
-        logger.debug(f"Registered async task {coro} in {self}")
+    def register_task(self, awaitable: Awaitable) -> None:
+        task = asyncio.create_task(awaitable)
+        self.tasks.append(task)
+        logger.debug(f"Registered async task {awaitable} in {self}")
 
     def register_module(
         self, module: modules.Module, signals: Iterable[int] = ()
     ) -> None:
-        self._modules[module.id] = {"module": module, "result": {}}
-        self.register_task(module.start(self._queue))
+        self.modules[module.id] = {"module": module, "result": {}}
+        self.register_task(module.start(self.queue))
 
         if signals:
             self.register_signal(module, signals)
 
     async def get_result(self) -> None:
-        id_, result = await self._queue.get()
-        self._modules[id_]["result"] = result
+        id_, result = await self.queue.get()
+        self.modules[id_]["result"] = result
 
     async def write_results(self) -> None:
         while True:
             await self.get_result()
-            output = [json.dumps(m["result"]) for m in self._modules.values()]
+            output = [json.dumps(m["result"]) for m in self.modules.values()]
             print("[" + ",".join(output) + "],", flush=True)
 
-    def click_event(self, raw: Union[str, bytes, bytearray]) -> None:
+    def click_event(self, raw: AnyStr) -> None:
         try:
             click_event = json.loads(raw)
             instance = click_event["instance"]
             id_ = uuid.UUID(instance)
-            module = self._modules[id_]["module"]
+            module = self.modules[id_]["module"]
 
             logger.debug(
                 f"Module {module.name} with id {module.id} received"
@@ -86,7 +86,7 @@ class Runner:
         reader = asyncio.StreamReader()
         protocol = asyncio.StreamReaderProtocol(reader)
 
-        await self._loop.connect_read_pipe(lambda: protocol, sys.stdin)
+        await self.loop.connect_read_pipe(lambda: protocol, sys.stdin)
 
         await reader.readline()
 
@@ -101,4 +101,4 @@ class Runner:
 
         print('{"version": 1, "click_events": true}\n[', flush=True)
 
-        await asyncio.wait(self._tasks, timeout=timeout)
+        await asyncio.wait(self.tasks, timeout=timeout)
