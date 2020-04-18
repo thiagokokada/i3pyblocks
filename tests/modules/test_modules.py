@@ -84,6 +84,28 @@ async def test_valid_module(mock_uuid4):
         "markup": "none",
     }
 
+    id_, result = await module.update_queue.get()
+
+    assert id_ == mock_uuid4
+    assert result == {
+        "align": "center",
+        "background": "#FFFFFF",
+        "border": "#FF0000",
+        "border_bottom": 1,
+        "border_left": 1,
+        "border_right": 1,
+        "border_top": 1,
+        "color": "#000000",
+        "full_text": "Done!",
+        "instance": str(mock_uuid4),
+        "min_width": 10,
+        "name": "Name",
+        "separator": False,
+        "separator_block_width": 9,
+        "urgent": False,
+        "markup": "none",
+    }
+
 
 def test_invalid_polling_module():
     class InvalidPollingModule(PollingModule):
