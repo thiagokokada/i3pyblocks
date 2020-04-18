@@ -122,7 +122,7 @@ class Module(metaclass=abc.ABCMeta):
         relative_y: int,
         width: int,
         height: int,
-        modifiers: List[str],
+        modifiers: List[Optional[str]],
     ) -> None:
         raise NotImplementedError("Should implement click_handler method")
 
