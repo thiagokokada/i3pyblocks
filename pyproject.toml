@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "i3pyblocks"
-version = "0.0.1"
+version = "0.1.0"
 description = "A replacement for i3status, written in Python using asyncio"
 authors = ["Thiago Kenji Okada <thiagokokada@gmail.com>"]
 license = "MIT"
