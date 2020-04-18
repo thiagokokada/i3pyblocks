@@ -95,6 +95,10 @@ class Runner:
             self.click_event(raw)
             await reader.readuntil(b",")
 
+    def stop(self) -> None:
+        for task in self.tasks:
+            task.cancel()
+
     async def start(self, timeout: Optional[int] = None) -> None:
         self.register_task(self.click_events())
         self.register_task(self.write_results())
@@ -102,3 +106,5 @@ class Runner:
         print('{"version": 1, "click_events": true}\n[', flush=True)
 
         await asyncio.wait(self.tasks, timeout=timeout)
+
+        self.stop()

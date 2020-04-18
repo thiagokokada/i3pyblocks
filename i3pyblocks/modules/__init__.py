@@ -103,11 +103,13 @@ class Module(metaclass=abc.ABCMeta):
         return {**self.default_state, **self.state}
 
     def push_update(self) -> None:
-        assert hasattr(
-            self, "update_queue"
-        ), "Cannot call push_update() method without calling start() method first"
-
-        self.update_queue.put_nowait((self.id, self.result()))
+        if hasattr(self, "update_queue"):
+            self.update_queue.put_nowait((self.id, self.result()))
+        else:
+            core.logger.warn(
+                "Not pushing update since module {self.name} with id {self.id} "
+                "did not started yet"
+            )
 
     def update(self, *args, **kwargs) -> None:
         self.update_state(*args, **kwargs)
@@ -130,7 +132,9 @@ class Module(metaclass=abc.ABCMeta):
         raise NotImplementedError("Should implement signal_handler method")
 
     @abc.abstractmethod
-    async def start(self, queue: asyncio.Queue) -> None:
+    async def start(self, queue: asyncio.Queue = None) -> None:
+        if not queue:
+            queue = asyncio.Queue()
         self.update_queue = queue
 
 
@@ -149,8 +153,8 @@ class PollingModule(Module):
     def signal_handler(self, *_, **__) -> None:
         self.run()
 
-    async def start(self, queue: asyncio.Queue) -> None:
-        self.update_queue = queue
+    async def start(self, queue: asyncio.Queue = None) -> None:
+        await super().start(queue)
         try:
             while True:
                 self.run()
@@ -169,8 +173,8 @@ class ThreadingModule(Module):
     def run(self) -> None:
         pass
 
-    async def start(self, queue: asyncio.Queue) -> None:
-        self.update_queue = queue
+    async def start(self, queue: asyncio.Queue = None) -> None:
+        await super().start(queue)
         try:
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(self._executor, self.run)

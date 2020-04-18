@@ -3,6 +3,7 @@ import asyncio
 import pytest
 
 from i3pyblocks.modules import Align, Markup, Module, PollingModule, ThreadingModule
+from i3pyblocks import modules
 
 
 def test_invalid_module():
@@ -15,8 +16,9 @@ def test_invalid_module():
 
 @pytest.mark.asyncio
 async def test_valid_module(mock_uuid4):
-    class ValidModule(Module):
+    class ValidModule(modules.Module):
         async def start(self):
+            await super().start()
             self.update("Done!", color=None, urgent=False, markup=Markup.NONE)
 
         def click_handler(self, *_, **__):
@@ -52,7 +54,7 @@ async def test_valid_module(mock_uuid4):
         "border_top": 1,
         "color": "#000000",
         "full_text": "",
-        "instance": "uuid4",
+        "instance": str(mock_uuid4),
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -73,7 +75,7 @@ async def test_valid_module(mock_uuid4):
         "border_top": 1,
         "color": "#000000",
         "full_text": "Done!",
-        "instance": "uuid4",
+        "instance": str(mock_uuid4),
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -95,14 +97,14 @@ def test_invalid_polling_module():
 async def test_valid_polling_module(mock_uuid4):
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
-            self.state = 0
+            self.count = 0
             super().__init__(
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
             )
 
         def run(self):
-            self.state += 1
-            self.update(str(self.state))
+            self.count += 1
+            self.update(str(self.count))
 
     module = ValidPollingModule()
 
@@ -114,7 +116,7 @@ async def test_valid_polling_module(mock_uuid4):
 
     assert module.result() == {
         "full_text": "5",
-        "instance": "uuid4",
+        "instance": str(mock_uuid4),
         "name": "ValidPollingModule",
     }
 
@@ -123,7 +125,7 @@ async def test_valid_polling_module(mock_uuid4):
 async def test_polling_module_with_error(mock_uuid4):
     class PollingModuleWithError(PollingModule):
         def __init__(self, sleep=1):
-            self.state = 0
+            self.count = 0
             super().__init__(
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
             )
@@ -137,7 +139,7 @@ async def test_polling_module_with_error(mock_uuid4):
 
     assert module.result() == {
         "full_text": "Exception in PollingModuleWithError: Boom!",
-        "instance": "uuid4",
+        "instance": str(mock_uuid4),
         "name": "PollingModuleWithError",
         "urgent": True,
     }
@@ -147,12 +149,12 @@ async def test_polling_module_with_error(mock_uuid4):
 async def test_valid_thread_pool_module(mock_uuid4):
     class ValidThreadingModule(ThreadingModule):
         def __init__(self):
-            self.state = 0
+            self.count = 0
             super().__init__(separator=None, urgent=None, align=None, markup=None)
 
         def run(self):
-            self.state += 1
-            self.update(str(self.state))
+            self.count += 1
+            self.update(str(self.count))
 
     module = ValidThreadingModule()
 
@@ -160,9 +162,11 @@ async def test_valid_thread_pool_module(mock_uuid4):
 
     await asyncio.wait([task])
 
+    task.cancel()
+
     assert module.result() == {
         "full_text": "1",
-        "instance": "uuid4",
+        "instance": str(mock_uuid4),
         "name": "ValidThreadingModule",
     }
 
@@ -171,7 +175,7 @@ async def test_valid_thread_pool_module(mock_uuid4):
 async def test_thread_pool_module_with_error(mock_uuid4):
     class ThreadingModuleWithError(ThreadingModule):
         def __init__(self):
-            self.state = 0
+            self.count = 0
             super().__init__(separator=None, urgent=None, align=None, markup=None)
 
         def run(self):
@@ -183,9 +187,11 @@ async def test_thread_pool_module_with_error(mock_uuid4):
 
     await asyncio.wait([task])
 
+    task.cancel()
+
     assert module.result() == {
         "full_text": "Exception in ThreadingModuleWithError: Boom!",
-        "instance": "uuid4",
+        "instance": str(mock_uuid4),
         "name": "ThreadingModuleWithError",
         "urgent": True,
     }
