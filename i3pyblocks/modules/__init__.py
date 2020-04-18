@@ -3,7 +3,7 @@ import asyncio
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import List, Optional
 
 from i3pyblocks import core, utils
 
@@ -43,7 +43,7 @@ class Module(metaclass=abc.ABCMeta):
         self.instance = str(self.id)
 
         # Those are default values for properties if they are not overrided
-        self._default_state = utils.non_nullable_dict(
+        self.default_state = utils.non_nullable_dict(
             name=self.name,
             instance=self.instance,
             color=color,
@@ -60,8 +60,6 @@ class Module(metaclass=abc.ABCMeta):
             separator_block_width=separator_block_width,
             markup=markup.value if markup else None,
         )
-
-        self.update()
 
     def update(
         self,
@@ -81,7 +79,7 @@ class Module(metaclass=abc.ABCMeta):
         separator_block_width: Optional[int] = None,
         markup: Optional[Markup] = None,
     ):
-        self._state = utils.non_nullable_dict(
+        new_state = utils.non_nullable_dict(
             full_text=full_text,
             short_text=short_text,
             color=color,
@@ -99,8 +97,11 @@ class Module(metaclass=abc.ABCMeta):
             markup=markup.value if markup else None,
         )
 
-    def result(self) -> Dict[str, Union[str, int, bool]]:
-        return {**self._default_state, **self._state}
+        assert hasattr(
+            self, "_queue"
+        ), "Cannot call update() method without starting module first"
+
+        self._queue.put_nowait((self.id, {**self.default_state, **new_state}))
 
     def click_handler(
         self,
@@ -119,8 +120,8 @@ class Module(metaclass=abc.ABCMeta):
         raise NotImplementedError("Should implement signal_handler method")
 
     @abc.abstractmethod
-    async def start(self) -> None:
-        pass
+    async def start(self, queue: asyncio.Queue) -> None:
+        self._queue = queue
 
 
 class PollingModule(Module):
@@ -138,7 +139,8 @@ class PollingModule(Module):
     def signal_handler(self, *_, **__) -> None:
         self.run()
 
-    async def start(self) -> None:
+    async def start(self, queue: asyncio.Queue) -> None:
+        self._queue = queue
         try:
             while True:
                 self.run()
@@ -157,7 +159,8 @@ class ThreadingModule(Module):
     def run(self) -> None:
         pass
 
-    async def start(self) -> None:
+    async def start(self, queue: asyncio.Queue) -> None:
+        self._queue = queue
         try:
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(self._executor, self.run)

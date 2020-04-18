@@ -3,7 +3,7 @@ from typing import Sequence
 
 import pulsectl
 
-from i3pyblocks import core, modules, utils, types
+from i3pyblocks import modules, utils, types
 
 
 # Based on: https://git.io/fjbHp
@@ -43,7 +43,6 @@ class PulseAudioModule(modules.ThreadingModule):
         self._find_sink_index()
         self._update_sink_info()
         self._setup_event_callback()
-        self._update_status()
 
     def __exit__(self, *_) -> None:
         self.pulse.close()
@@ -111,8 +110,5 @@ class PulseAudioModule(modules.ThreadingModule):
 
     def run(self) -> None:
         while True:
-            self._handle_event()
-
             self._update_status()
-
-            core.Runner.notify_update(self)
+            self._handle_event()
