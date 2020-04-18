@@ -43,7 +43,7 @@ class Module(metaclass=abc.ABCMeta):
         self.instance = str(self.id)
 
         # Those are default values for properties if they are not overrided
-        self._default_state = utils.non_nullable_dict(
+        self.default_state = utils.non_nullable_dict(
             name=self.name,
             instance=self.instance,
             color=color,
@@ -61,9 +61,9 @@ class Module(metaclass=abc.ABCMeta):
             markup=markup.value if markup else None,
         )
 
-        self.update()
+        self.update_state()
 
-    def update(
+    def update_state(
         self,
         full_text: str = "",
         short_text: Optional[str] = None,
@@ -80,8 +80,8 @@ class Module(metaclass=abc.ABCMeta):
         separator: Optional[bool] = None,
         separator_block_width: Optional[int] = None,
         markup: Optional[Markup] = None,
-    ):
-        self._state = utils.non_nullable_dict(
+    ) -> None:
+        self.state = utils.non_nullable_dict(
             full_text=full_text,
             short_text=short_text,
             color=color,
@@ -100,7 +100,20 @@ class Module(metaclass=abc.ABCMeta):
         )
 
     def result(self) -> Dict[str, Union[str, int, bool]]:
-        return {**self._default_state, **self._state}
+        return {**self.default_state, **self.state}
+
+    def push_update(self) -> None:
+        if hasattr(self, "update_queue"):
+            self.update_queue.put_nowait((self.id, self.result()))
+        else:
+            core.logger.warn(
+                "Not pushing update since module {self.name} with id {self.id} "
+                "did not started yet"
+            )
+
+    def update(self, *args, **kwargs) -> None:
+        self.update_state(*args, **kwargs)
+        self.push_update()
 
     def click_handler(
         self,
@@ -111,7 +124,7 @@ class Module(metaclass=abc.ABCMeta):
         relative_y: int,
         width: int,
         height: int,
-        modifiers: List[str],
+        modifiers: List[Optional[str]],
     ) -> None:
         raise NotImplementedError("Should implement click_handler method")
 
@@ -119,8 +132,10 @@ class Module(metaclass=abc.ABCMeta):
         raise NotImplementedError("Should implement signal_handler method")
 
     @abc.abstractmethod
-    async def start(self) -> None:
-        pass
+    async def start(self, queue: asyncio.Queue = None) -> None:
+        if not queue:
+            queue = asyncio.Queue()
+        self.update_queue = queue
 
 
 class PollingModule(Module):
@@ -138,7 +153,8 @@ class PollingModule(Module):
     def signal_handler(self, *_, **__) -> None:
         self.run()
 
-    async def start(self) -> None:
+    async def start(self, queue: asyncio.Queue = None) -> None:
+        await super().start(queue)
         try:
             while True:
                 self.run()
@@ -157,7 +173,8 @@ class ThreadingModule(Module):
     def run(self) -> None:
         pass
 
-    async def start(self) -> None:
+    async def start(self, queue: asyncio.Queue = None) -> None:
+        await super().start(queue)
         try:
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(self._executor, self.run)

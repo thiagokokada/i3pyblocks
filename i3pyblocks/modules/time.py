@@ -12,13 +12,13 @@ class LocalTimeModule(modules.PollingModule):
         self.format_time = format_time
         self.format = self.format_time
 
-    def click_handler(self, *args, **kwargs) -> None:
+    def click_handler(self, *_, **__) -> None:
         if self.format == self.format_date:
             self.format = self.format_time
         else:
             self.format = self.format_date
 
-        super().click_handler(*args, **kwargs)
+        self.run()
 
     def run(self) -> None:
         current_time = time.localtime()

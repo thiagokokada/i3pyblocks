@@ -11,4 +11,6 @@ def mock_stdin(mocker):
 
 @pytest.fixture
 def mock_uuid4(mocker):
-    return mocker.patch.object(uuid, "uuid4", return_value="uuid4")
+    mocked_uuid = uuid.uuid4()
+    mocker.patch.object(uuid, "uuid4", return_value=mocked_uuid)
+    return mocked_uuid
