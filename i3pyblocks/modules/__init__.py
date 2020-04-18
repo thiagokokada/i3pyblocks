@@ -61,7 +61,9 @@ class Module(metaclass=abc.ABCMeta):
             markup=markup.value if markup else None,
         )
 
-    def update(
+        self.update_state()
+
+    def update_state(
         self,
         full_text: str = "",
         short_text: Optional[str] = None,
@@ -78,8 +80,8 @@ class Module(metaclass=abc.ABCMeta):
         separator: Optional[bool] = None,
         separator_block_width: Optional[int] = None,
         markup: Optional[Markup] = None,
-    ):
-        new_state = utils.non_nullable_dict(
+    ) -> None:
+        self.state = utils.non_nullable_dict(
             full_text=full_text,
             short_text=short_text,
             color=color,
@@ -97,11 +99,16 @@ class Module(metaclass=abc.ABCMeta):
             markup=markup.value if markup else None,
         )
 
+    def push_update(self) -> None:
         assert hasattr(
-            self, "_queue"
-        ), "Cannot call update() method without starting module first"
+            self, "update_queue"
+        ), "Cannot call push_update() method without calling start() method first"
 
-        self._queue.put_nowait((self.id, {**self.default_state, **new_state}))
+        self.update_queue.put_nowait((self.id, {**self.default_state, **self.state}))
+
+    def update(self, *args, **kwargs) -> None:
+        self.update_state(*args, **kwargs)
+        self.push_update()
 
     def click_handler(
         self,
@@ -121,7 +128,7 @@ class Module(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     async def start(self, queue: asyncio.Queue) -> None:
-        self._queue = queue
+        self.update_queue = queue
 
 
 class PollingModule(Module):
@@ -140,7 +147,7 @@ class PollingModule(Module):
         self.run()
 
     async def start(self, queue: asyncio.Queue) -> None:
-        self._queue = queue
+        self.update_queue = queue
         try:
             while True:
                 self.run()
@@ -160,7 +167,7 @@ class ThreadingModule(Module):
         pass
 
     async def start(self, queue: asyncio.Queue) -> None:
-        self._queue = queue
+        self.update_queue = queue
         try:
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(self._executor, self.run)
