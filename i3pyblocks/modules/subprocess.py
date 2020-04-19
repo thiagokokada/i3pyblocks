@@ -31,14 +31,22 @@ class ShellModule(modules.PollingModule):
         if not command:
             return
 
-        process = await asyncio.create_subprocess_shell(command)
+        process = await asyncio.create_subprocess_shell(
+            command,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         process.wait()
 
         await self.run()
 
     async def run(self) -> None:
         process = await asyncio.create_subprocess_shell(
-            self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            self.command,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
 
         stdout, stderr = await process.communicate()
