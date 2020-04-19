@@ -108,8 +108,8 @@ class Module(metaclass=abc.ABCMeta):
             self.update_queue.put_nowait((self.id, self.result()))
         else:
             core.logger.warn(
-                "Not pushing update since module {self.name} with id {self.id} "
-                "did not started yet"
+                f"Not pushing update since module {self.name} with id {self.id} "
+                f"did not started yet"
             )
 
     def update(self, *args, **kwargs) -> None:
