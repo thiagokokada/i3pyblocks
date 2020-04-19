@@ -1,12 +1,14 @@
 from typing import Dict, Optional, Union
 
-from i3pyblocks.types import Items
+from i3pyblocks import types
 
 
-def calculate_threshold(items: Items, value: Union[int, float]) -> Optional[str]:
+def calculate_threshold(
+    items: types.Dictable, value: Union[int, float]
+) -> Optional[str]:
     selected_item = None
 
-    for threshold, item in items:
+    for threshold, item in dict(items).items():
         if value >= threshold:  # type: ignore
             selected_item = item
         else:

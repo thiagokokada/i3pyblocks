@@ -1,6 +1,7 @@
-from typing import Iterable, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, Optional, Tuple, Union
 
-Items = Iterable[Tuple[Union[float, int, str], Optional[str]]]
+# Dictable is either a Dict or something that can be converted to one
+Dictable = Union[Dict[object, Any], Iterable[Tuple[object, Any]]]
 
 
 class Mouse:
