@@ -21,10 +21,10 @@ async def test_valid_module(mock_uuid4):
             await super().start()
             self.update("Done!", color=None, urgent=False, markup=Markup.NONE)
 
-        def click_handler(self, *_, **__):
+        async def click_handler(self, *_, **__):
             pass
 
-        def signal_handler(self, *_, **__):
+        async def signal_handler(self, *_, **__):
             pass
 
     module = ValidModule(
@@ -124,7 +124,7 @@ async def test_valid_polling_module(mock_uuid4):
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
             )
 
-        def run(self):
+        async def run(self):
             self.count += 1
             self.update(str(self.count))
 

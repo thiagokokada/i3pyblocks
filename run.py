@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import signal
 from pathlib import Path
 
 import psutil as ps
@@ -43,7 +44,10 @@ async def main():
             icons=[(0, ""), (25, ""), (50, ""), (75, "")],
         )
     )
-    runner.register_module(psutil.CpuPercentModule(format=" {percent}%"))
+    runner.register_module(
+        psutil.CpuPercentModule(format=" {percent}%"),
+        signals=[signal.SIGUSR1, signal.SIGUSR2],
+    )
     runner.register_module(
         psutil.LoadAvgModule(
             format=" {load1}",
@@ -52,7 +56,7 @@ async def main():
                 (cpu_count // 2, types.Color.WARN),
                 (cpu_count, types.Color.URGENT),
             ],
-        )
+        ),
     )
     runner.register_module(
         psutil.SensorsBatteryModule(
