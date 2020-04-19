@@ -96,7 +96,7 @@ class PulseAudioModule(modules.ThreadingModule):
             icon = utils.calculate_threshold(self.icons, volume)
             self.update(self.format.format(volume=volume, icon=icon), color=color)
 
-    async def click_handler(self, button: int, *_, **__) -> None:  # type: ignore
+    async def click_handler(self, button: int, *_, **__) -> None:
         if button == types.Mouse.LEFT_BUTTON:
             subprocess.Popen(self.command)
         elif button == types.Mouse.RIGHT_BUTTON:

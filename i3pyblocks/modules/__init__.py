@@ -108,8 +108,8 @@ class Module(metaclass=abc.ABCMeta):
             self.update_queue.put_nowait((self.id, self.result()))
         else:
             core.logger.warn(
-                "Not pushing update since module {self.name} with id {self.id} "
-                "did not started yet"
+                f"Not pushing update since module {self.name} with id {self.id} "
+                f"did not started yet"
             )
 
     def update(self, *args, **kwargs) -> None:
@@ -118,6 +118,7 @@ class Module(metaclass=abc.ABCMeta):
 
     async def click_handler(
         self,
+        *,
         x: int,
         y: int,
         button: int,
@@ -129,7 +130,7 @@ class Module(metaclass=abc.ABCMeta):
     ) -> None:
         raise NotImplementedError("Should implement click_handler method")
 
-    async def signal_handler(self, sig: signal.Signals) -> None:
+    async def signal_handler(self, *, sig: signal.Signals) -> None:
         raise NotImplementedError("Should implement signal_handler method")
 
     @abc.abstractmethod
@@ -148,10 +149,21 @@ class PollingModule(Module):
     async def run(self) -> None:
         pass
 
-    async def click_handler(self, *_, **__) -> None:
+    async def click_handler(
+        self,
+        *,
+        x: int,
+        y: int,
+        button: int,
+        relative_x: int,
+        relative_y: int,
+        width: int,
+        height: int,
+        modifiers: List[Optional[str]],
+    ) -> None:
         await self.run()
 
-    async def signal_handler(self, *_, **__) -> None:
+    async def signal_handler(self, *, sig: signal.Signals) -> None:
         await self.run()
 
     async def start(self, queue: asyncio.Queue = None) -> None:

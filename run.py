@@ -8,7 +8,7 @@ from pathlib import Path
 import psutil as ps
 
 from i3pyblocks import core, types
-from i3pyblocks.modules import psutil, pulsectl, time
+from i3pyblocks.modules import psutil, pulsectl, subprocess, time
 
 logging.basicConfig(filename=Path.home() / ".i3pyblocks.log", level=logging.DEBUG)
 
@@ -64,6 +64,16 @@ async def main():
             format_unplugged="{icon} {percent:.0f}% {remaining_time}",
             format_unknown="{icon} {percent:.0f}%",
             icons=[(0, ""), (10, ""), (25, ""), (50, ""), (75, "")],
+        )
+    )
+    runner.register_module(
+        subprocess.ShellModule(
+            command="xkblayout-state print %s",
+            format=" {output}",
+            command_on_click=[
+                [types.Mouse.SCROLL_UP, "xkblayout-state set +1"],
+                [types.Mouse.SCROLL_DOWN, "xkblayout-state set -1"],
+            ],
         )
     )
     runner.register_module(

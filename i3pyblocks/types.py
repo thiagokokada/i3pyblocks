@@ -1,6 +1,6 @@
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, Optional, Tuple, Union
 
-Items = Iterable[Tuple[float, Optional[str]]]
+Items = Iterable[Tuple[Union[float, int, str], Optional[str]]]
 
 
 class Mouse:
