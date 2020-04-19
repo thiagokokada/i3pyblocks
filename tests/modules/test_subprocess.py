@@ -43,12 +43,12 @@ async def test_shell_module_click_handler():
         ),
     )
 
-    communicate_result = asyncio.Future()
-    communicate_result.set_result((b"stdout\n", b"stderr\n"))
+    communicate_return = asyncio.Future()
+    communicate_return.set_result((b"stdout\n", b"stderr\n"))
 
     with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
         process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_result
+        process_mock.communicate.return_value = communicate_return
         await instance.click_handler(types.Mouse.LEFT_BUTTON)
         shell_mock.assert_has_calls(
             [
@@ -63,7 +63,7 @@ async def test_shell_module_click_handler():
 
     with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
         process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_result
+        process_mock.communicate.return_value = communicate_return
         await instance.click_handler(types.Mouse.MIDDLE_BUTTON)
         shell_mock.assert_has_calls(
             [
@@ -78,7 +78,7 @@ async def test_shell_module_click_handler():
 
     with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
         process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_result
+        process_mock.communicate.return_value = communicate_return
         await instance.click_handler(types.Mouse.RIGHT_BUTTON)
         shell_mock.assert_has_calls(
             [
@@ -93,7 +93,7 @@ async def test_shell_module_click_handler():
 
     with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
         process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_result
+        process_mock.communicate.return_value = communicate_return
         await instance.click_handler(types.Mouse.SCROLL_UP)
         shell_mock.assert_has_calls(
             [
@@ -108,7 +108,7 @@ async def test_shell_module_click_handler():
 
     with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
         process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_result
+        process_mock.communicate.return_value = communicate_return
         await instance.click_handler(types.Mouse.SCROLL_DOWN)
         shell_mock.assert_has_calls(
             [
@@ -120,3 +120,35 @@ async def test_shell_module_click_handler():
                 )
             ]
         )
+
+
+@pytest.mark.asyncio
+async def test_toggle_module():
+    instance = m_sub.ToggleModule(
+        command_state="echo", command_on="state on", command_off="state off"
+    )
+
+    await instance.run()
+
+    result = instance.result()
+    assert result["full_text"] == "OFF"  # OFF since it is an empty echo
+
+    communicate_return_on = asyncio.Future()
+    communicate_return_on.set_result((b"stdout\n", b""))
+
+    with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
+        process_mock = shell_mock.return_value
+        process_mock.communicate.return_value = communicate_return_on
+        await instance.click_handler()
+        result = instance.result()
+        assert result["full_text"] == "ON"
+
+    communicate_return_off = asyncio.Future()
+    communicate_return_off.set_result((b"", b""))
+
+    with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
+        process_mock = shell_mock.return_value
+        process_mock.communicate.return_value = communicate_return_off
+        await instance.click_handler()
+        result = instance.result()
+        assert result["full_text"] == "OFF"

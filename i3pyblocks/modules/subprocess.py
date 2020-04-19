@@ -59,3 +59,59 @@ class ShellModule(modules.PollingModule):
         self.update(
             self.format.format(output=output, output_err=output_err), color=color
         )
+
+
+class ToggleModule(modules.PollingModule):
+    def __init__(
+        self,
+        command_state: str,
+        command_on: str,
+        command_off: str,
+        format_on: str = "ON",
+        format_off: str = "OFF",
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.command_state = command_state
+        self.command_on = command_on
+        self.command_off = command_off
+        self.format_on = format_on
+        self.format_off = format_off
+
+    async def get_toggle(self):
+        process = await asyncio.create_subprocess_shell(
+            self.command_state,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        stdout, _ = await process.communicate()
+
+        output = stdout.decode().strip()
+
+        if output:
+            self.toggle = True
+        else:
+            self.toggle = False
+
+    async def click_handler(self, *_, **__):
+        if not self.toggle:
+            command = self.command_on
+        else:
+            command = self.command_off
+
+        process = await asyncio.create_subprocess_shell(
+            command,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        process.wait()
+
+        await self.run()
+
+    async def run(self) -> None:
+        await self.get_toggle()
+
+        self.update(self.format_on if self.toggle else self.format_off)
