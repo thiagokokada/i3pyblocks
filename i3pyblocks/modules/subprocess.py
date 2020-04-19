@@ -1,24 +1,39 @@
 import asyncio
 from asyncio import subprocess
 
-from i3pyblocks import modules
+from i3pyblocks import modules, types
 
 
 class ShellModule(modules.PollingModule):
     def __init__(
-        self, command: str, format: str = "{output}", sleep: int = 1, **kwargs
+        self,
+        command: str,
+        format: str = "{output}",
+        command_on_click: types.Items = (
+            (types.Mouse.LEFT_BUTTON, None),
+            (types.Mouse.MIDDLE_BUTTON, None),
+            (types.Mouse.RIGHT_BUTTON, None),
+            (types.Mouse.SCROLL_UP, None),
+            (types.Mouse.SCROLL_DOWN, None),
+        ),
+        color_by_returncode: types.Items = (),
+        **kwargs
     ) -> None:
         super().__init__(**kwargs)
-        self.sleep = sleep
         self.format = format
         self.command = command
+        self.command_on_click = dict(command_on_click)
+        self.color_by_returncode = dict(color_by_returncode)
 
-    async def click_handler(self, *_, **__) -> None:
-        # TODO: Support running commands according to mouse clicks
-        await self.run()
+    async def click_handler(self, button: int, *_, **__) -> None:  # type: ignore
+        command = self.command_on_click.get(button)
 
-    async def signal_handler(self, *_, **__) -> None:
-        # TODO: Support reacting to signal handlers?
+        if not command:
+            return
+
+        process = await asyncio.create_subprocess_shell(command)
+        process.wait()
+
         await self.run()
 
     async def run(self) -> None:
@@ -28,7 +43,11 @@ class ShellModule(modules.PollingModule):
 
         stdout, stderr = await process.communicate()
 
+        color = self.color_by_returncode.get(process.returncode)
+
         output = stdout.decode().strip()
         output_err = stderr.decode().strip()
 
-        self.update(self.format.format(output=output, output_err=output_err))
+        self.update(
+            self.format.format(output=output, output_err=output_err), color=color
+        )

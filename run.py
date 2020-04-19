@@ -67,7 +67,14 @@ async def main():
         )
     )
     runner.register_module(
-        subprocess.ShellModule(command="xkblayout-state print %s", format=" {output}")
+        subprocess.ShellModule(
+            command="xkblayout-state print %s",
+            format=" {output}",
+            command_on_click=[
+                [types.Mouse.SCROLL_UP, "xkblayout-state set +1"],
+                [types.Mouse.SCROLL_DOWN, "xkblayout-state set -1"],
+            ],
+        )
     )
     runner.register_module(
         pulsectl.PulseAudioModule(format=" {volume:.0f}%", format_mute=" mute")
