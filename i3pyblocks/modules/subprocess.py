@@ -25,7 +25,7 @@ class ShellModule(modules.PollingModule):
         self.command_on_click = dict(command_on_click)
         self.color_by_returncode = dict(color_by_returncode)
 
-    async def click_handler(self, button: int, *_, **__) -> None:  # type: ignore
+    async def click_handler(self, button: int, *_, **__) -> None:
         command = self.command_on_click.get(button)
 
         if not command:
