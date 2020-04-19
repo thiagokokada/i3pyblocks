@@ -8,7 +8,7 @@ from pathlib import Path
 import psutil as ps
 
 from i3pyblocks import core, types
-from i3pyblocks.modules import psutil, pulsectl, subprocess, time
+from i3pyblocks.modules import datetime, psutil, pulsectl, subprocess
 
 logging.basicConfig(filename=Path.home() / ".i3pyblocks.log", level=logging.DEBUG)
 
@@ -80,7 +80,7 @@ async def main():
         pulsectl.PulseAudioModule(format=" {volume:.0f}%", format_mute=" mute")
     )
     runner.register_module(
-        time.DateTimeModule(format_time=" %T", format_date=" %a, %d/%m")
+        datetime.DateTimeModule(format_time=" %T", format_date=" %a, %d/%m")
     )
     await runner.start()
 
