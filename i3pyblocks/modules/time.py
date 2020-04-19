@@ -1,9 +1,9 @@
-import time
+from datetime import datetime
 
 from i3pyblocks import modules
 
 
-class LocalTimeModule(modules.PollingModule):
+class DateTimeModule(modules.PollingModule):
     def __init__(
         self, format_date: str = "%D", format_time: str = "%T", **kwargs
     ) -> None:
@@ -21,5 +21,5 @@ class LocalTimeModule(modules.PollingModule):
         await self.run()
 
     async def run(self) -> None:
-        current_time = time.localtime()
-        self.update(time.strftime(self.format, current_time))
+        current_time = datetime.now()
+        self.update(current_time.strftime(self.format))
