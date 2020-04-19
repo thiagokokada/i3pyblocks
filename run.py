@@ -67,6 +67,15 @@ async def main():
         )
     )
     runner.register_module(
+        subprocess.ToggleModule(
+            command_state="xset q | grep -Fo 'DPMS is Enabled'",
+            command_on="xset s on +dpms",
+            command_off="xset s off -dpms",
+            format_on="  ",
+            format_off="  ",
+        )
+    )
+    runner.register_module(
         subprocess.ShellModule(
             command="xkblayout-state print %s",
             format=" {output}",
