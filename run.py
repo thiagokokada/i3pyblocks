@@ -80,7 +80,7 @@ async def main():
         pulsectl.PulseAudioModule(format=" {volume:.0f}%", format_mute=" mute")
     )
     runner.register_module(
-        time.LocalTimeModule(format_time=" %T", format_date=" %a, %d/%m")
+        time.DateTimeModule(format_time=" %T", format_date=" %a, %d/%m")
     )
     await runner.start()
 
