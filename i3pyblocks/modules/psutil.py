@@ -12,7 +12,7 @@ class CpuPercentModule(modules.PollingModule):
     def __init__(
         self,
         format: str = "C: {percent}%",
-        colors: types.Items = (
+        colors: types.Dictable = (
             (0, types.Color.NEUTRAL),
             (75, types.Color.WARN),
             (90, types.Color.URGENT),
@@ -22,7 +22,7 @@ class CpuPercentModule(modules.PollingModule):
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
-        self.colors = colors
+        self.colors = dict(colors)
 
     async def run(self) -> None:
         percent = psutil.cpu_percent(interval=None)
@@ -36,12 +36,12 @@ class DiskUsageModule(modules.PollingModule):
     def __init__(
         self,
         format: str = "{label}: {free:.1f}GiB",
-        colors: types.Items = (
+        colors: types.Dictable = (
             (0, types.Color.NEUTRAL),
             (75, types.Color.WARN),
             (90, types.Color.URGENT),
         ),
-        icons: types.Items = (
+        icons: types.Dictable = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -59,8 +59,8 @@ class DiskUsageModule(modules.PollingModule):
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
-        self.colors = colors
-        self.icons = icons
+        self.colors = dict(colors)
+        self.icons = dict(icons)
         self.divisor = divisor
         self.path = path
         if short_label:
@@ -97,7 +97,7 @@ class LoadAvgModule(modules.PollingModule):
     def __init__(
         self,
         format: str = "L: {load1}",
-        colors: types.Items = (
+        colors: types.Dictable = (
             (0, types.Color.NEUTRAL),
             (2, types.Color.WARN),
             (4, types.Color.URGENT),
@@ -107,7 +107,7 @@ class LoadAvgModule(modules.PollingModule):
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
-        self.colors = colors
+        self.colors = dict(colors)
 
     async def run(self) -> None:
         load1, load5, load15 = psutil.getloadavg()
@@ -124,7 +124,7 @@ class NetworkSpeedModule(modules.PollingModule):
         self,
         format_up: str = "{interface}:  U {upload} D {download}",
         format_down: str = "NO NETWORK",
-        colors: types.Items = (
+        colors: types.Dictable = (
             (0, types.Color.NEUTRAL),
             (2 * types.IECUnit.MiB, types.Color.WARN),
             (5 * types.IECUnit.MiB, types.Color.URGENT),
@@ -136,7 +136,7 @@ class NetworkSpeedModule(modules.PollingModule):
         super().__init__(sleep=sleep, **kwargs)
         self.format_up = format_up
         self.format_down = format_down
-        self.colors = colors
+        self.colors = dict(colors)
         self.interface_regex = re.compile(interface_regex)
         self.previous = psutil.net_io_counters(pernic=True)
 
@@ -193,12 +193,12 @@ class SensorsBatteryModule(modules.PollingModule):
         format_plugged: str = "B: PLUGGED {percent:.0f}%",
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         format_unknown: str = "B: {icon} {percent:.0f}%",
-        colors: types.Items = (
+        colors: types.Dictable = (
             (0, types.Color.URGENT),
             (10, types.Color.WARN),
             (25, types.Color.NEUTRAL),
         ),
-        icons: types.Items = (
+        icons: types.Dictable = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -215,8 +215,8 @@ class SensorsBatteryModule(modules.PollingModule):
         self.format_plugged = format_plugged
         self.format_unplugged = format_unplugged
         self.format_unknown = format_unknown
-        self.colors = colors
-        self.icons = icons
+        self.colors = dict(colors)
+        self.icons = dict(icons)
 
     async def run(self):
         battery = psutil.sensors_battery()
@@ -249,12 +249,12 @@ class SensorsTemperaturesModule(modules.PollingModule):
     def __init__(
         self,
         format: str = "T: {current:.0f}°C",
-        colors: types.Items = (
+        colors: types.Dictable = (
             (0, types.Color.NEUTRAL),
             (60, types.Color.WARN),
             (85, types.Color.URGENT),
         ),
-        icons: types.Items = (
+        icons: types.Dictable = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -271,8 +271,8 @@ class SensorsTemperaturesModule(modules.PollingModule):
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
-        self.colors = colors
-        self.icons = icons
+        self.colors = dict(colors)
+        self.icons = dict(icons)
         self.fahrenheit = fahrenheit
         if sensor:
             self.sensor = sensor
@@ -302,12 +302,12 @@ class VirtualMemoryModule(modules.PollingModule):
     def __init__(
         self,
         format: str = "M: {available:.1f}GiB",
-        colors: types.Items = (
+        colors: types.Dictable = (
             (0, types.Color.NEUTRAL),
             (75, types.Color.WARN),
             (90, types.Color.URGENT),
         ),
-        icons: types.Items = (
+        icons: types.Dictable = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -323,8 +323,8 @@ class VirtualMemoryModule(modules.PollingModule):
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
-        self.colors = colors
-        self.icons = icons
+        self.colors = dict(colors)
+        self.icons = dict(icons)
         self.divisor = divisor
 
     def _convert(self, dividend: float) -> float:

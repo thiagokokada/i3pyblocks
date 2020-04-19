@@ -41,21 +41,21 @@ async def main():
     runner.register_module(
         psutil.SensorsTemperaturesModule(
             format="{icon} {current:.0f}°C",
-            icons=[(0, ""), (25, ""), (50, ""), (75, "")],
+            icons=((0, ""), (25, ""), (50, ""), (75, "")),
         )
     )
     runner.register_module(
         psutil.CpuPercentModule(format=" {percent}%"),
-        signals=[signal.SIGUSR1, signal.SIGUSR2],
+        signals=(signal.SIGUSR1, signal.SIGUSR2),
     )
     runner.register_module(
         psutil.LoadAvgModule(
             format=" {load1}",
-            colors=[
+            colors=(
                 (0, None),
                 (cpu_count // 2, types.Color.WARN),
                 (cpu_count, types.Color.URGENT),
-            ],
+            ),
         ),
     )
     runner.register_module(
@@ -63,17 +63,17 @@ async def main():
             format_plugged=" {percent:.0f}%",
             format_unplugged="{icon} {percent:.0f}% {remaining_time}",
             format_unknown="{icon} {percent:.0f}%",
-            icons=[(0, ""), (10, ""), (25, ""), (50, ""), (75, "")],
+            icons=((0, ""), (10, ""), (25, ""), (50, ""), (75, "")),
         )
     )
     runner.register_module(
         subprocess.ShellModule(
             command="xkblayout-state print %s",
             format=" {output}",
-            command_on_click=[
-                [types.Mouse.SCROLL_UP, "xkblayout-state set +1"],
-                [types.Mouse.SCROLL_DOWN, "xkblayout-state set -1"],
-            ],
+            command_on_click=(
+                (types.Mouse.SCROLL_UP, "xkblayout-state set +1"),
+                (types.Mouse.SCROLL_DOWN, "xkblayout-state set -1"),
+            ),
         )
     )
     runner.register_module(

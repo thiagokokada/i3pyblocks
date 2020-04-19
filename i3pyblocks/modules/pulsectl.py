@@ -12,12 +12,12 @@ class PulseAudioModule(modules.ThreadingModule):
         self,
         format: str = "V: {volume:.0f}%",
         format_mute: str = "V: MUTE",
-        colors: types.Items = (
+        colors: types.Dictable = (
             (0, types.Color.URGENT),
             (10, types.Color.WARN),
             (25, types.Color.NEUTRAL),
         ),
-        icons: types.Items = (
+        icons: types.Dictable = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -33,8 +33,8 @@ class PulseAudioModule(modules.ThreadingModule):
         super().__init__(**kwargs)
         self.format = format
         self.format_mute = format_mute
-        self.colors = colors
-        self.icons = icons
+        self.colors = dict(colors)
+        self.icons = dict(icons)
         self.command = command
 
         # https://pypi.org/project/pulsectl/#event-handling-code-threads

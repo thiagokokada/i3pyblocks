@@ -9,14 +9,14 @@ class ShellModule(modules.PollingModule):
         self,
         command: str,
         format: str = "{output}",
-        command_on_click: types.Items = (
+        command_on_click: types.Dictable = (
             (types.Mouse.LEFT_BUTTON, None),
             (types.Mouse.MIDDLE_BUTTON, None),
             (types.Mouse.RIGHT_BUTTON, None),
             (types.Mouse.SCROLL_UP, None),
             (types.Mouse.SCROLL_DOWN, None),
         ),
-        color_by_returncode: types.Items = (),
+        color_by_returncode: types.Dictable = (),
         **kwargs
     ) -> None:
         super().__init__(**kwargs)
