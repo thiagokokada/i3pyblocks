@@ -5,6 +5,8 @@
 
 A replacement for i3status, written in [Python][1] using [asyncio][2].
 
+For Python 3.7+.
+
 ## Installation
 
 For now, the best way to use i3pyblocks is installing [poetry][3] first:
@@ -33,7 +35,7 @@ and install a wheel:
 
 ```bash
 poetry build
-pip install dist/i3pyblocks-0.0.1-py3-none-any.whl
+pip install dist/i3pyblocks-0.1.0-py3-none-any.whl
 ```
 
 Afterwards, you can put something like this in your `$HOME/.config/i3/config`
@@ -62,7 +64,7 @@ from i3pyblocks.modules import time
 async def main():
     runner = core.Runner()
 
-    runner.register_module(time.LocalTimeModule())
+    runner.register_module(time.DateTimeModule())
 
     await runner.start()
 
