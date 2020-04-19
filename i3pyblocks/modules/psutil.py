@@ -24,7 +24,7 @@ class CpuPercentModule(modules.PollingModule):
         self.format = format
         self.colors = colors
 
-    def run(self) -> None:
+    async def run(self) -> None:
         percent = psutil.cpu_percent(interval=None)
 
         color = utils.calculate_threshold(self.colors, percent)
@@ -74,7 +74,7 @@ class DiskUsageModule(modules.PollingModule):
     def _get_short_label(self, path: str) -> str:
         return "/" + "/".join(x[0] for x in self.path.split("/") if x)
 
-    def run(self) -> None:
+    async def run(self) -> None:
         disk = psutil.disk_usage(self.path)
 
         color = utils.calculate_threshold(self.colors, disk.percent)
@@ -109,7 +109,7 @@ class LoadAvgModule(modules.PollingModule):
         self.format = format
         self.colors = colors
 
-    def run(self) -> None:
+    async def run(self) -> None:
         load1, load5, load15 = psutil.getloadavg()
 
         color = utils.calculate_threshold(self.colors, load1)
@@ -155,7 +155,7 @@ class NetworkSpeedModule(modules.PollingModule):
 
         return upload, download
 
-    def run(self) -> None:
+    async def run(self) -> None:
         interface = self._find_interface()
 
         if not interface:
@@ -218,7 +218,7 @@ class SensorsBatteryModule(modules.PollingModule):
         self.colors = colors
         self.icons = icons
 
-    def run(self):
+    async def run(self):
         battery = psutil.sensors_battery()
 
         if not battery:
@@ -279,7 +279,7 @@ class SensorsTemperaturesModule(modules.PollingModule):
         else:
             self.sensor = next(iter(psutil.sensors_temperatures()))
 
-    def run(self) -> None:
+    async def run(self) -> None:
         temperatures = psutil.sensors_temperatures(self.fahrenheit)[self.sensor]
         temperature = temperatures[0]
 
@@ -330,7 +330,7 @@ class VirtualMemoryModule(modules.PollingModule):
     def _convert(self, dividend: float) -> float:
         return dividend / self.divisor
 
-    def run(self) -> None:
+    async def run(self) -> None:
         memory = psutil.virtual_memory()
 
         color = utils.calculate_threshold(self.colors, memory.percent)

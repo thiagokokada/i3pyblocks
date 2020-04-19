@@ -1,16 +1,18 @@
 from collections import namedtuple
 
 import psutil
+import pytest
 
 from i3pyblocks import types
 from i3pyblocks.modules import psutil as m_psutil
 
 
-def test_cpu_percent_module(mocker):
+@pytest.mark.asyncio
+async def test_cpu_percent_module(mocker):
     mocker.patch.object(psutil, "cpu_percent", return_value=75.5)
 
     instance = m_psutil.CpuPercentModule(format="{percent}")
-    instance.run()
+    await instance.run()
 
     result = instance.result()
 
@@ -18,7 +20,8 @@ def test_cpu_percent_module(mocker):
     assert result["color"] == types.Color.WARN
 
 
-def test_disk_usage_module(mocker):
+@pytest.mark.asyncio
+async def test_disk_usage_module(mocker):
     sdiskusage = namedtuple("sdiskusage", ["total", "used", "free", "percent"])
 
     fixture = sdiskusage(
@@ -29,7 +32,7 @@ def test_disk_usage_module(mocker):
     instance = m_psutil.DiskUsageModule(
         format="{icon} {label} {total:.1f} {used:.1f} {free:.1f} {percent}"
     )
-    instance.run()
+    await instance.run()
 
     result = instance.result()
 
@@ -37,12 +40,13 @@ def test_disk_usage_module(mocker):
     assert result["color"] == types.Color.URGENT
 
 
-def test_load_avg_module(mocker):
+@pytest.mark.asyncio
+async def test_load_avg_module(mocker):
     mocker.patch.object(psutil, "getloadavg", return_value=(2.5, 5, 15))
 
     instance = m_psutil.LoadAvgModule(format="{load1} {load5} {load15}")
 
-    instance.run()
+    await instance.run()
 
     result = instance.result()
 
@@ -50,7 +54,8 @@ def test_load_avg_module(mocker):
     assert result["color"] == types.Color.WARN
 
 
-def test_network_speed_module_down(mocker):
+@pytest.mark.asyncio
+async def test_network_speed_module_down(mocker):
     snicstats = namedtuple("snistats", ["isup", "duplex", "speed", "mtu"])
 
     fixture_stats = {
@@ -65,7 +70,7 @@ def test_network_speed_module_down(mocker):
 
     instance = m_psutil.NetworkSpeedModule(format_up="{interface} {upload} {download}")
 
-    instance.run()
+    await instance.run()
 
     result = instance.result()
 
@@ -73,7 +78,8 @@ def test_network_speed_module_down(mocker):
     assert result["color"] == types.Color.URGENT
 
 
-def test_network_speed_module_up(mocker):
+@pytest.mark.asyncio
+async def test_network_speed_module_up(mocker):
     snicstats = namedtuple("snistats", ["isup", "duplex", "speed", "mtu"])
 
     fixture_stats = {
@@ -124,7 +130,7 @@ def test_network_speed_module_up(mocker):
     }
     mocker.patch.object(psutil, "net_io_counters", return_value=fixture_after)
 
-    instance.run()
+    await instance.run()
 
     result = instance.result()
 
@@ -132,19 +138,21 @@ def test_network_speed_module_up(mocker):
     assert result["color"] == types.Color.WARN
 
 
-def test_sensors_battery_module_without_battery(mocker):
+@pytest.mark.asyncio
+async def test_sensors_battery_module_without_battery(mocker):
     mocker.patch.object(psutil, "sensors_battery", return_value=None)
 
     instance = m_psutil.SensorsBatteryModule()
 
-    instance.run()
+    await instance.run()
 
     result = instance.result()
 
     assert result["full_text"] == ""
 
 
-def test_sensors_battery_module_with_battery(mocker):
+@pytest.mark.asyncio
+async def test_sensors_battery_module_with_battery(mocker):
     sbattery = namedtuple("sbattery", ["percent", "secsleft", "power_plugged"])
 
     fixture = sbattery(
@@ -154,7 +162,7 @@ def test_sensors_battery_module_with_battery(mocker):
 
     instance = m_psutil.SensorsBatteryModule()
 
-    instance.run()
+    await instance.run()
 
     result = instance.result()
 
@@ -163,7 +171,7 @@ def test_sensors_battery_module_with_battery(mocker):
     fixture = sbattery(percent=23, secsleft=16628, power_plugged=False)
     mocker.patch.object(psutil, "sensors_battery", return_value=fixture)
 
-    instance.run()
+    await instance.run()
 
     result = instance.result()
 
@@ -175,7 +183,7 @@ def test_sensors_battery_module_with_battery(mocker):
     )
     mocker.patch.object(psutil, "sensors_battery", return_value=fixture)
 
-    instance.run()
+    await instance.run()
 
     result = instance.result()
 
@@ -183,7 +191,8 @@ def test_sensors_battery_module_with_battery(mocker):
     assert result["color"] == types.Color.URGENT
 
 
-def test_sensors_temperature_module(mocker):
+@pytest.mark.asyncio
+async def test_sensors_temperature_module(mocker):
     shwtemp = namedtuple("shwtemp", ["label", "current", "high", "critical"])
 
     fixture = {
@@ -208,7 +217,7 @@ def test_sensors_temperature_module(mocker):
         format="{icon} {label} {current} {high} {critical}"
     )
 
-    instance_default.run()
+    await instance_default.run()
 
     result = instance_default.result()
 
@@ -217,14 +226,15 @@ def test_sensors_temperature_module(mocker):
 
     instance_acpitz = m_psutil.SensorsTemperaturesModule(sensor="acpitz")
 
-    instance_acpitz.run()
+    await instance_acpitz.run()
 
     result = instance_acpitz.result()
 
     assert result["full_text"] == "T: 17°C"
 
 
-def test_virtual_memory_module(mocker):
+@pytest.mark.asyncio
+async def test_virtual_memory_module(mocker):
     svmem = namedtuple("svmem", ["total", "available", "percent", "used", "free"])
 
     fixture = svmem(
@@ -241,7 +251,7 @@ def test_virtual_memory_module(mocker):
         format="{icon} {total:.1f} {available:.1f} {used:.1f} {free:.1f} {percent}"
     )
 
-    instance.run()
+    await instance.run()
 
     result = instance.result()
 

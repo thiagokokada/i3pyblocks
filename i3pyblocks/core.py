@@ -1,9 +1,10 @@
 import asyncio
 import json
 import logging
+import signal
 import sys
 import uuid
-from typing import Any, AnyStr, Awaitable, Dict, Iterable, List, Optional
+from typing import Any, AnyStr, Awaitable, Dict, Iterable, List, Optional, Union
 
 from i3pyblocks import modules
 
@@ -18,19 +19,25 @@ class Runner:
         self.tasks: List[asyncio.Future] = []
         self.queue: asyncio.Queue = asyncio.Queue()
 
-    def register_signal(self, module: modules.Module, signums: Iterable[int]) -> None:
-        def signal_handler(signum: int):
+    def register_signal(
+        self, module: modules.Module, signums: Iterable[Union[int, signal.Signals]]
+    ) -> None:
+        async def signal_handler(sig: signal.Signals):
             try:
                 logger.debug(
-                    f"Module {module.name} with id {module.id} received a signal {signum}"
+                    f"Module {module.name} with id {module.id} received a signal {sig.name}"
                 )
-                module.signal_handler(signum=signum)
+                await module.signal_handler(sig=sig)
             except Exception:
                 logger.exception(f"Exception in {module.name} signal handler")
 
+        def callback_fn(sig: signal.Signals):
+            return asyncio.create_task(signal_handler(sig))
+
         for signum in signums:
-            self.loop.add_signal_handler(signum, signal_handler, signum)
-            logger.debug(f"Registered signal {signum} for {module.name}")
+            sig = signal.Signals(signum)  # Make sure this is a Signals instance
+            self.loop.add_signal_handler(sig, callback_fn, sig)
+            logger.debug(f"Registered signal {sig.name} for {module.name}")
 
     def register_task(self, awaitable: Awaitable) -> None:
         task = asyncio.create_task(awaitable)
@@ -38,7 +45,7 @@ class Runner:
         logger.debug(f"Registered async task {awaitable} in {self}")
 
     def register_module(
-        self, module: modules.Module, signals: Iterable[int] = ()
+        self, module: modules.Module, signals: Iterable[Union[int, signal.Signals]] = ()
     ) -> None:
         self.modules[module.id] = {"module": module, "result": {}}
         self.register_task(module.start(self.queue))
@@ -56,7 +63,7 @@ class Runner:
             output = [json.dumps(m["result"]) for m in self.modules.values()]
             print("[" + ",".join(output) + "],", flush=True)
 
-    def click_event(self, raw: AnyStr) -> None:
+    async def click_event(self, raw: AnyStr) -> None:
         try:
             click_event = json.loads(raw)
             instance = click_event["instance"]
@@ -65,10 +72,10 @@ class Runner:
 
             logger.debug(
                 f"Module {module.name} with id {module.id} received"
-                " a click event: {click_event}"
+                f" a click event: {click_event}"
             )
 
-            module.click_handler(
+            await module.click_handler(
                 x=click_event.get("x"),
                 y=click_event.get("y"),
                 button=click_event.get("button"),
@@ -92,7 +99,7 @@ class Runner:
 
         while True:
             raw = await reader.readuntil(b"}")
-            self.click_event(raw)
+            await self.click_event(raw)
             await reader.readuntil(b",")
 
     def stop(self) -> None:

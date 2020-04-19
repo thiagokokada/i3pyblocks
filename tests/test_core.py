@@ -18,7 +18,7 @@ async def test_runner(capsys, mock_stdin, mock_uuid4):
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
             )
 
-        def run(self):
+        async def run(self):
             self.count += 1
             self.update(str(self.count))
 
@@ -52,7 +52,7 @@ async def test_runner_with_fault_module(capsys, mock_stdin, mock_uuid4):
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
             )
 
-        def run(self):
+        async def run(self):
             self.count += 1
             if self.count > 4:
                 raise Exception("Boom!")
@@ -97,13 +97,13 @@ async def test_runner_with_signal_handler(capsys, mock_stdin, mock_uuid4):
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
             )
 
-        def run(self):
+        async def run(self):
             pass
 
-        def signal_handler(self, signum):
-            if signum == signal.SIGUSR1:
+        async def signal_handler(self, sig):
+            if sig == signal.SIGUSR1:
                 self.update("received_signal")
-            elif signum == signal.SIGUSR2:
+            elif sig == signal.SIGUSR2:
                 self.update("received_another_signal")
             else:
                 raise Exception("This shouldn't happen")
@@ -133,10 +133,10 @@ async def test_runner_with_click_handler(capsys, mock_uuid4):
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
             )
 
-        def run(self):
+        async def run(self):
             pass
 
-        def click_handler(
+        async def click_handler(
             self, x, y, button, relative_x, relative_y, width, height, modifiers
         ):
             self.update(
@@ -165,7 +165,7 @@ async def test_runner_with_click_handler(capsys, mock_uuid4):
         ).encode()
 
         await asyncio.sleep(0.1)
-        runner.click_event(click_event)
+        await runner.click_event(click_event)
 
     runner.register_task(send_click())
 

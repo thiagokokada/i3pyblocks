@@ -1,5 +1,6 @@
 import abc
 import asyncio
+import signal
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
@@ -115,7 +116,7 @@ class Module(metaclass=abc.ABCMeta):
         self.update_state(*args, **kwargs)
         self.push_update()
 
-    def click_handler(
+    async def click_handler(
         self,
         x: int,
         y: int,
@@ -128,7 +129,7 @@ class Module(metaclass=abc.ABCMeta):
     ) -> None:
         raise NotImplementedError("Should implement click_handler method")
 
-    def signal_handler(self, signum: int) -> None:
+    async def signal_handler(self, sig: signal.Signals) -> None:
         raise NotImplementedError("Should implement signal_handler method")
 
     @abc.abstractmethod
@@ -144,20 +145,20 @@ class PollingModule(Module):
         self.sleep = sleep
 
     @abc.abstractmethod
-    def run(self) -> None:
+    async def run(self) -> None:
         pass
 
-    def click_handler(self, *_, **__) -> None:
-        self.run()
+    async def click_handler(self, *_, **__) -> None:
+        await self.run()
 
-    def signal_handler(self, *_, **__) -> None:
-        self.run()
+    async def signal_handler(self, *_, **__) -> None:
+        await self.run()
 
     async def start(self, queue: asyncio.Queue = None) -> None:
         await super().start(queue)
         try:
             while True:
-                self.run()
+                await self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:
             core.logger.exception(f"Exception in {self.name}")
