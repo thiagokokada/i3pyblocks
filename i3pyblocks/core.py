@@ -51,7 +51,6 @@ class Runner:
         self.modules[module.id] = module
         # This only works correctly because from Python 3.7+ dict is ordered
         self.results[module.id] = None
-        self.register_task(module.start(self.queue))
 
         if signals:
             self.register_signal(module, signals)
