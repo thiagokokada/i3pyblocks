@@ -4,9 +4,9 @@ import signal
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import List, Optional
 
-from i3pyblocks import core, utils
+from i3pyblocks import core, utils, types
 
 
 class Align(Enum):
@@ -100,7 +100,7 @@ class Module(metaclass=abc.ABCMeta):
             markup=markup.value if markup else None,
         )
 
-    def result(self) -> Dict[str, Union[str, int, bool]]:
+    def result(self) -> types.Result:
         return {**self.default_state, **self.state}
 
     def push_update(self) -> None:

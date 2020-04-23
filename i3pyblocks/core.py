@@ -4,9 +4,9 @@ import logging
 import signal
 import sys
 import uuid
-from typing import Any, AnyStr, Awaitable, Dict, Iterable, List, Optional, Union
+from typing import AnyStr, Awaitable, Dict, Iterable, List, Optional, Union
 
-from i3pyblocks import modules
+from i3pyblocks import modules, types
 
 logger = logging.getLogger("i3pyblocks")
 logger.addHandler(logging.NullHandler())
@@ -15,7 +15,8 @@ logger.addHandler(logging.NullHandler())
 class Runner:
     def __init__(self) -> None:
         self.loop = asyncio.get_running_loop()
-        self.modules: Dict[uuid.UUID, Dict[str, Any]] = {}
+        self.modules: Dict[uuid.UUID, modules.Module] = {}
+        self.results: Dict[uuid.UUID, Optional[types.Result]] = {}
         self.tasks: List[asyncio.Future] = []
         self.queue: asyncio.Queue = asyncio.Queue()
 
@@ -47,20 +48,22 @@ class Runner:
     def register_module(
         self, module: modules.Module, signals: Iterable[Union[int, signal.Signals]] = ()
     ) -> None:
-        self.modules[module.id] = {"module": module, "result": {}}
+        self.modules[module.id] = module
+        # This only works correctly because from Python 3.7+ dict is ordered
+        self.results[module.id] = None
         self.register_task(module.start(self.queue))
 
         if signals:
             self.register_signal(module, signals)
 
-    async def get_result(self) -> None:
+    async def update_result(self) -> None:
         id_, result = await self.queue.get()
-        self.modules[id_]["result"] = result
+        self.results[id_] = result
 
     async def write_results(self) -> None:
         while True:
-            await self.get_result()
-            output = [json.dumps(m["result"]) for m in self.modules.values()]
+            await self.update_result()
+            output = [json.dumps(r) for r in self.results.values() if r]
             print("[" + ",".join(output) + "],", flush=True)
 
     async def click_event(self, raw: AnyStr) -> None:
@@ -68,7 +71,7 @@ class Runner:
             click_event = json.loads(raw)
             instance = click_event["instance"]
             id_ = uuid.UUID(instance)
-            module = self.modules[id_]["module"]
+            module = self.modules[id_]
 
             logger.debug(
                 f"Module {module.name} with id {module.id} received"
