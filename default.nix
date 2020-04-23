@@ -1,16 +1,15 @@
 with import <nixpkgs> {};
 
-# TODO: Migrate to poetry2nix.mkPoetryEnv
-stdenv.mkDerivation rec {
+let pythonEnv = poetry2nix.mkPoetryEnv {
+  projectDir = ./.;
+};
+in
+mkShell {
   name = "i3pyblocks";
-
-  buildInputs = [
-    libpulseaudio
-    python37Full
+  nativeBuildInputs = [
     libffi
-    # poetry is broken in NixOS 19.09
-    # python37Packages.poetry
+    libpulseaudio
+    pythonEnv
   ];
-
   LD_LIBRARY_PATH="${libpulseaudio}/lib";
 }

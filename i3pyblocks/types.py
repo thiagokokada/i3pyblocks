@@ -1,5 +1,7 @@
 from typing import Any, Dict, Iterable, Optional, Tuple, Union
 
+Result = Dict[str, Union[str, int, bool]]
+
 # Dictable is either a Dict or something that can be converted to one
 Dictable = Union[Dict[object, Any], Iterable[Tuple[object, Any]]]
 
