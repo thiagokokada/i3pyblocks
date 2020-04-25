@@ -41,12 +41,11 @@ class Module(metaclass=abc.ABCMeta):
     ) -> None:
         self.id = uuid.uuid4()
         self.name = name or self.__class__.__name__
-        self.instance = str(self.id)
 
         # Those are default values for properties if they are not overrided
-        self.default_state = utils.non_nullable_dict(
+        self._default_state = utils.non_nullable_dict(
             name=self.name,
-            instance=self.instance,
+            instance=str(self.id),
             color=color,
             background=background,
             border=border,
@@ -82,7 +81,7 @@ class Module(metaclass=abc.ABCMeta):
         separator_block_width: Optional[int] = None,
         markup: Optional[Markup] = None,
     ) -> None:
-        self.state = utils.non_nullable_dict(
+        self._state = utils.non_nullable_dict(
             full_text=full_text,
             short_text=short_text,
             color=color,
@@ -101,7 +100,7 @@ class Module(metaclass=abc.ABCMeta):
         )
 
     def result(self) -> types.Result:
-        return {**self.default_state, **self.state}
+        return {**self._default_state, **self._state}
 
     def push_update(self) -> None:
         if hasattr(self, "update_queue"):
