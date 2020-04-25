@@ -7,8 +7,15 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-psutil = {version = "^5.7", optional = true}
-pulsectl = {version = "^20.2", optional = true}
+psutil = {version = "^5.7.0", optional = true}
+pulsectl = {version = "^20.4.3", optional = true}
+aionotify = {version = "^0.2.0", optional = true}
+
+[tool.poetry.extras]
+psutil = ["psutil"]
+pulsectl = ["pulsectl"]
+aionotify = ["aionotify"]
+all_deps = ["psutil", "pulsectl", "aionotify"]
 
 [tool.poetry.dev-dependencies]
 black = { version = "*", allow-prereleases = true }

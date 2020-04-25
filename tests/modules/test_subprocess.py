@@ -1,6 +1,6 @@
 import pytest
-from unittest.mock import call, patch
 from asynctest import CoroutineMock
+from unittest.mock import call, patch
 
 from i3pyblocks import types
 from i3pyblocks.modules import subprocess as m_sub
@@ -34,58 +34,29 @@ async def test_shell_module_click_handler():
     instance = m_sub.ShellModule(
         command="exit 0",
         command_on_click=(
-            (types.Mouse.LEFT_BUTTON, "left-button"),
-            (types.Mouse.MIDDLE_BUTTON, "middle-button"),
-            (types.Mouse.RIGHT_BUTTON, "right-button"),
-            (types.Mouse.SCROLL_UP, "scroll-up"),
-            (types.Mouse.SCROLL_DOWN, "scroll-down"),
+            (types.Mouse.LEFT_BUTTON, "LEFT_BUTTON"),
+            (types.Mouse.MIDDLE_BUTTON, "MIDDLE_BUTTON"),
+            (types.Mouse.RIGHT_BUTTON, "RIGHT_BUTTON"),
+            (types.Mouse.SCROLL_UP, "SCROLL_UP"),
+            (types.Mouse.SCROLL_DOWN, "SCROLL_DOWN"),
         ),
     )
 
-    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
-        shell_mock.return_value = (
-            b"stdout\n",
-            b"stderr\n",
-            misc.AttributeDict(returncode=0),
-        )
-        await instance.click_handler(types.Mouse.LEFT_BUTTON)
-        shell_mock.assert_has_calls([call("left-button")])
-
-    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
-        shell_mock.return_value = (
-            b"stdout\n",
-            b"stderr\n",
-            misc.AttributeDict(returncode=0),
-        )
-        await instance.click_handler(types.Mouse.RIGHT_BUTTON)
-        shell_mock.assert_has_calls([call("right-button")])
-
-    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
-        shell_mock.return_value = (
-            b"stdout\n",
-            b"stderr\n",
-            misc.AttributeDict(returncode=0),
-        )
-        await instance.click_handler(types.Mouse.MIDDLE_BUTTON)
-        shell_mock.assert_has_calls([call("middle-button")])
-
-    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
-        shell_mock.return_value = (
-            b"stdout\n",
-            b"stderr\n",
-            misc.AttributeDict(returncode=0),
-        )
-        await instance.click_handler(types.Mouse.SCROLL_UP)
-        shell_mock.assert_has_calls([call("scroll-up")])
-
-    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
-        shell_mock.return_value = (
-            b"stdout\n",
-            b"stderr\n",
-            misc.AttributeDict(returncode=0),
-        )
-        await instance.click_handler(types.Mouse.SCROLL_DOWN)
-        shell_mock.assert_has_calls([call("scroll-down")])
+    for button in [
+        "LEFT_BUTTON",
+        "RIGHT_BUTTON",
+        "MIDDLE_BUTTON",
+        "SCROLL_UP",
+        "SCROLL_DOWN",
+    ]:
+        with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
+            shell_mock.return_value = (
+                b"stdout\n",
+                b"stderr\n",
+                misc.AttributeDict(returncode=0),
+            )
+            await instance.click_handler(getattr(types.Mouse, button))
+            shell_mock.assert_has_calls([call(button)])
 
 
 @pytest.mark.asyncio

@@ -7,6 +7,14 @@ python-versions = "*"
 version = "0.1.16"
 
 [[package]]
+category = "main"
+description = "Asyncio-powered inotify library"
+name = "aionotify"
+optional = true
+python-versions = "*"
+version = "0.2.0"
+
+[[package]]
 category = "dev"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 name = "appdirs"
@@ -256,7 +264,7 @@ description = "Python high-level interface and ctypes-based bindings for PulseAu
 name = "pulsectl"
 optional = true
 python-versions = "*"
-version = "20.2.4"
+version = "20.4.3"
 
 [package.dependencies]
 setuptools = "*"
@@ -458,7 +466,7 @@ version = "0.1.9"
 [[package]]
 category = "dev"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-marker = "python_version >= \"3.5\" and python_version < \"3.8\" or python_version < \"3.8\" or python_version >= \"3.5\" and python_version < \"3.8\" and (python_version >= \"3.5\" and python_version < \"3.8\" or python_version < \"3.8\")"
+marker = "python_version >= \"3.5\" and python_version < \"3.8\" or python_version < \"3.8\""
 name = "zipp"
 optional = false
 python-versions = ">=3.6"
@@ -468,13 +476,23 @@ version = "3.1.0"
 docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
+[extras]
+aionotify = ["aionotify"]
+all_deps = ["psutil", "pulsectl", "aionotify"]
+psutil = ["psutil"]
+pulsectl = ["pulsectl"]
+
 [metadata]
-content-hash = "50d3d783ef477a8650980f009975547e968139117fb2c09dc2e01bb35c6a4722"
+content-hash = "ea048aac95a40ff5428339d74fc859633bbb12e092de9e659dc161bcef0b08c8"
 python-versions = "^3.7"
 
 [metadata.files]
 aioconsole = [
     {file = "aioconsole-0.1.16.tar.gz", hash = "sha256:a5d98a99539e060f514b96425f19839abc4bc2b487b39cdb76b91df2367c647a"},
+]
+aionotify = [
+    {file = "aionotify-0.2.0-py3-none-any.whl", hash = "sha256:385e1becfaac2d9f4326673033d53912ef9565b6febdedbec593ee966df392c6"},
+    {file = "aionotify-0.2.0.tar.gz", hash = "sha256:64b702ad0eb115034533f9f62730a9253b79f5ff0fbf3d100c392124cdf12507"},
 ]
 appdirs = [
     {file = "appdirs-1.4.3-py2.py3-none-any.whl", hash = "sha256:d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e"},
@@ -615,8 +633,8 @@ psutil = [
     {file = "psutil-5.7.0.tar.gz", hash = "sha256:685ec16ca14d079455892f25bd124df26ff9137664af445563c1bd36629b5e0e"},
 ]
 pulsectl = [
-    {file = "pulsectl-20.2.4-py2.py3-none-any.whl", hash = "sha256:e61474a8f8227d1ae522402b0a610a1c827594249567f803aab9fdf873e28a58"},
-    {file = "pulsectl-20.2.4.tar.gz", hash = "sha256:fca9ed501bef2efd551b35773fd24bba36bbd21bc448f402cf8ee13c12423c19"},
+    {file = "pulsectl-20.4.3-py2.py3-none-any.whl", hash = "sha256:92a63e4dfa31b3148c4373db9e804764e3e9f77e14374d1247cca9c578bfc6f3"},
+    {file = "pulsectl-20.4.3.tar.gz", hash = "sha256:f5fffd7db08aba0bb90ea2af8e777c272a6882d574598d511433930cc8f9aed4"},
 ]
 py = [
     {file = "py-1.8.1-py2.py3-none-any.whl", hash = "sha256:c20fdd83a5dbc0af9efd622bee9a5564e278f6380fffcacc43ba6f43db2813b0"},

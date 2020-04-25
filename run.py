@@ -8,7 +8,7 @@ from pathlib import Path
 import psutil as ps
 
 from i3pyblocks import core, types
-from i3pyblocks.modules import datetime, psutil, pulsectl, subprocess
+from i3pyblocks.modules import aionotify, datetime, psutil, pulsectl, subprocess
 
 logging.basicConfig(filename=Path.home() / ".i3pyblocks.log", level=logging.DEBUG)
 
@@ -56,7 +56,7 @@ async def main():
                 (cpu_count // 2, types.Color.WARN),
                 (cpu_count, types.Color.URGENT),
             ),
-        ),
+        )
     )
     runner.register_module(
         psutil.SensorsBatteryModule(
@@ -82,6 +82,15 @@ async def main():
             command_on_click=(
                 (types.Mouse.SCROLL_UP, "xkblayout-state set +1"),
                 (types.Mouse.SCROLL_DOWN, "xkblayout-state set -1"),
+            ),
+        )
+    )
+    runner.register_module(
+        aionotify.BacklightModule(
+            format=" {percent:.0f}%",
+            command_on_click=(
+                (types.Mouse.SCROLL_UP, "light -A 5%"),
+                (types.Mouse.SCROLL_DOWN, "light -U 5"),
             ),
         )
     )
