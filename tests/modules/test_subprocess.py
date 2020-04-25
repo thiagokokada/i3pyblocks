@@ -1,12 +1,11 @@
-import asyncio
-from asyncio import subprocess
-
 import pytest
 from unittest.mock import call, patch
 from asynctest import CoroutineMock
 
 from i3pyblocks import types
 from i3pyblocks.modules import subprocess as m_sub
+
+from helpers import misc
 
 
 @pytest.mark.asyncio
@@ -43,83 +42,50 @@ async def test_shell_module_click_handler():
         ),
     )
 
-    communicate_return = asyncio.Future()
-    communicate_return.set_result((b"stdout\n", b"stderr\n"))
-
-    with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
-        process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_return
+    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
+        shell_mock.return_value = (
+            b"stdout\n",
+            b"stderr\n",
+            misc.AttributeDict(returncode=0),
+        )
         await instance.click_handler(types.Mouse.LEFT_BUTTON)
-        shell_mock.assert_has_calls(
-            [
-                call(
-                    "left-button",
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-            ]
-        )
+        shell_mock.assert_has_calls([call("left-button")])
 
-    with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
-        process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_return
-        await instance.click_handler(types.Mouse.MIDDLE_BUTTON)
-        shell_mock.assert_has_calls(
-            [
-                call(
-                    "middle-button",
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-            ]
+    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
+        shell_mock.return_value = (
+            b"stdout\n",
+            b"stderr\n",
+            misc.AttributeDict(returncode=0),
         )
-
-    with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
-        process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_return
         await instance.click_handler(types.Mouse.RIGHT_BUTTON)
-        shell_mock.assert_has_calls(
-            [
-                call(
-                    "right-button",
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-            ]
-        )
+        shell_mock.assert_has_calls([call("right-button")])
 
-    with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
-        process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_return
+    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
+        shell_mock.return_value = (
+            b"stdout\n",
+            b"stderr\n",
+            misc.AttributeDict(returncode=0),
+        )
+        await instance.click_handler(types.Mouse.MIDDLE_BUTTON)
+        shell_mock.assert_has_calls([call("middle-button")])
+
+    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
+        shell_mock.return_value = (
+            b"stdout\n",
+            b"stderr\n",
+            misc.AttributeDict(returncode=0),
+        )
         await instance.click_handler(types.Mouse.SCROLL_UP)
-        shell_mock.assert_has_calls(
-            [
-                call(
-                    "scroll-up",
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-            ]
-        )
+        shell_mock.assert_has_calls([call("scroll-up")])
 
-    with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
-        process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_return
-        await instance.click_handler(types.Mouse.SCROLL_DOWN)
-        shell_mock.assert_has_calls(
-            [
-                call(
-                    "scroll-down",
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-            ]
+    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
+        shell_mock.return_value = (
+            b"stdout\n",
+            b"stderr\n",
+            misc.AttributeDict(returncode=0),
         )
+        await instance.click_handler(types.Mouse.SCROLL_DOWN)
+        shell_mock.assert_has_calls([call("scroll-down")])
 
 
 @pytest.mark.asyncio
@@ -133,22 +99,22 @@ async def test_toggle_module():
     result = instance.result()
     assert result["full_text"] == "OFF"  # OFF since it is an empty echo
 
-    communicate_return_on = asyncio.Future()
-    communicate_return_on.set_result((b"stdout\n", b""))
-
-    with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
-        process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_return_on
+    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
+        shell_mock.return_value = (
+            b"stdout\n",
+            b"\n",
+            misc.AttributeDict(returncode=0),
+        )
         await instance.click_handler()
         result = instance.result()
         assert result["full_text"] == "ON"
 
-    communicate_return_off = asyncio.Future()
-    communicate_return_off.set_result((b"", b""))
-
-    with patch("asyncio.create_subprocess_shell", new=CoroutineMock()) as shell_mock:
-        process_mock = shell_mock.return_value
-        process_mock.communicate.return_value = communicate_return_off
+    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
+        shell_mock.return_value = (
+            b"\n",
+            b"\n",
+            misc.AttributeDict(returncode=0),
+        )
         await instance.click_handler()
         result = instance.result()
         assert result["full_text"] == "OFF"
