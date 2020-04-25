@@ -1,7 +1,6 @@
-import asyncio
 from asyncio import subprocess
 
-from i3pyblocks import modules, types
+from i3pyblocks import modules, types, utils
 
 
 class ShellModule(modules.PollingModule):
@@ -31,25 +30,13 @@ class ShellModule(modules.PollingModule):
         if not command:
             return
 
-        process = await asyncio.create_subprocess_shell(
-            command,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        process.wait()
-
+        await utils.shell_run(command)
         await self.run()
 
     async def run(self) -> None:
-        process = await asyncio.create_subprocess_shell(
-            self.command,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+        stdout, stderr, process = await utils.shell_run(
+            self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
-
-        stdout, stderr = await process.communicate()
 
         color = self.color_by_returncode.get(process.returncode)
 
@@ -79,14 +66,7 @@ class ToggleModule(modules.PollingModule):
         self.format_off = format_off
 
     async def get_state(self) -> bool:
-        process = await asyncio.create_subprocess_shell(
-            self.command_state,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-        stdout, _ = await process.communicate()
+        stdout, _, _ = await utils.shell_run(self.command_state, stdout=subprocess.PIPE)
 
         output = stdout.decode().strip()
 
@@ -100,14 +80,7 @@ class ToggleModule(modules.PollingModule):
         else:
             command = self.command_off
 
-        process = await asyncio.create_subprocess_shell(
-            command,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        process.wait()
-
+        await utils.shell_run(command)
         await self.run()
 
     async def run(self) -> None:

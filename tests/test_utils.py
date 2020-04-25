@@ -1,3 +1,7 @@
+from asyncio import subprocess
+
+import pytest
+
 from i3pyblocks import utils
 
 
@@ -19,3 +23,23 @@ def test_calculate_threshold():
 
 def test_non_nullable_dict():
     assert utils.non_nullable_dict(foo="bar", spams=None) == {"foo": "bar"}
+
+
+@pytest.mark.asyncio
+async def test_shell_run():
+    stdout, stderr, process = await utils.shell_run(
+        command="""
+        cat -
+        echo Hello World | cut -d" " -f2
+        echo Someone 1>&2
+        exit 1
+        """,
+        input=b"Hello ",
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    assert stdout == b"Hello World\n"
+    assert stderr == b"Someone\n"
+    assert process.returncode == 1
