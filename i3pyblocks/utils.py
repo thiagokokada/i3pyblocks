@@ -34,6 +34,6 @@ async def shell_run(
         command, stdin=stdin, stdout=stdout, stderr=stderr
     )
 
-    stdout, stderr = await process.communicate(input=input)
+    stdout_data, stderr_data = await process.communicate(input=input)
 
-    return stdout, stderr, process
+    return stdout_data, stderr_data, process
