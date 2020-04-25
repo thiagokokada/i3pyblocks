@@ -1,4 +1,6 @@
-from typing import Dict, Optional, Union
+import asyncio
+from asyncio import subprocess
+from typing import Dict, Optional, Union, Tuple
 
 from i3pyblocks import types
 
@@ -19,3 +21,19 @@ def calculate_threshold(
 
 def non_nullable_dict(**kwargs) -> Dict:
     return {k: v for k, v in kwargs.items() if v is not None}
+
+
+async def shell_run(
+    command: str,
+    input: Optional[bytes] = None,
+    stdin: int = subprocess.DEVNULL,
+    stdout: int = subprocess.DEVNULL,
+    stderr: int = subprocess.DEVNULL,
+) -> Tuple[bytes, bytes, subprocess.Process]:
+    process = await asyncio.create_subprocess_shell(
+        command, stdin=stdin, stdout=stdout, stderr=stderr
+    )
+
+    stdout, stderr = await process.communicate(input=input)
+
+    return stdout, stderr, process
