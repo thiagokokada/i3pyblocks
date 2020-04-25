@@ -80,8 +80,9 @@ async def test_backlight_module(tmpdir):
 
 
 @pytest.mark.asyncio
-async def test_backlight_module_click_handler():
+async def test_backlight_module_click_handler(tmpdir):
     instance = m_aionotify.BacklightModule(
+        path=str(tmpdir),
         command_on_click=(
             (types.Mouse.LEFT_BUTTON, "LEFT_BUTTON"),
             (types.Mouse.MIDDLE_BUTTON, "MIDDLE_BUTTON"),
