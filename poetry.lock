@@ -476,8 +476,14 @@ version = "3.1.0"
 docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
+[extras]
+aionotify = ["aionotify"]
+all_deps = ["psutil", "pulsectl", "aionotify"]
+psutil = ["psutil"]
+pulsectl = ["pulsectl"]
+
 [metadata]
-content-hash = "add19a7a2dc5da470e60bcf863c8ec23dfccfc14e1e4a7c7658a6735bc85d9bc"
+content-hash = "ea048aac95a40ff5428339d74fc859633bbb12e092de9e659dc161bcef0b08c8"
 python-versions = "^3.7"
 
 [metadata.files]
