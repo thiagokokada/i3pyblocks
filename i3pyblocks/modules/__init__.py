@@ -2,7 +2,7 @@ import abc
 import asyncio
 import signal
 import uuid
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Executor
 from enum import Enum
 from typing import List, Optional
 
@@ -176,10 +176,14 @@ class PollingModule(Module):
             self.update(f"Exception in {self.name}: {e}", urgent=True)
 
 
-class ThreadingModule(Module):
-    def __init__(self, _max_workers: int = 1, **kwargs) -> None:
+class ExecutorModule(Module):
+    def __init__(self, executor: Optional[Executor] = None, **kwargs) -> None:
         super().__init__(**kwargs)
-        self._executor = ThreadPoolExecutor(max_workers=_max_workers)
+        self.executor = executor
+
+    def __exit__(self, *_) -> None:
+        if self.executor:
+            self.executor.shutdown(wait=True)
 
     @abc.abstractmethod
     def run(self) -> None:
@@ -189,7 +193,7 @@ class ThreadingModule(Module):
         await super().start(queue)
         try:
             loop = asyncio.get_running_loop()
-            await loop.run_in_executor(self._executor, self.run)
+            await loop.run_in_executor(self.executor, self.run)
         except Exception as e:
             core.logger.exception(f"Exception in {self.name}")
             self.update(f"Exception in {self.name}: {e}", urgent=True)

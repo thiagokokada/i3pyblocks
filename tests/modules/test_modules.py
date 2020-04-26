@@ -2,12 +2,11 @@ import asyncio
 
 import pytest
 
-from i3pyblocks.modules import Align, Markup, Module, PollingModule, ThreadingModule
 from i3pyblocks import modules
 
 
 def test_invalid_module():
-    class InvalidModule(Module):
+    class InvalidModule(modules.Module):
         pass
 
     with pytest.raises(TypeError):
@@ -19,7 +18,7 @@ async def test_valid_module(mock_uuid4):
     class ValidModule(modules.Module):
         async def start(self):
             await super().start()
-            self.update("Done!", color=None, urgent=False, markup=Markup.NONE)
+            self.update("Done!", color=None, urgent=False, markup=modules.Markup.NONE)
 
         async def click_handler(self, *_, **__):
             pass
@@ -37,11 +36,11 @@ async def test_valid_module(mock_uuid4):
         border_bottom=1,
         border_left=1,
         min_width=10,
-        align=Align.CENTER,
+        align=modules.Align.CENTER,
         urgent=True,
         separator=False,
         separator_block_width=9,
-        markup=Markup.PANGO,
+        markup=modules.Markup.PANGO,
     )
 
     assert module.result() == {
@@ -108,7 +107,7 @@ async def test_valid_module(mock_uuid4):
 
 
 def test_invalid_polling_module():
-    class InvalidPollingModule(PollingModule):
+    class InvalidPollingModule(modules.PollingModule):
         pass
 
     with pytest.raises(TypeError):
@@ -117,7 +116,7 @@ def test_invalid_polling_module():
 
 @pytest.mark.asyncio
 async def test_valid_polling_module(mock_uuid4):
-    class ValidPollingModule(PollingModule):
+    class ValidPollingModule(modules.PollingModule):
         def __init__(self, sleep=0.1):
             self.count = 0
             super().__init__(
@@ -145,7 +144,7 @@ async def test_valid_polling_module(mock_uuid4):
 
 @pytest.mark.asyncio
 async def test_polling_module_with_error(mock_uuid4):
-    class PollingModuleWithError(PollingModule):
+    class PollingModuleWithError(modules.PollingModule):
         def __init__(self, sleep=1):
             self.count = 0
             super().__init__(
@@ -168,8 +167,8 @@ async def test_polling_module_with_error(mock_uuid4):
 
 
 @pytest.mark.asyncio
-async def test_valid_thread_pool_module(mock_uuid4):
-    class ValidThreadingModule(ThreadingModule):
+async def test_valid_executor_module(mock_uuid4):
+    class ValidExecutorModule(modules.ExecutorModule):
         def __init__(self):
             self.count = 0
             super().__init__(separator=None, urgent=None, align=None, markup=None)
@@ -178,7 +177,7 @@ async def test_valid_thread_pool_module(mock_uuid4):
             self.count += 1
             self.update(str(self.count))
 
-    module = ValidThreadingModule()
+    module = ValidExecutorModule()
 
     task = asyncio.create_task(module.start())
 
@@ -189,13 +188,13 @@ async def test_valid_thread_pool_module(mock_uuid4):
     assert module.result() == {
         "full_text": "1",
         "instance": str(mock_uuid4),
-        "name": "ValidThreadingModule",
+        "name": "ValidExecutorModule",
     }
 
 
 @pytest.mark.asyncio
-async def test_thread_pool_module_with_error(mock_uuid4):
-    class ThreadingModuleWithError(ThreadingModule):
+async def test_executor_module_with_error(mock_uuid4):
+    class ExecutorModuleWithError(modules.ExecutorModule):
         def __init__(self):
             self.count = 0
             super().__init__(separator=None, urgent=None, align=None, markup=None)
@@ -203,7 +202,7 @@ async def test_thread_pool_module_with_error(mock_uuid4):
         def run(self):
             raise Exception("Boom!")
 
-    module = ThreadingModuleWithError()
+    module = ExecutorModuleWithError()
 
     task = asyncio.create_task(module.start())
 
@@ -212,8 +211,8 @@ async def test_thread_pool_module_with_error(mock_uuid4):
     task.cancel()
 
     assert module.result() == {
-        "full_text": "Exception in ThreadingModuleWithError: Boom!",
+        "full_text": "Exception in ExecutorModuleWithError: Boom!",
         "instance": str(mock_uuid4),
-        "name": "ThreadingModuleWithError",
+        "name": "ExecutorModuleWithError",
         "urgent": True,
     }
