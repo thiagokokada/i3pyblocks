@@ -39,22 +39,22 @@ async def test_runner(capsys, mock_stdin):
         == f"""\
 {{"version": 1, "click_events": true}}
 [
-[{{"name": "ValidPollingModule", "instance": "{str(instance_1.id)}", "full_text": "1"}},\
-{{"name": "ValidPollingModule", "instance": "{str(instance_2.id)}", "full_text": "1"}}],
-[{{"name": "ValidPollingModule", "instance": "{str(instance_1.id)}", "full_text": "2"}},\
-{{"name": "ValidPollingModule", "instance": "{str(instance_2.id)}", "full_text": "2"}}],
-[{{"name": "ValidPollingModule", "instance": "{str(instance_1.id)}", "full_text": "3"}},\
-{{"name": "ValidPollingModule", "instance": "{str(instance_2.id)}", "full_text": "3"}}],
-[{{"name": "ValidPollingModule", "instance": "{str(instance_1.id)}", "full_text": "4"}},\
-{{"name": "ValidPollingModule", "instance": "{str(instance_2.id)}", "full_text": "4"}}],
-[{{"name": "ValidPollingModule", "instance": "{str(instance_1.id)}", "full_text": "5"}},\
-{{"name": "ValidPollingModule", "instance": "{str(instance_2.id)}", "full_text": "5"}}],
+[{{"name": "ValidPollingModule", "instance": "{instance_1.id}", "full_text": "1"}},\
+{{"name": "ValidPollingModule", "instance": "{instance_2.id}", "full_text": "1"}}],
+[{{"name": "ValidPollingModule", "instance": "{instance_1.id}", "full_text": "2"}},\
+{{"name": "ValidPollingModule", "instance": "{instance_2.id}", "full_text": "2"}}],
+[{{"name": "ValidPollingModule", "instance": "{instance_1.id}", "full_text": "3"}},\
+{{"name": "ValidPollingModule", "instance": "{instance_2.id}", "full_text": "3"}}],
+[{{"name": "ValidPollingModule", "instance": "{instance_1.id}", "full_text": "4"}},\
+{{"name": "ValidPollingModule", "instance": "{instance_2.id}", "full_text": "4"}}],
+[{{"name": "ValidPollingModule", "instance": "{instance_1.id}", "full_text": "5"}},\
+{{"name": "ValidPollingModule", "instance": "{instance_2.id}", "full_text": "5"}}],
 """
     )
 
 
 @pytest.mark.asyncio
-async def test_runner_with_fault_module(capsys, mock_stdin, mock_uuid4):
+async def test_runner_with_fault_module(capsys, mock_stdin):
     class FaultPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.count = 0
@@ -69,7 +69,8 @@ async def test_runner_with_fault_module(capsys, mock_stdin, mock_uuid4):
             self.update(str(self.count))
 
     runner = Runner()
-    runner.register_module(FaultPollingModule())
+    instance = FaultPollingModule()
+    runner.register_module(instance)
 
     await runner.start(timeout=0.5)
 
@@ -80,18 +81,18 @@ async def test_runner_with_fault_module(capsys, mock_stdin, mock_uuid4):
         == f"""\
 {{"version": 1, "click_events": true}}
 [
-[{{"name": "FaultPollingModule", "instance": "{str(mock_uuid4)}", "full_text": "1"}}],
-[{{"name": "FaultPollingModule", "instance": "{str(mock_uuid4)}", "full_text": "2"}}],
-[{{"name": "FaultPollingModule", "instance": "{str(mock_uuid4)}", "full_text": "3"}}],
-[{{"name": "FaultPollingModule", "instance": "{str(mock_uuid4)}", "full_text": "4"}}],
-[{{"name": "FaultPollingModule", "instance": "{str(mock_uuid4)}", \
+[{{"name": "FaultPollingModule", "instance": "{instance.id}", "full_text": "1"}}],
+[{{"name": "FaultPollingModule", "instance": "{instance.id}", "full_text": "2"}}],
+[{{"name": "FaultPollingModule", "instance": "{instance.id}", "full_text": "3"}}],
+[{{"name": "FaultPollingModule", "instance": "{instance.id}", "full_text": "4"}}],
+[{{"name": "FaultPollingModule", "instance": "{instance.id}", \
 "full_text": "Exception in FaultPollingModule: Boom!", "urgent": true}}],
 """
     )
 
 
 @pytest.mark.asyncio
-async def test_runner_with_signal_handler(capsys, mock_stdin, mock_uuid4):
+async def test_runner_with_signal_handler(capsys, mock_stdin):
     async def send_signal():
         await asyncio.sleep(0.1)
         os.kill(os.getpid(), signal.SIGUSR1)
@@ -136,7 +137,7 @@ async def test_runner_with_signal_handler(capsys, mock_stdin, mock_uuid4):
 
 # TODO: Test with mocked sys.stdin instead of calling functions directly
 @pytest.mark.asyncio
-async def test_runner_with_click_handler(capsys, mock_uuid4):
+async def test_runner_with_click_handler(capsys):
     class ValidPollingModuleWithClickHandler(PollingModule):
         def __init__(self, sleep=0.1):
             super().__init__(
@@ -154,14 +155,14 @@ async def test_runner_with_click_handler(capsys, mock_uuid4):
             )
 
     runner = Runner()
-    module = ValidPollingModuleWithClickHandler()
-    runner.register_module(module)
+    instance = ValidPollingModuleWithClickHandler()
+    runner.register_module(instance)
 
     async def send_click():
         click_event = json.dumps(
             {
                 "name": "ValidPollingModuleWithClickHandler",
-                "instance": str(mock_uuid4),
+                "instance": str(instance.id),
                 "button": 1,
                 "modifiers": ["Mod1"],
                 "x": 123,
