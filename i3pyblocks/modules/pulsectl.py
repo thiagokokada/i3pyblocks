@@ -7,7 +7,7 @@ from i3pyblocks import modules, utils, types
 
 
 # Based on: https://git.io/fjbHp
-class PulseAudioModule(modules.ThreadingModule):
+class PulseAudioModule(modules.ExecutorModule):
     def __init__(
         self,
         format: str = "V: {volume:.0f}%",
@@ -45,6 +45,7 @@ class PulseAudioModule(modules.ThreadingModule):
         self._setup_event_callback()
 
     def __exit__(self, *_) -> None:
+        super().__exit__()
         self.pulse.close()
 
     def _setup_event_callback(self) -> None:
