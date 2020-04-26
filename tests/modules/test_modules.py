@@ -194,6 +194,14 @@ async def test_polling_module_with_error(mock_uuid4):
     }
 
 
+def test_invalid_executor_module():
+    class InvalidExecutorModule(modules.ExecutorModule):
+        pass
+
+    with pytest.raises(TypeError):
+        InvalidExecutorModule()
+
+
 @pytest.mark.asyncio
 async def test_valid_executor_module(mock_uuid4):
     class ValidExecutorModule(modules.ExecutorModule):
