@@ -8,7 +8,7 @@ from pathlib import Path
 import psutil as ps
 
 from i3pyblocks import core, types
-from i3pyblocks.modules import aionotify, datetime, psutil, pulsectl, subprocess
+from i3pyblocks.modules import aionotify, i3ipc, datetime, psutil, pulsectl, subprocess
 
 logging.basicConfig(filename=Path.home() / ".i3pyblocks.log", level=logging.DEBUG)
 
@@ -22,6 +22,7 @@ async def main():
     cpu_count = ps.cpu_count()
     runner = core.Runner()
 
+    runner.register_module(i3ipc.WindowTitleModule(format=" {window_title:.41s}"))
     runner.register_module(
         psutil.NetworkSpeedModule(
             format_up=" {interface:.2s}:  {upload}  {download}",
