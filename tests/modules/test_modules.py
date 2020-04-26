@@ -1,4 +1,5 @@
 import asyncio
+import signal
 
 import pytest
 
@@ -19,12 +20,6 @@ async def test_valid_module(mock_uuid4):
         async def start(self):
             await super().start()
             self.update("Done!", color=None, urgent=False, markup=modules.Markup.NONE)
-
-        async def click_handler(self, *_, **__):
-            pass
-
-        async def signal_handler(self, *_, **__):
-            pass
 
     module = ValidModule(
         name="Name",
@@ -105,6 +100,21 @@ async def test_valid_module(mock_uuid4):
         "markup": "none",
     }
 
+    with pytest.raises(NotImplementedError):
+        await module.click_handler(
+            x=1,
+            y=1,
+            button=1,
+            relative_x=1,
+            relative_y=1,
+            width=1,
+            height=1,
+            modifiers=[],
+        )
+
+    with pytest.raises(NotImplementedError):
+        await module.signal_handler(sig=signal.SIGHUP)
+
 
 def test_invalid_polling_module():
     class InvalidPollingModule(modules.PollingModule):
@@ -137,6 +147,24 @@ async def test_valid_polling_module(mock_uuid4):
 
     assert module.result() == {
         "full_text": "5",
+        "instance": str(mock_uuid4),
+        "name": "ValidPollingModule",
+    }
+
+    await module.click_handler(
+        x=1, y=1, button=1, relative_x=1, relative_y=1, width=1, height=1, modifiers=[],
+    )
+
+    assert module.result() == {
+        "full_text": "6",
+        "instance": str(mock_uuid4),
+        "name": "ValidPollingModule",
+    }
+
+    await module.signal_handler(sig=signal.SIGHUP)
+
+    assert module.result() == {
+        "full_text": "7",
         "instance": str(mock_uuid4),
         "name": "ValidPollingModule",
     }
