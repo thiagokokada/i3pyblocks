@@ -10,7 +10,7 @@ from i3pyblocks.modules import PollingModule
 
 
 @pytest.mark.asyncio
-async def test_runner(capsys, mock_stdin, mock_uuid4):
+async def test_runner(capsys, mock_stdin):
     class ValidPollingModule(PollingModule):
         def __init__(self, sleep=0.1):
             self.count = 0
@@ -23,7 +23,12 @@ async def test_runner(capsys, mock_stdin, mock_uuid4):
             self.update(str(self.count))
 
     runner = Runner()
-    runner.register_module(ValidPollingModule())
+
+    instance_1 = ValidPollingModule()
+    instance_2 = ValidPollingModule()
+
+    runner.register_module(instance_1)
+    runner.register_module(instance_2)
 
     await runner.start(timeout=0.5)
 
@@ -34,11 +39,16 @@ async def test_runner(capsys, mock_stdin, mock_uuid4):
         == f"""\
 {{"version": 1, "click_events": true}}
 [
-[{{"name": "ValidPollingModule", "instance": "{str(mock_uuid4)}", "full_text": "1"}}],
-[{{"name": "ValidPollingModule", "instance": "{str(mock_uuid4)}", "full_text": "2"}}],
-[{{"name": "ValidPollingModule", "instance": "{str(mock_uuid4)}", "full_text": "3"}}],
-[{{"name": "ValidPollingModule", "instance": "{str(mock_uuid4)}", "full_text": "4"}}],
-[{{"name": "ValidPollingModule", "instance": "{str(mock_uuid4)}", "full_text": "5"}}],
+[{{"name": "ValidPollingModule", "instance": "{str(instance_1.id)}", "full_text": "1"}},\
+{{"name": "ValidPollingModule", "instance": "{str(instance_2.id)}", "full_text": "1"}}],
+[{{"name": "ValidPollingModule", "instance": "{str(instance_1.id)}", "full_text": "2"}},\
+{{"name": "ValidPollingModule", "instance": "{str(instance_2.id)}", "full_text": "2"}}],
+[{{"name": "ValidPollingModule", "instance": "{str(instance_1.id)}", "full_text": "3"}},\
+{{"name": "ValidPollingModule", "instance": "{str(instance_2.id)}", "full_text": "3"}}],
+[{{"name": "ValidPollingModule", "instance": "{str(instance_1.id)}", "full_text": "4"}},\
+{{"name": "ValidPollingModule", "instance": "{str(instance_2.id)}", "full_text": "4"}}],
+[{{"name": "ValidPollingModule", "instance": "{str(instance_1.id)}", "full_text": "5"}},\
+{{"name": "ValidPollingModule", "instance": "{str(instance_2.id)}", "full_text": "5"}}],
 """
     )
 
