@@ -56,13 +56,19 @@ class Runner:
         if signals:
             self.register_signal(module, signals)
 
-    async def update_result(self) -> None:
+    async def update_results(self) -> None:
         id_, result = await self.queue.get()
         self.results[id_] = result
 
+        # To reduce the number of redraws, let's empty the queue here
+        # and draw all updates at the same time
+        while self.queue.qsize() > 0:
+            id_, result = self.queue.get_nowait()
+            self.results[id_] = result
+
     async def write_results(self) -> None:
         while True:
-            await self.update_result()
+            await self.update_results()
             output = [json.dumps(r) for r in self.results.values() if r]
             print("[" + ",".join(output) + "],", flush=True)
 

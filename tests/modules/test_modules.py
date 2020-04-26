@@ -15,7 +15,7 @@ def test_invalid_module():
 
 
 @pytest.mark.asyncio
-async def test_valid_module(mock_uuid4):
+async def test_valid_module():
     class ValidModule(modules.Module):
         async def start(self):
             await super().start()
@@ -48,7 +48,7 @@ async def test_valid_module(mock_uuid4):
         "border_top": 1,
         "color": "#000000",
         "full_text": "",
-        "instance": str(mock_uuid4),
+        "instance": str(module.id),
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -69,7 +69,7 @@ async def test_valid_module(mock_uuid4):
         "border_top": 1,
         "color": "#000000",
         "full_text": "Done!",
-        "instance": str(mock_uuid4),
+        "instance": str(module.id),
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -80,7 +80,7 @@ async def test_valid_module(mock_uuid4):
 
     id_, result = await module.update_queue.get()
 
-    assert id_ == mock_uuid4
+    assert id_ == module.id
     assert result == {
         "align": "center",
         "background": "#FFFFFF",
@@ -91,7 +91,7 @@ async def test_valid_module(mock_uuid4):
         "border_top": 1,
         "color": "#000000",
         "full_text": "Done!",
-        "instance": str(mock_uuid4),
+        "instance": str(module.id),
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -125,7 +125,7 @@ def test_invalid_polling_module():
 
 
 @pytest.mark.asyncio
-async def test_valid_polling_module(mock_uuid4):
+async def test_valid_polling_module():
     class ValidPollingModule(modules.PollingModule):
         def __init__(self, sleep=0.1):
             self.count = 0
@@ -147,7 +147,7 @@ async def test_valid_polling_module(mock_uuid4):
 
     assert module.result() == {
         "full_text": "5",
-        "instance": str(mock_uuid4),
+        "instance": str(module.id),
         "name": "ValidPollingModule",
     }
 
@@ -157,7 +157,7 @@ async def test_valid_polling_module(mock_uuid4):
 
     assert module.result() == {
         "full_text": "6",
-        "instance": str(mock_uuid4),
+        "instance": str(module.id),
         "name": "ValidPollingModule",
     }
 
@@ -165,13 +165,13 @@ async def test_valid_polling_module(mock_uuid4):
 
     assert module.result() == {
         "full_text": "7",
-        "instance": str(mock_uuid4),
+        "instance": str(module.id),
         "name": "ValidPollingModule",
     }
 
 
 @pytest.mark.asyncio
-async def test_polling_module_with_error(mock_uuid4):
+async def test_polling_module_with_error():
     class PollingModuleWithError(modules.PollingModule):
         def __init__(self, sleep=1):
             self.count = 0
@@ -188,7 +188,7 @@ async def test_polling_module_with_error(mock_uuid4):
 
     assert module.result() == {
         "full_text": "Exception in PollingModuleWithError: Boom!",
-        "instance": str(mock_uuid4),
+        "instance": str(module.id),
         "name": "PollingModuleWithError",
         "urgent": True,
     }
@@ -203,7 +203,7 @@ def test_invalid_executor_module():
 
 
 @pytest.mark.asyncio
-async def test_valid_executor_module(mock_uuid4):
+async def test_valid_executor_module():
     class ValidExecutorModule(modules.ExecutorModule):
         def __init__(self):
             self.count = 0
@@ -223,13 +223,13 @@ async def test_valid_executor_module(mock_uuid4):
 
     assert module.result() == {
         "full_text": "1",
-        "instance": str(mock_uuid4),
+        "instance": str(module.id),
         "name": "ValidExecutorModule",
     }
 
 
 @pytest.mark.asyncio
-async def test_executor_module_with_error(mock_uuid4):
+async def test_executor_module_with_error():
     class ExecutorModuleWithError(modules.ExecutorModule):
         def __init__(self):
             self.count = 0
@@ -248,7 +248,7 @@ async def test_executor_module_with_error(mock_uuid4):
 
     assert module.result() == {
         "full_text": "Exception in ExecutorModuleWithError: Boom!",
-        "instance": str(mock_uuid4),
+        "instance": str(module.id),
         "name": "ExecutorModuleWithError",
         "urgent": True,
     }
