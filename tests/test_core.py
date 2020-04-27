@@ -41,28 +41,21 @@ async def test_runner(capsys, mock_stdin):
 
     captured = capsys.readouterr()
 
-    assert (
-        captured.out
-        == f"""\
-{{"version": 1, "click_events": true}}
-[
-[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "1"}}, \
-{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "1"}}, \
-{{"name": "instance_3", "instance": "{instance_3.id}", "full_text": "1"}}],
-[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "2"}}, \
-{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "2"}}, \
-{{"name": "instance_3", "instance": "{instance_3.id}", "full_text": "2"}}],
-[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "3"}}, \
-{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "3"}}, \
-{{"name": "instance_3", "instance": "{instance_3.id}", "full_text": "3"}}],
-[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "4"}}, \
-{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "4"}}, \
-{{"name": "instance_3", "instance": "{instance_3.id}", "full_text": "4"}}],
-[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "5"}}, \
-{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "5"}}, \
-{{"name": "instance_3", "instance": "{instance_3.id}", "full_text": "5"}}],
-"""
-    )
+    output_lines = captured.out.split("\n")
+    header = json.loads(output_lines[0])
+
+    assert header == {"version": 1, "click_events": True}
+
+    results = json.loads("".join(output_lines[1:]))
+
+    for i, result in enumerate(results[:5], start=1):
+        assert result == [
+            {"name": "instance_1", "instance": str(instance_1.id), "full_text": str(i)},
+            {"name": "instance_2", "instance": str(instance_2.id), "full_text": str(i)},
+            {"name": "instance_3", "instance": str(instance_3.id), "full_text": str(i)},
+        ]
+
+    assert results[5] is None
 
 
 @pytest.mark.asyncio
@@ -88,19 +81,18 @@ async def test_runner_with_fault_module(capsys, mock_stdin):
 
     captured = capsys.readouterr()
 
-    assert (
-        captured.out
-        == f"""\
-{{"version": 1, "click_events": true}}
-[
-[{{"name": "FaultPollingModule", "instance": "{instance.id}", "full_text": "1"}}],
-[{{"name": "FaultPollingModule", "instance": "{instance.id}", "full_text": "2"}}],
-[{{"name": "FaultPollingModule", "instance": "{instance.id}", "full_text": "3"}}],
-[{{"name": "FaultPollingModule", "instance": "{instance.id}", "full_text": "4"}}],
-[{{"name": "FaultPollingModule", "instance": "{instance.id}", \
-"full_text": "Exception in FaultPollingModule: Boom!", "urgent": true}}],
-"""
-    )
+    output_lines = captured.out.split("\n")
+
+    results = json.loads("".join(output_lines[1:]))
+
+    assert results[4] == [
+        {
+            "name": "FaultPollingModule",
+            "instance": str(instance.id),
+            "full_text": "Exception in FaultPollingModule: Boom!",
+            "urgent": True,
+        }
+    ]
 
 
 @pytest.mark.asyncio
@@ -132,9 +124,8 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
                 raise Exception("This shouldn't happen")
 
     runner = Runner()
-    runner.register_module(
-        ValidPollingModuleWithSignalHandler(), signals=[signal.SIGUSR1, signal.SIGUSR2]
-    )
+    instance = ValidPollingModuleWithSignalHandler()
+    runner.register_module(instance, signals=[signal.SIGUSR1, signal.SIGUSR2])
 
     runner.register_task(send_signal())
     runner.register_task(send_another_signal())
@@ -143,8 +134,25 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
 
     captured = capsys.readouterr()
 
-    assert "received_signal" in captured.out
-    assert "received_another_signal" in captured.out
+    output_lines = captured.out.split("\n")
+
+    results = json.loads("".join(output_lines[1:]))
+
+    assert results[0] == [
+        {
+            "name": "ValidPollingModuleWithSignalHandler",
+            "instance": str(instance.id),
+            "full_text": "received_signal",
+        }
+    ]
+
+    assert results[1] == [
+        {
+            "name": "ValidPollingModuleWithSignalHandler",
+            "instance": str(instance.id),
+            "full_text": "received_another_signal",
+        }
+    ]
 
 
 # TODO: Test with mocked sys.stdin instead of calling functions directly
@@ -196,4 +204,14 @@ async def test_runner_with_click_handler(capsys):
 
     captured = capsys.readouterr()
 
-    assert "123-456-1-12-34-20-40-['Mod1']" in captured.out
+    output_lines = captured.out.split("\n")
+
+    results = json.loads("".join(output_lines[1:]))
+
+    assert results[0] == [
+        {
+            "name": "ValidPollingModuleWithClickHandler",
+            "instance": str(instance.id),
+            "full_text": "123-456-1-12-34-20-40-['Mod1']",
+        }
+    ]

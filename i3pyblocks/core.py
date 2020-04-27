@@ -123,4 +123,8 @@ class Runner:
 
         await asyncio.wait(self.tasks, timeout=timeout)
 
+        # This is a hack so we can end with a valid JSON, since there is
+        # probably some trailing comma somewhere
+        print("null\n]")
+
         self.stop()
