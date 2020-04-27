@@ -69,8 +69,8 @@ class Runner:
     async def write_results(self) -> None:
         while True:
             await self.update_results()
-            output = [json.dumps(r) for r in self.results.values() if r]
-            print("[" + ",".join(output) + "],", flush=True)
+            output = list(self.results.values())
+            print(json.dumps(output), end=",\n", flush=True)
 
     async def click_event(self, raw: AnyStr) -> None:
         try:
@@ -119,7 +119,7 @@ class Runner:
         self.register_task(self.click_events())
         self.register_task(self.write_results())
 
-        print('{"version": 1, "click_events": true}\n[', flush=True)
+        print(json.dumps({"version": 1, "click_events": True}), end="\n[\n", flush=True)
 
         await asyncio.wait(self.tasks, timeout=timeout)
 
