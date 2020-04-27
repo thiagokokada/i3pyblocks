@@ -46,20 +46,20 @@ async def test_runner(capsys, mock_stdin):
         == f"""\
 {{"version": 1, "click_events": true}}
 [
-[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "1"}},\
-{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "1"}},\
+[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "1"}}, \
+{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "1"}}, \
 {{"name": "instance_3", "instance": "{instance_3.id}", "full_text": "1"}}],
-[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "2"}},\
-{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "2"}},\
+[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "2"}}, \
+{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "2"}}, \
 {{"name": "instance_3", "instance": "{instance_3.id}", "full_text": "2"}}],
-[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "3"}},\
-{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "3"}},\
+[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "3"}}, \
+{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "3"}}, \
 {{"name": "instance_3", "instance": "{instance_3.id}", "full_text": "3"}}],
-[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "4"}},\
-{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "4"}},\
+[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "4"}}, \
+{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "4"}}, \
 {{"name": "instance_3", "instance": "{instance_3.id}", "full_text": "4"}}],
-[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "5"}},\
-{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "5"}},\
+[{{"name": "instance_1", "instance": "{instance_1.id}", "full_text": "5"}}, \
+{{"name": "instance_2", "instance": "{instance_2.id}", "full_text": "5"}}, \
 {{"name": "instance_3", "instance": "{instance_3.id}", "full_text": "5"}}],
 """
     )
