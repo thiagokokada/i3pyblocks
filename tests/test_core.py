@@ -46,7 +46,7 @@ async def test_runner(capsys, mock_stdin):
 
     assert header == {"version": 1, "click_events": True}
 
-    results = json.loads("".join(output_lines[1:]))
+    results = json.loads("\n".join(output_lines[1:]))
 
     for i, result in enumerate(results[:5], start=1):
         assert result == [
@@ -83,7 +83,7 @@ async def test_runner_with_fault_module(capsys, mock_stdin):
 
     output_lines = captured.out.split("\n")
 
-    results = json.loads("".join(output_lines[1:]))
+    results = json.loads("\n".join(output_lines[1:]))
 
     assert results[4] == [
         {
@@ -136,7 +136,7 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
 
     output_lines = captured.out.split("\n")
 
-    results = json.loads("".join(output_lines[1:]))
+    results = json.loads("\n".join(output_lines[1:]))
 
     assert results[0] == [
         {
@@ -206,7 +206,7 @@ async def test_runner_with_click_handler(capsys):
 
     output_lines = captured.out.split("\n")
 
-    results = json.loads("".join(output_lines[1:]))
+    results = json.loads("\n".join(output_lines[1:]))
 
     assert results[0] == [
         {
