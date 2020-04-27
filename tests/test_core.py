@@ -85,6 +85,15 @@ async def test_runner_with_fault_module(capsys, mock_stdin):
 
     results = json.loads("\n".join(output_lines[1:]))
 
+    for i, result in enumerate(results[:4], start=1):
+        assert result == [
+            {
+                "name": "FaultPollingModule",
+                "instance": str(instance.id),
+                "full_text": str(i),
+            },
+        ]
+
     assert results[4] == [
         {
             "name": "FaultPollingModule",
