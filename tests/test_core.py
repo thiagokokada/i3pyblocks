@@ -4,14 +4,26 @@ import os
 import signal
 
 import pytest
+from asynctest import CoroutineMock
+from unittest.mock import patch
 
-from i3pyblocks.core import Runner
-from i3pyblocks.modules import PollingModule
+from i3pyblocks import core, modules
+
+
+# TODO: Validate if we can actually read from stdin here
+@pytest.mark.asyncio
+async def test_get_aio_reader(capsys, mocker):
+    mocker.patch("sys.stdin", return_value=b"Hello!")
+    loop = asyncio.get_running_loop()
+
+    with capsys.disabled():
+        reader = await core.get_aio_reader(loop)
+        assert isinstance(reader, asyncio.StreamReader)
 
 
 @pytest.mark.asyncio
 async def test_runner(capsys, mock_stdin):
-    class ValidPollingModule(PollingModule):
+    class ValidPollingModule(modules.PollingModule):
         def __init__(self, name, sleep=0.1):
             self.count = 0
             super().__init__(
@@ -27,7 +39,7 @@ async def test_runner(capsys, mock_stdin):
             self.count += 1
             self.update(str(self.count))
 
-    runner = Runner()
+    runner = core.Runner()
 
     instance_1 = ValidPollingModule(name="instance_1")
     instance_2 = ValidPollingModule(name="instance_2")
@@ -60,7 +72,7 @@ async def test_runner(capsys, mock_stdin):
 
 @pytest.mark.asyncio
 async def test_runner_with_fault_module(capsys, mock_stdin):
-    class FaultPollingModule(PollingModule):
+    class FaultPollingModule(modules.PollingModule):
         def __init__(self, sleep=0.1):
             self.count = 0
             super().__init__(
@@ -73,7 +85,7 @@ async def test_runner_with_fault_module(capsys, mock_stdin):
                 raise Exception("Boom!")
             self.update(str(self.count))
 
-    runner = Runner()
+    runner = core.Runner()
     instance = FaultPollingModule()
     runner.register_module(instance)
 
@@ -114,7 +126,7 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
         await asyncio.sleep(0.2)
         os.kill(os.getpid(), signal.SIGUSR2)
 
-    class ValidPollingModuleWithSignalHandler(PollingModule):
+    class ValidPollingModuleWithSignalHandler(modules.PollingModule):
         def __init__(self, sleep=0.1):
             self.count = 0
             super().__init__(
@@ -132,7 +144,7 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
             else:
                 raise Exception("This shouldn't happen")
 
-    runner = Runner()
+    runner = core.Runner()
     instance = ValidPollingModuleWithSignalHandler()
     runner.register_module(instance, signals=[signal.SIGUSR1, signal.SIGUSR2])
 
@@ -164,10 +176,9 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
     ]
 
 
-# TODO: Test with mocked sys.stdin instead of calling functions directly
 @pytest.mark.asyncio
-async def test_runner_with_click_handler(capsys):
-    class ValidPollingModuleWithClickHandler(PollingModule):
+async def test_runner_with_click_events(capsys):
+    class ValidPollingModuleWithClickHandler(modules.PollingModule):
         def __init__(self, sleep=0.1):
             super().__init__(
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
@@ -183,33 +194,36 @@ async def test_runner_with_click_handler(capsys):
                 f"{x}-{y}-{button}-{relative_x}-{relative_y}-{width}-{height}-{modifiers}"
             )
 
-    runner = Runner()
+    runner = core.Runner()
     instance = ValidPollingModuleWithClickHandler()
     runner.register_module(instance)
 
-    async def send_click():
-        click_event = json.dumps(
-            {
-                "name": "ValidPollingModuleWithClickHandler",
-                "instance": str(instance.id),
-                "button": 1,
-                "modifiers": ["Mod1"],
-                "x": 123,
-                "y": 456,
-                "relative_x": 12,
-                "relative_y": 34,
-                "width": 20,
-                "height": 40,
-                "extra": "should be ignored",
-            }
-        ).encode()
+    click_event = json.dumps(
+        {
+            "name": "ValidPollingModuleWithClickHandler",
+            "instance": str(instance.id),
+            "button": 1,
+            "modifiers": ["Mod1"],
+            "x": 123,
+            "y": 456,
+            "relative_x": 12,
+            "relative_y": 34,
+            "width": 20,
+            "height": 40,
+            "extra": "should be ignored",
+        }
+    ).encode()
 
-        await asyncio.sleep(0.1)
-        await runner.click_event(click_event)
+    with patch(
+        "i3pyblocks.core.get_aio_reader", new=CoroutineMock()
+    ) as get_aio_reader_mock:
+        reader_mock = get_aio_reader_mock.return_value
+        reader_mock.readline = CoroutineMock()
+        reader_mock.readline.return_value = b"[\n"
+        reader_mock.readuntil = CoroutineMock()
+        reader_mock.readuntil.side_effect = [click_event, b","]
 
-    runner.register_task(send_click())
-
-    await runner.start(timeout=0.5)
+        await runner.start(timeout=0.5)
 
     captured = capsys.readouterr()
 

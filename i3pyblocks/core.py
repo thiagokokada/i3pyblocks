@@ -12,6 +12,15 @@ logger = logging.getLogger("i3pyblocks")
 logger.addHandler(logging.NullHandler())
 
 
+async def get_aio_reader(loop: asyncio.AbstractEventLoop) -> asyncio.StreamReader:
+    reader = asyncio.StreamReader()
+    protocol = asyncio.StreamReaderProtocol(reader)
+
+    await loop.connect_read_pipe(lambda: protocol, sys.stdin)
+
+    return reader
+
+
 class Runner:
     def __init__(self) -> None:
         self.loop = asyncio.get_running_loop()
@@ -99,11 +108,7 @@ class Runner:
 
     # Based on: https://git.io/fjbHx
     async def click_events(self) -> None:
-        reader = asyncio.StreamReader()
-        protocol = asyncio.StreamReaderProtocol(reader)
-
-        await self.loop.connect_read_pipe(lambda: protocol, sys.stdin)
-
+        reader = await get_aio_reader(self.loop)
         await reader.readline()
 
         while True:
