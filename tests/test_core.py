@@ -177,6 +177,115 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
 
 
 @pytest.mark.asyncio
+async def test_runner_with_signal_handler_exception(capsys, mock_stdin, mocker):
+    async def send_signal():
+        await asyncio.sleep(0.1)
+        os.kill(os.getpid(), signal.SIGUSR1)
+
+    class InvalidPollingModuleWithSignalHandler(modules.PollingModule):
+        def __init__(self, sleep=0.1):
+            self.count = 0
+            super().__init__(
+                sleep=sleep, separator=None, urgent=None, align=None, markup=None
+            )
+
+        async def run(self):
+            pass
+
+        async def signal_handler(self, sig):
+            raise Exception("Boom!")
+
+    logger_mock = mocker.patch("i3pyblocks.core.logger.exception")
+    runner = core.Runner()
+    instance = InvalidPollingModuleWithSignalHandler()
+    runner.register_module(instance, signals=[signal.SIGUSR1])
+
+    runner.register_task(send_signal())
+
+    await runner.start(timeout=0.5)
+
+    logger_mock.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_runner_with_click_event():
+    class ValidPollingModuleWithClickHandler(modules.PollingModule):
+        def __init__(self, sleep=0.1):
+            super().__init__(
+                sleep=sleep, separator=None, urgent=None, align=None, markup=None
+            )
+
+        async def run(self):
+            pass
+
+        async def click_handler(
+            self, x, y, button, relative_x, relative_y, width, height, modifiers
+        ):
+            self.update(
+                f"{x}-{y}-{button}-{relative_x}-{relative_y}-{width}-{height}-{modifiers}"
+            )
+
+    runner = core.Runner()
+    instance = ValidPollingModuleWithClickHandler()
+    runner.register_module(instance)
+
+    click_event = json.dumps(
+        {
+            "name": "ValidPollingModuleWithClickHandler",
+            "instance": str(instance.id),
+            "button": 1,
+            "modifiers": ["Mod1"],
+            "x": 123,
+            "y": 456,
+            "relative_x": 12,
+            "relative_y": 34,
+            "width": 20,
+            "height": 40,
+            "extra": "should be ignored",
+        }
+    ).encode()
+
+    await runner.click_event(click_event)
+    result = instance.result()
+
+    assert result == {
+        "name": "ValidPollingModuleWithClickHandler",
+        "instance": str(instance.id),
+        "full_text": "123-456-1-12-34-20-40-['Mod1']",
+    }
+
+
+@pytest.mark.asyncio
+async def test_runner_with_click_event_exception(mocker):
+    class InvalidPollingModuleWithClickHandler(modules.PollingModule):
+        def __init__(self, sleep=0.1):
+            super().__init__(
+                sleep=sleep, separator=None, urgent=None, align=None, markup=None
+            )
+
+        async def run(self):
+            pass
+
+        async def click_handler(
+            self, x, y, button, relative_x, relative_y, width, height, modifiers
+        ):
+            raise Exception("Boom!")
+
+    logger_mock = mocker.patch("i3pyblocks.core.logger.exception")
+    runner = core.Runner()
+    instance = InvalidPollingModuleWithClickHandler()
+    runner.register_module(instance)
+
+    click_event = json.dumps(
+        {"name": "InvalidPollingModuleWithClickHandler", "instance": str(instance.id)}
+    ).encode()
+
+    await runner.click_event(click_event)
+
+    logger_mock.assert_called_once()
+
+
+@pytest.mark.asyncio
 async def test_runner_with_click_events(capsys):
     class ValidPollingModuleWithClickHandler(modules.PollingModule):
         def __init__(self, sleep=0.1):
