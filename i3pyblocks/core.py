@@ -23,7 +23,7 @@ async def get_aio_reader(loop: asyncio.AbstractEventLoop) -> asyncio.StreamReade
 
 class Runner:
     def __init__(self) -> None:
-        self.loop = asyncio.get_running_loop()
+        self.loop = asyncio.get_event_loop()
         self.modules: Dict[uuid.UUID, modules.Module] = {}
         self.results: Dict[uuid.UUID, Optional[types.Result]] = {}
         self.tasks: List[asyncio.Future] = []
