@@ -6,9 +6,10 @@ let pythonEnv = poetry2nix.mkPoetryEnv {
 in
 mkShell {
   name = "i3pyblocks";
-  nativeBuildInputs = [
+  buildInputs = [
     libffi
     libpulseaudio
+    python37Packages.poetry
     pythonEnv
   ];
   LD_LIBRARY_PATH="${libpulseaudio}/lib";
