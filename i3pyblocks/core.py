@@ -71,9 +71,12 @@ class Runner:
 
         # To reduce the number of redraws, let's empty the queue here
         # and draw all updates at the same time
-        while self.queue.qsize() > 0:
-            id_, result = self.queue.get_nowait()
-            self.results[id_] = result
+        while True:
+            try:
+                id_, result = self.queue.get_nowait()
+                self.results[id_] = result
+            except asyncio.QueueEmpty:
+                break
 
     async def write_results(self) -> None:
         while True:
