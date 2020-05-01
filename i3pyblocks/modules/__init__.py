@@ -132,10 +132,10 @@ class Module(metaclass=abc.ABCMeta):
         height: int,
         modifiers: List[Optional[str]],
     ) -> None:
-        raise NotImplementedError("Should implement click_handler method")
+        pass
 
     async def signal_handler(self, *, sig: signal.Signals) -> None:
-        raise NotImplementedError("Should implement signal_handler method")
+        pass
 
     @abc.abstractmethod
     async def start(self, queue: asyncio.Queue = None) -> None:
