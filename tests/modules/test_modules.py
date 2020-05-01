@@ -128,23 +128,6 @@ async def test_valid_module():
     with pytest.raises(asyncio.QueueEmpty):
         await module.update_queue.get_nowait()
 
-    # click_handler() by default should raise NotImplementedError
-    with pytest.raises(NotImplementedError):
-        await module.click_handler(
-            x=1,
-            y=1,
-            button=1,
-            relative_x=1,
-            relative_y=1,
-            width=1,
-            height=1,
-            modifiers=[],
-        )
-
-    # signal_handler() by default should raise NotImplementedError
-    with pytest.raises(NotImplementedError):
-        await module.signal_handler(sig=signal.SIGHUP)
-
 
 def test_invalid_polling_module():
     class InvalidPollingModule(modules.PollingModule):
