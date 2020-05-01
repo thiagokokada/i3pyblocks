@@ -41,6 +41,7 @@ class Module(metaclass=abc.ABCMeta):
     ) -> None:
         self.id = uuid.uuid4()
         self.name = name or self.__class__.__name__
+        self.freeze = True
 
         # Those are default values for properties if they are not overrided
         self._default_state = utils.non_nullable_dict(
@@ -103,17 +104,21 @@ class Module(metaclass=abc.ABCMeta):
         return {**self._default_state, **self._state}
 
     def push_update(self) -> None:
-        if hasattr(self, "update_queue"):
+        if not self.freeze:
             self.update_queue.put_nowait((self.id, self.result()))
         else:
             core.logger.warn(
-                f"Not pushing update since module {self.name} with id {self.id} "
-                f"did not started yet"
+                f"Not pusshing update since module {self.name} with "
+                f"id {self.id} is frozen"
             )
 
     def update(self, *args, **kwargs) -> None:
         self.update_state(*args, **kwargs)
         self.push_update()
+
+    def abort(self, *args, **kwargs) -> None:
+        self.update(*args, **kwargs)
+        self.freeze = True
 
     async def click_handler(
         self,
@@ -137,6 +142,7 @@ class Module(metaclass=abc.ABCMeta):
         if not queue:
             queue = asyncio.Queue()
         self.update_queue = queue
+        self.freeze = False
 
 
 class PollingModule(Module):
@@ -173,7 +179,7 @@ class PollingModule(Module):
                 await asyncio.sleep(self.sleep)
         except Exception as e:
             core.logger.exception(f"Exception in {self.name}")
-            self.update(f"Exception in {self.name}: {e}", urgent=True)
+            self.abort(f"Exception in {self.name}: {e}", urgent=True)
 
 
 class ExecutorModule(Module):
@@ -196,4 +202,4 @@ class ExecutorModule(Module):
             await loop.run_in_executor(self.executor, self.run)
         except Exception as e:
             core.logger.exception(f"Exception in {self.name}")
-            self.update(f"Exception in {self.name}: {e}", urgent=True)
+            self.abort(f"Exception in {self.name}: {e}", urgent=True)

@@ -177,7 +177,7 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
 
 
 @pytest.mark.asyncio
-async def test_runner_with_signal_handler_exception(capsys, mock_stdin, mocker):
+async def test_runner_with_signal_handler_exception(capsys, mock_stdin):
     async def send_signal():
         await asyncio.sleep(0.1)
         os.kill(os.getpid(), signal.SIGUSR1)
@@ -195,7 +195,6 @@ async def test_runner_with_signal_handler_exception(capsys, mock_stdin, mocker):
         async def signal_handler(self, sig):
             raise Exception("Boom!")
 
-    logger_mock = mocker.patch("i3pyblocks.core.logger.exception")
     runner = core.Runner()
     instance = InvalidPollingModuleWithSignalHandler()
     runner.register_module(instance, signals=[signal.SIGUSR1])
@@ -204,7 +203,14 @@ async def test_runner_with_signal_handler_exception(capsys, mock_stdin, mocker):
 
     await runner.start(timeout=0.5)
 
-    logger_mock.assert_called_once()
+    result = instance.result()
+
+    assert (
+        result["full_text"]
+        == "Exception in InvalidPollingModuleWithSignalHandler signal handler: Boom!"
+    )
+
+    assert result["urgent"] is True
 
 
 @pytest.mark.asyncio
@@ -256,7 +262,7 @@ async def test_runner_with_click_event():
 
 
 @pytest.mark.asyncio
-async def test_runner_with_click_event_exception(mocker):
+async def test_runner_with_click_event_exception():
     class InvalidPollingModuleWithClickHandler(modules.PollingModule):
         def __init__(self, sleep=0.1):
             super().__init__(
@@ -271,7 +277,6 @@ async def test_runner_with_click_event_exception(mocker):
         ):
             raise Exception("Boom!")
 
-    logger_mock = mocker.patch("i3pyblocks.core.logger.exception")
     runner = core.Runner()
     instance = InvalidPollingModuleWithClickHandler()
     runner.register_module(instance)
@@ -282,7 +287,14 @@ async def test_runner_with_click_event_exception(mocker):
 
     await runner.click_event(click_event)
 
-    logger_mock.assert_called_once()
+    result = instance.result()
+
+    assert (
+        result["full_text"]
+        == "Exception in InvalidPollingModuleWithClickHandler click handler: Boom!"
+    )
+
+    assert result["urgent"] is True
 
 
 @pytest.mark.asyncio
