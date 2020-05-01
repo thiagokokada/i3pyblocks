@@ -38,8 +38,11 @@ class Runner:
                     f"Module {module.name} with id {module.id} received a signal {sig.name}"
                 )
                 await module.signal_handler(sig=sig)
-            except Exception:
+            except Exception as e:
                 logger.exception(f"Exception in {module.name} signal handler")
+                module.abort(
+                    f"Exception in {module.name} signal handler: {e}", urgent=True
+                )
 
         def callback_fn(sig: signal.Signals):
             return asyncio.create_task(signal_handler(sig))
@@ -106,8 +109,9 @@ class Runner:
                 height=click_event.get("height"),
                 modifiers=click_event.get("modifiers"),
             )
-        except Exception:
+        except Exception as e:
             logger.exception(f"Error in {module.name} click handler")
+            module.abort(f"Exception in {module.name} click handler: {e}", urgent=True)
 
     # Based on: https://git.io/fjbHx
     async def click_events(self) -> None:

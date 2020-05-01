@@ -100,6 +100,35 @@ async def test_valid_module():
         "markup": "none",
     }
 
+    module.abort("Aborted!")
+
+    _, result = await module.update_queue.get()
+
+    assert result == {
+        "align": "center",
+        "background": "#FFFFFF",
+        "border": "#FF0000",
+        "border_bottom": 1,
+        "border_left": 1,
+        "border_right": 1,
+        "border_top": 1,
+        "color": "#000000",
+        "full_text": "Aborted!",
+        "instance": str(module.id),
+        "min_width": 10,
+        "name": "Name",
+        "separator": False,
+        "separator_block_width": 9,
+        "urgent": True,
+        "markup": "pango",
+    }
+
+    module.update("Shouldn't update since aborted")
+
+    with pytest.raises(asyncio.QueueEmpty):
+        await module.update_queue.get_nowait()
+
+    # click_handler() by default should raise NotImplementedError
     with pytest.raises(NotImplementedError):
         await module.click_handler(
             x=1,
@@ -112,6 +141,7 @@ async def test_valid_module():
             modifiers=[],
         )
 
+    # signal_handler() by default should raise NotImplementedError
     with pytest.raises(NotImplementedError):
         await module.signal_handler(sig=signal.SIGHUP)
 
