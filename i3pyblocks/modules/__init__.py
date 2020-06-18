@@ -108,7 +108,7 @@ class Module(metaclass=abc.ABCMeta):
             self.update_queue.put_nowait((self.id, self.result()))
         else:
             core.logger.warn(
-                f"Not pusshing update since module {self.name} with "
+                f"Not pushing update since module {self.name} with "
                 f"id {self.id} is frozen"
             )
 
