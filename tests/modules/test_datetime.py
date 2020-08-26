@@ -1,22 +1,28 @@
 import pytest
-from freezegun import freeze_time
+
+from datetime import datetime
+from unittest.mock import MagicMock
 
 from i3pyblocks.modules import datetime as m_datetime
 
 
-@freeze_time("2020-04-19T17:00:00")
 @pytest.mark.asyncio
 async def test_datetime_module():
+    mock_datetime = MagicMock()
+    mock_datetime.now.return_value = datetime(2020, 8, 25, 23, 30, 0)
+
     # Use a non locale dependent format
-    instance = m_datetime.DateTimeModule(format_time="%H:%M:%S", format_date="%y-%m-%d")
+    instance = m_datetime.DateTimeModule(
+        format_time="%H:%M:%S", format_date="%y-%m-%d", _datetime=mock_datetime
+    )
     await instance.run()
 
-    assert instance.result()["full_text"] == "17:00:00"
+    assert instance.result()["full_text"] == "23:30:00"
 
     # Simulate click
     await instance.click_handler()
-    assert instance.result()["full_text"] == "20-04-19"
+    assert instance.result()["full_text"] == "20-08-25"
 
     # Simulate another click, should go back to hours
     await instance.click_handler()
-    assert instance.result()["full_text"] == "17:00:00"
+    assert instance.result()["full_text"] == "23:30:00"
