@@ -86,15 +86,18 @@ async def main():
             ),
         )
     )
-    runner.register_module(
-        aionotify.BacklightModule(
-            format=" {percent:.0f}%",
-            command_on_click=(
-                (types.Mouse.SCROLL_UP, "light -A 5%"),
-                (types.Mouse.SCROLL_DOWN, "light -U 5"),
-            ),
+    try:
+        runner.register_module(
+            aionotify.BacklightModule(
+                format=" {percent:.0f}%",
+                command_on_click=(
+                    (types.Mouse.SCROLL_UP, "light -A 5%"),
+                    (types.Mouse.SCROLL_DOWN, "light -U 5"),
+                ),
+            )
         )
-    )
+    except StopIteration:
+        pass
     runner.register_module(
         pulsectl.PulseAudioModule(format=" {volume:.0f}%", format_mute=" mute")
     )
