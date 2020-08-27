@@ -16,7 +16,7 @@ class DateTimeModule(modules.PollingModule):
         self.format_date = format_date
         self.format_time = format_time
         self.format = self.format_time
-        self._datetime = _datetime
+        self.datetime = _datetime
 
     async def click_handler(self, *_, **__) -> None:
         if self.format == self.format_date:
@@ -27,5 +27,5 @@ class DateTimeModule(modules.PollingModule):
         await self.run()
 
     async def run(self) -> None:
-        current_time = self._datetime.now()
+        current_time = self.datetime.now()
         self.update(current_time.strftime(self.format))
