@@ -1,8 +1,6 @@
 import pytest
 from asynctest import CoroutineMock
-from unittest.mock import call, patch, Mock, MagicMock
-
-from i3ipc import Event
+from unittest.mock import MagicMock
 
 from i3pyblocks.modules import i3ipc as m_i3ipc
 
