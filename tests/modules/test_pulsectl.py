@@ -1,6 +1,5 @@
-from unittest.mock import call
+from unittest.mock import call, MagicMock
 
-import pulsectl
 import pytest
 
 from i3pyblocks import types
@@ -17,23 +16,23 @@ ANOTHER_SINK = misc.AttributeDict(
 
 
 @pytest.fixture
-def mock_pulse(mocker):
-    # Mock Pulse class
-    MockPulse = mocker.patch.object(pulsectl, "Pulse")
-    # Mock a Pulse instance
-    mock_instance = MockPulse.return_value
+def pulsectl_mocker(mocker):
+    mock_pulsectl = MagicMock()
+    # Mock Pulse instance class
+    mock_pulse = mock_pulsectl.Pulse.return_value
     # Mock pulse.server_list()
-    mock_instance.sink_list.return_value = [SINK, ANOTHER_SINK]
+    mock_pulse.sink_list.return_value = [SINK, ANOTHER_SINK]
     # Mock pulse.server_info()
-    mock_instance.sink_info.return_value = SINK
+    mock_pulse.sink_info.return_value = SINK
     # Mock pulse.volume_get_all_chans()
-    mock_instance.volume_get_all_chans.return_value = 1.0
+    mock_pulse.volume_get_all_chans.return_value = 1.0
 
-    return mock_instance
+    return mock_pulsectl, mock_pulse
 
 
-def test_pulse_audio_module(mock_pulse):
-    instance = m_pulsectl.PulseAudioModule()
+def test_pulse_audio_module(pulsectl_mocker):
+    mock_pulsectl, mock_pulse = pulsectl_mocker
+    instance = m_pulsectl.PulseAudioModule(_pulsectl=mock_pulsectl)
 
     # If volume is 10%, returns Colors.WARN
     mock_pulse.volume_get_all_chans.return_value = 0.1
@@ -73,12 +72,15 @@ def test_pulse_audio_module(mock_pulse):
 
 
 @pytest.mark.asyncio
-async def test_pulse_audio_module_click_handler(mocker, mock_pulse):
-    instance = m_pulsectl.PulseAudioModule(command=("command", "-c"))
+async def test_pulse_audio_module_click_handler(pulsectl_mocker):
+    mock_pulsectl, mock_pulse = pulsectl_mocker
+    mock_subprocess = MagicMock()
+    instance = m_pulsectl.PulseAudioModule(
+        command=("command", "-c"), _pulsectl=mock_pulsectl, _subprocess=mock_subprocess
+    )
 
-    popen_mock = mocker.patch("subprocess.Popen")
     await instance.click_handler(types.Mouse.LEFT_BUTTON)
-    popen_mock.assert_called_once_with(("command", "-c"))
+    mock_subprocess.Popen.assert_called_once_with(("command", "-c"))
 
     mute_mock = mock_pulse.mute
     await instance.click_handler(types.Mouse.RIGHT_BUTTON)
