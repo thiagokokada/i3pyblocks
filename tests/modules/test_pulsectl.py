@@ -1,6 +1,7 @@
 from unittest.mock import call, MagicMock
 
 import pytest
+import pulsectl
 
 from i3pyblocks import types
 from i3pyblocks.modules import pulsectl as m_pulsectl
@@ -30,6 +31,11 @@ def pulsectl_mocker(mocker):
     return mock_pulsectl, mock_pulse
 
 
+def mock_event(module_instance, event):
+    module_instance.event = MagicMock()
+    module_instance.event.facility = event
+
+
 def test_pulse_audio_module(pulsectl_mocker):
     mock_pulsectl, mock_pulse = pulsectl_mocker
     instance = m_pulsectl.PulseAudioModule(_pulsectl=mock_pulsectl)
@@ -37,7 +43,7 @@ def test_pulse_audio_module(pulsectl_mocker):
     # If volume is 10%, returns Colors.WARN
     mock_pulse.volume_get_all_chans.return_value = 0.1
 
-    instance._update_status()
+    instance.update_status()
 
     result = instance.result()
 
@@ -47,28 +53,47 @@ def test_pulse_audio_module(pulsectl_mocker):
     # If volume is 10%, returns Colors.NEUTRAL (None)
     mock_pulse.volume_get_all_chans.return_value = 0.5
 
-    instance._update_status()
+    instance.update_status()
 
     result = instance.result()
 
     assert result["full_text"] == "V: 50%"
 
-    instance._toggle_mute()
+    instance.toggle_mute()
     mock_pulse.mute.assert_called_with(SINK, mute=True)
 
     # If volume is muted, change text and returns Color.URGENT
     mock_pulse.sink_info.return_value = SINK_MUTE
 
-    instance._update_sink_info()
-    instance._update_status()
+    # Simulate a normal event
+    mock_event(instance, event="sink")
+    instance.handle_event()
+    instance.update_status()
 
     result = instance.result()
 
     assert result["full_text"] == "V: MUTE"
     assert result["color"] == types.Color.URGENT
 
-    instance._toggle_mute()
+    instance.toggle_mute()
     mock_pulse.mute.assert_called_with(SINK_MUTE, mute=False)
+
+
+def test_pulse_audio_module_exception(pulsectl_mocker):
+    mock_pulsectl, mock_pulse = pulsectl_mocker
+    instance = m_pulsectl.PulseAudioModule(_pulsectl=mock_pulsectl)
+
+    # Simulate an event going wrong
+    mock_event(instance, event="server")
+    mock_pulse.sink_info.side_effect = [pulsectl.PulseError(), MagicMock()]
+    instance.handle_event()
+
+    mock_pulse.sink_info.assert_called()
+    # Why 3 times?
+    # - The first is during setup
+    # - The second is during handle_event() (raising an Exception)
+    # - The third is called by retry logic in _update_sink_info()
+    assert mock_pulse.sink_info.call_count == 3
 
 
 @pytest.mark.asyncio
