@@ -1,20 +1,29 @@
 import asyncio
 
-from i3ipc import Event
+import i3ipc
 from i3ipc.aio import Connection
 
 from i3pyblocks import core, modules
 
 
 class WindowTitleModule(modules.Module):
-    def __init__(self, format: str = "{window_title:.81s}", **kwargs):
+    def __init__(
+        self,
+        format: str = "{window_title:.81s}",
+        *,
+        _i3ipc=i3ipc,
+        _i3ipc_connection=Connection,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self.format = format
+        self.i3ipc = _i3ipc
+        self.i3ipc_connection = _i3ipc_connection
 
     async def clear_title(self, *_):
         self.update()
 
-    async def update_title(self, connection: Connection, *_):
+    async def update_title(self, connection, *_):
         tree = await connection.get_tree()
         window = tree.find_focused()
 
@@ -24,13 +33,13 @@ class WindowTitleModule(modules.Module):
         await super().start(queue)
 
         # https://git.io/Jft7j
-        connection = Connection(auto_reconnect=True)
+        connection = self.i3ipc_connection(auto_reconnect=True)
         await connection.connect()
 
-        connection.on(Event.WORKSPACE_FOCUS, self.clear_title)
-        connection.on(Event.WINDOW_CLOSE, self.clear_title)
-        connection.on(Event.WINDOW_TITLE, self.update_title)
-        connection.on(Event.WINDOW_FOCUS, self.update_title)
+        connection.on(self.i3ipc.Event.WORKSPACE_FOCUS, self.clear_title)
+        connection.on(self.i3ipc.Event.WINDOW_CLOSE, self.clear_title)
+        connection.on(self.i3ipc.Event.WINDOW_TITLE, self.update_title)
+        connection.on(self.i3ipc.Event.WINDOW_FOCUS, self.update_title)
 
         try:
             await self.update_title(connection)

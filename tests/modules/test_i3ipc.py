@@ -1,8 +1,6 @@
 import pytest
 from asynctest import CoroutineMock
-from unittest.mock import call, patch, Mock
-
-from i3ipc import Event
+from unittest.mock import MagicMock
 
 from i3pyblocks.modules import i3ipc as m_i3ipc
 
@@ -14,27 +12,21 @@ from helpers import misc
 # load this module successfully
 @pytest.mark.asyncio
 async def test_window_title_module():
-    with patch("i3pyblocks.modules.i3ipc.Connection") as connection_mock:
-        connection_mock_instance = connection_mock.return_value
-        connection_mock_instance.connect = CoroutineMock()
+    mock_i3ipc = MagicMock()
+    mock_i3ipc_connection = MagicMock()
+    connection_mock = mock_i3ipc_connection.return_value
+    connection_mock.connect = CoroutineMock()
 
-        instance = m_i3ipc.WindowTitleModule()
-        await instance.start()
-
-        connection_mock_instance.on.assert_has_calls(
-            [
-                call(Event.WORKSPACE_FOCUS, instance.clear_title),
-                call(Event.WINDOW_CLOSE, instance.clear_title),
-                call(Event.WINDOW_TITLE, instance.update_title),
-                call(Event.WINDOW_FOCUS, instance.update_title),
-            ]
-        )
+    instance = m_i3ipc.WindowTitleModule(
+        _i3ipc=mock_i3ipc, _i3ipc_connection=mock_i3ipc_connection
+    )
+    await instance.start()
 
 
 @pytest.mark.asyncio
 async def test_window_title_module_callbacks():
     instance = m_i3ipc.WindowTitleModule()
-    connection_mock = Mock()
+    connection_mock = MagicMock()
     connection_mock.get_tree = CoroutineMock()
     tree_mock = connection_mock.get_tree.return_value
     window_mock = tree_mock.find_focused

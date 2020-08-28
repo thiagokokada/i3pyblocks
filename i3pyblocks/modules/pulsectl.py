@@ -28,6 +28,9 @@ class PulseAudioModule(modules.ExecutorModule):
             (87.5, "█"),
         ),
         command: Sequence[str] = ("pavucontrol",),
+        *,
+        _pulsectl=pulsectl,
+        _subprocess=subprocess,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -36,9 +39,11 @@ class PulseAudioModule(modules.ExecutorModule):
         self.colors = dict(colors)
         self.icons = dict(icons)
         self.command = command
+        self.pulsectl = _pulsectl
+        self.subprocess = _subprocess
 
         # https://pypi.org/project/pulsectl/#event-handling-code-threads
-        self.pulse = pulsectl.Pulse(__name__, threading_lock=True)
+        self.pulse = self.pulsectl.Pulse(__name__, threading_lock=True)
 
         self._find_sink_index()
         self._update_sink_info()
@@ -51,7 +56,7 @@ class PulseAudioModule(modules.ExecutorModule):
     def _setup_event_callback(self) -> None:
         def event_callback(event):
             self.event = event
-            raise pulsectl.PulseLoopStop()
+            raise self.pulsectl.PulseLoopStop()
 
         self.pulse.event_mask_set("sink", "server")
         self.pulse.event_callback_set(event_callback)
@@ -99,7 +104,7 @@ class PulseAudioModule(modules.ExecutorModule):
 
     async def click_handler(self, button: int, *_, **__) -> None:
         if button == types.Mouse.LEFT_BUTTON:
-            subprocess.Popen(self.command)
+            self.subprocess.Popen(self.command)
         elif button == types.Mouse.RIGHT_BUTTON:
             self._toggle_mute()
         elif button == types.Mouse.SCROLL_UP:
