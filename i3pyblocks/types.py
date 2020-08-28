@@ -6,6 +6,17 @@ Result = Dict[str, Union[str, int, bool]]
 Dictable = Union[Dict[object, Any], Iterable[Tuple[object, Any]]]
 
 
+class Align:
+    CENTER: str = "center"
+    RIGHT: str = "right"
+    LEFT: str = "left"
+
+
+class Markup:
+    NONE: str = "none"
+    PANGO: str = "pango"
+
+
 class Mouse:
     LEFT_BUTTON: int = 1
     MIDDLE_BUTTON: int = 2
