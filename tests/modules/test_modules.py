@@ -3,7 +3,7 @@ import signal
 
 import pytest
 
-from i3pyblocks import modules
+from i3pyblocks import modules, types
 
 
 def test_invalid_module():
@@ -19,7 +19,7 @@ async def test_valid_module():
     class ValidModule(modules.Module):
         async def start(self):
             await super().start()
-            self.update("Done!", color=None, urgent=False, markup=modules.Markup.NONE)
+            self.update("Done!", color=None, urgent=False, markup=types.Markup.NONE)
 
     module = ValidModule(
         name="Name",
@@ -31,11 +31,11 @@ async def test_valid_module():
         border_bottom=1,
         border_left=1,
         min_width=10,
-        align=modules.Align.CENTER,
+        align=types.Align.CENTER,
         urgent=True,
         separator=False,
         separator_block_width=9,
-        markup=modules.Markup.PANGO,
+        markup=types.Markup.PANGO,
     )
 
     assert module.result() == {

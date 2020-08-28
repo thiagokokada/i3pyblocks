@@ -9,17 +9,6 @@ from typing import List, Optional
 from i3pyblocks import core, utils, types
 
 
-class Align(Enum):
-    CENTER = "center"
-    RIGHT = "right"
-    LEFT = "left"
-
-
-class Markup(Enum):
-    NONE = "none"
-    PANGO = "pango"
-
-
 class Module(metaclass=abc.ABCMeta):
     def __init__(
         self,
@@ -33,11 +22,11 @@ class Module(metaclass=abc.ABCMeta):
         border_bottom: Optional[int] = None,
         border_left: Optional[int] = None,
         min_width: Optional[int] = None,
-        align: Optional[Align] = Align.LEFT,
+        align: Optional[str] = types.Align.LEFT,
         urgent: Optional[bool] = False,
         separator: Optional[bool] = True,
         separator_block_width: Optional[int] = None,
-        markup: Optional[Markup] = Markup.NONE,
+        markup: Optional[str] = types.Markup.NONE,
     ) -> None:
         self.id = uuid.uuid4()
         self.name = name or self.__class__.__name__
@@ -55,11 +44,11 @@ class Module(metaclass=abc.ABCMeta):
             border_left=border_left,
             border_bottom=border_bottom,
             min_width=min_width,
-            align=align.value if align else None,
+            align=align,
             urgent=urgent,
             separator=separator,
             separator_block_width=separator_block_width,
-            markup=markup.value if markup else None,
+            markup=markup,
         )
 
         self.update_state()
@@ -76,11 +65,11 @@ class Module(metaclass=abc.ABCMeta):
         border_bottom: Optional[int] = None,
         border_left: Optional[int] = None,
         min_width: Optional[int] = None,
-        align: Optional[Align] = None,
+        align: Optional[str] = None,
         urgent: Optional[bool] = None,
         separator: Optional[bool] = None,
         separator_block_width: Optional[int] = None,
-        markup: Optional[Markup] = None,
+        markup: Optional[str] = None,
     ) -> None:
         self._state = utils.non_nullable_dict(
             full_text=full_text,
@@ -93,11 +82,11 @@ class Module(metaclass=abc.ABCMeta):
             border_left=border_left,
             border_bottom=border_bottom,
             min_width=min_width,
-            align=align.value if align else None,
+            align=align,
             urgent=urgent,
             separator=separator,
             separator_block_width=separator_block_width,
-            markup=markup.value if markup else None,
+            markup=markup,
         )
 
     def result(self) -> types.Result:
