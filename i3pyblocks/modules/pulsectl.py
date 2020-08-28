@@ -43,15 +43,19 @@ class PulseAudioModule(modules.ExecutorModule):
         self.subprocess = _subprocess
 
         # https://pypi.org/project/pulsectl/#event-handling-code-threads
-        self.pulse = self.pulsectl.Pulse(__name__, threading_lock=True)
-
-        self._find_sink_index()
-        self._update_sink_info()
-        self._setup_event_callback()
+        self.pulse = self.pulsectl.Pulse(__name__, connect=False, threading_lock=True)
+        self._initialize_pulse()
 
     def __exit__(self, *_) -> None:
         super().__exit__()
         self.pulse.close()
+
+    def _initialize_pulse(self):
+        self.pulse.connect(autospawn=True)
+
+        self._find_sink_index()
+        self._update_sink_info()
+        self._setup_event_callback()
 
     def _setup_event_callback(self) -> None:
         def event_callback(event):
@@ -85,7 +89,10 @@ class PulseAudioModule(modules.ExecutorModule):
         )
 
     def _update_sink_info(self) -> None:
-        self.sink = self.pulse.sink_info(self.sink_index)
+        try:
+            self.sink = self.pulse.sink_info(self.sink_index)
+        except pulsectl.PulseError:
+            self._initialize_pulse()
 
     def _toggle_mute(self):
         if self.sink.mute:
