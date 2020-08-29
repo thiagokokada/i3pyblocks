@@ -18,7 +18,7 @@ ANOTHER_SINK = misc.AttributeDict(
 
 
 @pytest.fixture
-def pulsectl_mocker(mocker):
+def pulsectl_mocker():
     mock_pulsectl = Mock(pulsectl)
     # Mock Pulse instance class
     mock_pulse = mock_pulsectl.Pulse.return_value

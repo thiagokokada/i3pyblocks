@@ -12,13 +12,15 @@ from i3pyblocks import core, modules
 
 # TODO: Validate if we can actually read from stdin here
 @pytest.mark.asyncio
-async def test_get_aio_reader(capsys, mocker):
-    mocker.patch("sys.stdin", return_value=b"Hello!")
-    loop = asyncio.get_running_loop()
+async def test_get_aio_reader(capsys):
+    with patch("sys.stdin") as mock_stdin:
+        mock_stdin.return_value = b"Hello!"
 
-    with capsys.disabled():
-        reader = await core.get_aio_reader(loop)
-        assert isinstance(reader, asyncio.StreamReader)
+        loop = asyncio.get_running_loop()
+
+        with capsys.disabled():
+            reader = await core.get_aio_reader(loop)
+            assert isinstance(reader, asyncio.StreamReader)
 
 
 @pytest.mark.asyncio
