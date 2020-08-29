@@ -40,6 +40,8 @@ async def test_valid_module():
         markup=types.Markup.PANGO,
     )
 
+    module.setup(asyncio.Queue())
+
     assert module.result() == {
         "align": "center",
         "background": "#FFFFFF",
