@@ -9,10 +9,13 @@ from i3pyblocks import core, modules, types, utils
 
 
 class FileWatcherModule(modules.Module):
-    def __init__(self, path: str, flags: aionotify.Flags, **kwargs):
+    def __init__(
+        self, path: str, flags: aionotify.Flags, *, _aionotify=aionotify, **kwargs
+    ):
         super().__init__(**kwargs)
         self.flags = flags
         self.path = path
+        self.aionotify = _aionotify
 
     @abc.abstractmethod
     async def run(self) -> None:
@@ -21,7 +24,7 @@ class FileWatcherModule(modules.Module):
     async def start(self, queue: asyncio.Queue = None) -> None:
         await super().start(queue)
 
-        watcher = aionotify.Watcher()
+        watcher = self.aionotify.Watcher()
         watcher.watch(self.path, flags=self.flags)
 
         try:
@@ -47,13 +50,18 @@ class BacklightModule(FileWatcherModule):
             (types.Mouse.SCROLL_UP, None),
             (types.Mouse.SCROLL_DOWN, None),
         ),
+        *,
+        _aionotify=aionotify,
         **kwargs,
     ) -> None:
         self.base_path = next(glob.iglob(path))
         self.brightness_path = os.path.join(self.base_path, "brightness")
         self.max_brightness_path = os.path.join(self.base_path, "max_brightness")
         super().__init__(
-            path=self.brightness_path, flags=aionotify.Flags.MODIFY, **kwargs
+            path=self.brightness_path,
+            flags=_aionotify.Flags.MODIFY,
+            _aionotify=_aionotify,
+            **kwargs,
         )
         self.format = format
         self.command_on_click = dict(command_on_click)
