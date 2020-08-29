@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 
 import psutil
 import pytest
@@ -11,7 +11,7 @@ from helpers import misc
 
 @pytest.mark.asyncio
 async def test_cpu_percent_module():
-    mock_psutil = MagicMock()
+    mock_psutil = Mock(psutil)
     mock_psutil.cpu_percent.return_value = 75.5
 
     instance = m_psutil.CpuPercentModule(format="{percent}", _psutil=mock_psutil)
@@ -25,7 +25,7 @@ async def test_cpu_percent_module():
 
 @pytest.mark.asyncio
 async def test_disk_usage_module():
-    mock_psutil = MagicMock()
+    mock_psutil = Mock(psutil)
     mock_psutil.disk_usage.return_value = misc.AttributeDict(
         total=226227036160, used=49354395648, free=165309575168, percent=91.3
     )
@@ -44,7 +44,7 @@ async def test_disk_usage_module():
 
 @pytest.mark.asyncio
 async def test_load_avg_module():
-    mock_psutil = MagicMock()
+    mock_psutil = Mock(psutil)
     mock_psutil.getloadavg.return_value = (2.5, 5, 15)
 
     instance = m_psutil.LoadAvgModule(
@@ -61,8 +61,8 @@ async def test_load_avg_module():
 
 @pytest.mark.asyncio
 async def test_network_speed_module_down():
-    mock_psutil = MagicMock()
-    mock_psutil.psutil.net_if_stats.return_value = {
+    mock_psutil = Mock(psutil)
+    mock_psutil.net_if_stats.return_value = {
         "lo": misc.AttributeDict(
             isup=True, duplex=psutil.NIC_DUPLEX_UNKNOWN, speed=0, mtu=65536
         ),
@@ -85,7 +85,7 @@ async def test_network_speed_module_down():
 
 @pytest.mark.asyncio
 async def test_network_speed_module_up():
-    mock_psutil = MagicMock()
+    mock_psutil = Mock(psutil)
     mock_psutil.net_if_stats.return_value = {
         "lo": misc.AttributeDict(
             isup=True, duplex=psutil.NIC_DUPLEX_UNKNOWN, speed=0, mtu=65536
@@ -140,7 +140,7 @@ async def test_network_speed_module_up():
 
 @pytest.mark.asyncio
 async def test_sensors_battery_module_without_battery():
-    mock_psutil = MagicMock()
+    mock_psutil = Mock(psutil)
     mock_psutil.sensors_battery.return_value = None
 
     instance = m_psutil.SensorsBatteryModule(_psutil=mock_psutil)
@@ -154,7 +154,7 @@ async def test_sensors_battery_module_without_battery():
 
 @pytest.mark.asyncio
 async def test_sensors_battery_module_with_battery():
-    mock_psutil = MagicMock()
+    mock_psutil = Mock(psutil)
     mock_psutil.sensors_battery.side_effect = [
         misc.AttributeDict(
             percent=93, secsleft=psutil.POWER_TIME_UNLIMITED, power_plugged=True
@@ -190,7 +190,7 @@ async def test_sensors_battery_module_with_battery():
 
 @pytest.mark.asyncio
 async def test_sensors_temperature_module():
-    mock_psutil = MagicMock()
+    mock_psutil = Mock(psutil)
     mock_psutil.sensors_temperatures.return_value = {
         "coretemp": [
             misc.AttributeDict(
@@ -234,7 +234,7 @@ async def test_sensors_temperature_module():
 
 @pytest.mark.asyncio
 async def test_virtual_memory_module():
-    mock_psutil = MagicMock()
+    mock_psutil = Mock(psutil)
     mock_psutil.virtual_memory.return_value = misc.AttributeDict(
         total=16758484992,
         available=13300297728,
