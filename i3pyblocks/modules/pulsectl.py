@@ -3,6 +3,7 @@ import time
 from typing import Sequence
 
 import pulsectl
+from pulsectl import PulseError, PulseLoopStop
 
 from i3pyblocks import modules, utils, types
 
@@ -71,19 +72,19 @@ class PulseAudioModule(modules.ExecutorModule):
     def _update_sink_info(self) -> None:
         try:
             self.sink = self.pulse.sink_info(self.sink_index)
-        except pulsectl.PulseError:
+        except PulseError:
             # Waiting a little before trying to connect again so we don't
             # burn CPU in a infinity loop
             time.sleep(0.5)
             self._initialize_pulse()
 
-    def _setup_event_callback(self) -> None:
-        def _event_callback(event):
-            self.event = event
-            raise self.pulsectl.PulseLoopStop()
+    def _event_callback(self, event):
+        self.event = event
+        raise PulseLoopStop()
 
+    def _setup_event_callback(self) -> None:
         self.pulse.event_mask_set("sink", "server")
-        self.pulse.event_callback_set(_event_callback)
+        self.pulse.event_callback_set(self._event_callback)
 
     def handle_event(self) -> None:
         self.pulse.event_listen()

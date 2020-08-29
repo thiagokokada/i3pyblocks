@@ -31,9 +31,11 @@ def pulsectl_mocker(mocker):
     return mock_pulsectl, mock_pulse
 
 
-def mock_event(module_instance, event):
-    module_instance.event = MagicMock()
-    module_instance.event.facility = event
+def mock_event(module_instance, facility):
+    with pytest.raises(pulsectl.PulseLoopStop):
+        event = MagicMock()
+        event.facility = facility
+        module_instance._event_callback(event)
 
 
 def test_pulse_audio_module(pulsectl_mocker):
@@ -66,7 +68,7 @@ def test_pulse_audio_module(pulsectl_mocker):
     mock_pulse.sink_info.return_value = SINK_MUTE
 
     # Simulate a normal event
-    mock_event(instance, event="sink")
+    mock_event(instance, facility="sink")
     instance.handle_event()
     instance.update_status()
 
@@ -84,7 +86,7 @@ def test_pulse_audio_module_exception(pulsectl_mocker):
     instance = m_pulsectl.PulseAudioModule(_pulsectl=mock_pulsectl)
 
     # Simulate an event going wrong
-    mock_event(instance, event="server")
+    mock_event(instance, facility="server")
     mock_pulse.sink_info.side_effect = [pulsectl.PulseError(), MagicMock()]
     instance.handle_event()
 
