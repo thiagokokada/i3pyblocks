@@ -112,6 +112,8 @@ class BacklightModule(FileWatcherModule):
 
         self.update(
             self.format.format(
-                brightness=brightness, max_brightness=max_brightness, percent=percent,
+                brightness=brightness,
+                max_brightness=max_brightness,
+                percent=percent,
             )
         )
