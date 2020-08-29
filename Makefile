@@ -7,7 +7,7 @@ clean:
 	git clean -fxd
 
 tests:
-	poetry run python -m pytest
+	poetry run python3 -m pytest tests
 
 format:
 	poetry run black $(SRC_PATHS)

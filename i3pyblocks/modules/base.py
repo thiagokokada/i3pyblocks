@@ -377,6 +377,7 @@ class PollingModule(Module):
         except Exception as e:
             core.logger.exception(f"Exception in {self.name}")
             self.abort(f"Exception in {self.name}: {e}", urgent=True)
+            raise e
 
 
 class ExecutorModule(Module):
@@ -423,3 +424,4 @@ class ExecutorModule(Module):
         except Exception as e:
             core.logger.exception(f"Exception in {self.name}")
             self.abort(f"Exception in {self.name}: {e}", urgent=True)
+            raise e
