@@ -171,7 +171,7 @@ class NetworkSpeedModule(modules.PollingModule):
         interface = self._find_interface()
 
         if not interface:
-            self.update(self.format_down, color=types.Color.URGENT)
+            self.abort(self.format_down, color=types.Color.URGENT)
             return
 
         now = self.psutil.net_io_counters(pernic=True)

@@ -43,4 +43,4 @@ class WindowTitleModule(modules.Module):
             await connection.main()
         except Exception as e:
             core.logger.exception(f"Exception in {self.name}")
-            self.update(f"Exception in {self.name}: {e}", urgent=True)
+            self.abort(f"Exception in {self.name}: {e}", urgent=True)
