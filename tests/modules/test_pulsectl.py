@@ -1,4 +1,5 @@
-from unittest.mock import call, MagicMock
+import subprocess
+from unittest.mock import call, Mock
 
 import pytest
 import pulsectl
@@ -17,8 +18,8 @@ ANOTHER_SINK = misc.AttributeDict(
 
 
 @pytest.fixture
-def pulsectl_mocker(mocker):
-    mock_pulsectl = MagicMock()
+def pulsectl_mocker():
+    mock_pulsectl = Mock(pulsectl)
     # Mock Pulse instance class
     mock_pulse = mock_pulsectl.Pulse.return_value
     # Mock pulse.server_list()
@@ -33,7 +34,7 @@ def pulsectl_mocker(mocker):
 
 def mock_event(module_instance, facility):
     with pytest.raises(pulsectl.PulseLoopStop):
-        event = MagicMock()
+        event = Mock(pulsectl.PulseEventInfo)
         event.facility = facility
         module_instance._event_callback(event)
 
@@ -87,7 +88,7 @@ def test_pulse_audio_module_exception(pulsectl_mocker):
 
     # Simulate an event going wrong
     mock_event(instance, facility="server")
-    mock_pulse.sink_info.side_effect = [pulsectl.PulseError(), MagicMock()]
+    mock_pulse.sink_info.side_effect = [pulsectl.PulseError(), SINK]
     instance.handle_event()
 
     mock_pulse.sink_info.assert_called()
@@ -101,7 +102,8 @@ def test_pulse_audio_module_exception(pulsectl_mocker):
 @pytest.mark.asyncio
 async def test_pulse_audio_module_click_handler(pulsectl_mocker):
     mock_pulsectl, mock_pulse = pulsectl_mocker
-    mock_subprocess = MagicMock()
+    mock_subprocess = Mock(subprocess)
+
     instance = m_pulsectl.PulseAudioModule(
         command=("command", "-c"), _pulsectl=mock_pulsectl, _subprocess=mock_subprocess
     )

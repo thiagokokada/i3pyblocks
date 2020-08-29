@@ -165,7 +165,14 @@ async def test_valid_polling_module():
     }
 
     await module.click_handler(
-        x=1, y=1, button=1, relative_x=1, relative_y=1, width=1, height=1, modifiers=[],
+        x=1,
+        y=1,
+        button=1,
+        relative_x=1,
+        relative_y=1,
+        width=1,
+        height=1,
+        modifiers=[],
     )
 
     assert module.result() == {

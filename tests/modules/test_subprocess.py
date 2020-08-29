@@ -1,8 +1,7 @@
 import pytest
-from asynctest import CoroutineMock
-from unittest.mock import call, MagicMock
+from asynctest import Mock
 
-from i3pyblocks import types
+from i3pyblocks import types, utils
 from i3pyblocks.modules import subprocess as m_sub
 
 from helpers import misc
@@ -31,7 +30,8 @@ async def test_shell_module():
 
 @pytest.mark.asyncio
 async def test_shell_module_click_handler():
-    mock_utils = MagicMock()
+    mock_utils = Mock(utils)
+
     instance = m_sub.ShellModule(
         command="exit 0",
         command_on_click=(
@@ -51,23 +51,27 @@ async def test_shell_module_click_handler():
         "SCROLL_UP",
         "SCROLL_DOWN",
     ]:
-
-        mock_utils.shell_run = CoroutineMock()
         mock_utils.shell_run.return_value = (
             b"stdout\n",
             b"stderr\n",
             misc.AttributeDict(returncode=0),
         )
         await instance.click_handler(getattr(types.Mouse, button))
-        mock_utils.shell_run.assert_has_calls([call(button)])
+        mock_utils.shell_run.assert_called_once_with(button)
+        mock_utils.shell_run.reset_mock()
 
 
 @pytest.mark.asyncio
 async def test_toggle_module(tmpdir):
+    file_on = tmpdir / "on"
+    file_off = tmpdir / "off"
+
+    # This test is not mocked, since basic Linux tools should be available
+    # in any place that have an i3 setup
     instance = m_sub.ToggleModule(
         command_state="echo",
-        command_on=f"touch {tmpdir}/on",
-        command_off=f"touch {tmpdir}/off",
+        command_on=f"touch {file_on}",
+        command_off=f"touch {file_off}",
     )
 
     await instance.run()
@@ -77,14 +81,14 @@ async def test_toggle_module(tmpdir):
     assert result["full_text"] == "OFF"
 
     await instance.click_handler()
-    # Will call command_off since the state == False
-    assert (tmpdir / "on").exists()
+    # Will call command_on since the state == False
+    assert (file_on).exists()
 
     instance.command_state = "echo ON"
 
     await instance.click_handler()
-    # Will call command_on since the state == True
-    assert (tmpdir / "off").exists()
+    # Will call command_off since the state == True
+    assert (file_off).exists()
 
     result = instance.result()
     # ON since it is an non-empty echo

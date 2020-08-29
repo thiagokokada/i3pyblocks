@@ -1,5 +1,5 @@
 import i3ipc
-from i3ipc.aio import Connection
+import i3ipc.aio
 
 from i3pyblocks import core, modules
 
@@ -10,13 +10,13 @@ class WindowTitleModule(modules.Module):
         format: str = "{window_title:.81s}",
         *,
         _i3ipc=i3ipc,
-        _i3ipc_connection=Connection,
+        _i3ipc_aio=i3ipc.aio,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.format = format
         self.i3ipc = _i3ipc
-        self.i3ipc_connection = _i3ipc_connection
+        self.i3ipc_aio = _i3ipc_aio
 
     async def clear_title(self, *_):
         self.update()
@@ -29,7 +29,8 @@ class WindowTitleModule(modules.Module):
 
     async def start(self) -> None:
         # https://git.io/Jft7j
-        connection = self.i3ipc_connection(auto_reconnect=True)
+        connection = self.i3ipc_aio.Connection(auto_reconnect=True)
+
         await connection.connect()
 
         connection.on(self.i3ipc.Event.WORKSPACE_FOCUS, self.clear_title)

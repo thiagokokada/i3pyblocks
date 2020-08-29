@@ -1,14 +1,14 @@
 import pytest
 
 from datetime import datetime
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 
 from i3pyblocks.modules import datetime as m_datetime
 
 
 @pytest.mark.asyncio
 async def test_datetime_module():
-    mock_datetime = MagicMock()
+    mock_datetime = Mock(datetime)
     mock_datetime.now.return_value = datetime(2020, 8, 25, 23, 30, 0)
 
     # Use a non locale dependent format
