@@ -52,6 +52,7 @@ class BacklightModule(FileWatcherModule):
         ),
         *,
         _aionotify=aionotify,
+        _utils=utils,
         **kwargs,
     ) -> None:
         self.base_path = next(glob.iglob(path))
@@ -65,6 +66,7 @@ class BacklightModule(FileWatcherModule):
         )
         self.format = format
         self.command_on_click = dict(command_on_click)
+        self.utils = _utils
 
     async def click_handler(self, button: int, *_, **__) -> None:
         command = self.command_on_click.get(button)
@@ -72,7 +74,7 @@ class BacklightModule(FileWatcherModule):
         if not command:
             return
 
-        await utils.shell_run(command)
+        await self.utils.shell_run(command)
 
     def _get_max_brightness(self) -> int:
         with open(self.max_brightness_path) as f:
