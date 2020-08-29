@@ -34,3 +34,9 @@ async def test_window_title_module():
 
     result = instance.result()
     assert result["full_text"] == ""
+
+    # Sometimes window.name returns None
+    window_mock.return_value = misc.AttributeDict(name=None)
+    await instance.update_title(mock_connection)
+    result = instance.result()
+    assert result["full_text"] == ""

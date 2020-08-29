@@ -25,7 +25,7 @@ class WindowTitleModule(modules.Module):
         tree = await connection.get_tree()
         window = tree.find_focused()
 
-        self.update(self.format.format(window_title=window.name))
+        self.update(self.format.format(window_title=window.name or ""))
 
     async def start(self) -> None:
         # https://git.io/Jft7j
