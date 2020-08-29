@@ -154,7 +154,7 @@ async def test_valid_polling_module():
 
     module = ValidPollingModule()
 
-    await task.runner([module.start()])
+    await task.runner([module.start()], timeout=0.5)
 
     assert module.result() == {
         "full_text": "5",

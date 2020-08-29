@@ -33,7 +33,7 @@ async def test_file_watcher_module(tmpdir):
 
     module = ValidFileWatcherModule()
 
-    await task.runner([module.start(), update_file()])
+    await task.runner([module.start(), update_file()], timeout=0.2)
 
     result = module.result()
     assert result["full_text"] == "Hello World!"
@@ -80,7 +80,7 @@ async def test_backlight_module(tmpdir):
     result = module.result()
     assert result["full_text"] == "30.0 450 1500"
 
-    await task.runner([module.start(), update_file()])
+    await task.runner([module.start(), update_file()], timeout=0.2)
 
     result = module.result()
     assert result["full_text"] == "36.7 550 1500"
