@@ -44,3 +44,4 @@ class WindowTitleModule(modules.Module):
         except Exception as e:
             core.logger.exception(f"Exception in {self.name}")
             self.abort(f"Exception in {self.name}: {e}", urgent=True)
+            raise e

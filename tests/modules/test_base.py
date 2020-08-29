@@ -204,7 +204,8 @@ async def test_polling_module_with_error():
 
     module = PollingModuleWithError()
 
-    await module.start()
+    with pytest.raises(Exception):
+        await module.start()
 
     assert module.result() == {
         "full_text": "Exception in PollingModuleWithError: Boom!",
