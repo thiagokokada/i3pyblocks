@@ -397,10 +397,6 @@ class ExecutorModule(Module):
         super().__init__(**kwargs)
         self.executor = executor
 
-    def __exit__(self, *_) -> None:
-        if self.executor:
-            self.executor.shutdown(wait=True)
-
     @abc.abstractmethod
     def run(self) -> None:
         """Main loop in PollingModule
