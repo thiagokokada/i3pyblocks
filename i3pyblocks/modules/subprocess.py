@@ -16,6 +16,7 @@ class ShellModule(modules.PollingModule):
             (types.Mouse.SCROLL_DOWN, None),
         ),
         color_by_returncode: types.Dictable = (),
+        _utils=utils,
         **kwargs
     ) -> None:
         super().__init__(**kwargs)
@@ -23,6 +24,7 @@ class ShellModule(modules.PollingModule):
         self.command = command
         self.command_on_click = dict(command_on_click)
         self.color_by_returncode = dict(color_by_returncode)
+        self.utils = _utils
 
     async def click_handler(self, button: int, *_, **__) -> None:
         command = self.command_on_click.get(button)
@@ -30,7 +32,7 @@ class ShellModule(modules.PollingModule):
         if not command:
             return
 
-        await utils.shell_run(command)
+        await self.utils.shell_run(command)
         await self.run()
 
     async def run(self) -> None:
@@ -56,6 +58,8 @@ class ToggleModule(modules.PollingModule):
         command_off: str,
         format_on: str = "ON",
         format_off: str = "OFF",
+        *,
+        _utils=utils,
         **kwargs
     ) -> None:
         super().__init__(**kwargs)
@@ -64,6 +68,7 @@ class ToggleModule(modules.PollingModule):
         self.command_off = command_off
         self.format_on = format_on
         self.format_off = format_off
+        self.utils = _utils
 
     async def get_state(self) -> bool:
         stdout, _, _ = await utils.shell_run(self.command_state, stdout=subprocess.PIPE)
@@ -80,7 +85,7 @@ class ToggleModule(modules.PollingModule):
         else:
             command = self.command_off
 
-        await utils.shell_run(command)
+        await self.utils.shell_run(command)
         await self.run()
 
     async def run(self) -> None:

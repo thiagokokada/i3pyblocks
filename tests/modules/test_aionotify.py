@@ -3,7 +3,7 @@ import asyncio
 import aionotify
 import pytest
 from asynctest import CoroutineMock
-from unittest.mock import call, patch
+from unittest.mock import call, MagicMock
 
 from i3pyblocks import types
 from i3pyblocks.modules import aionotify as m_aionotify
@@ -81,6 +81,8 @@ async def test_backlight_module(tmpdir):
 
 @pytest.mark.asyncio
 async def test_backlight_module_click_handler(tmpdir):
+    mock_utils = MagicMock()
+
     instance = m_aionotify.BacklightModule(
         path=str(tmpdir),
         command_on_click=(
@@ -90,6 +92,7 @@ async def test_backlight_module_click_handler(tmpdir):
             (types.Mouse.SCROLL_UP, "SCROLL_UP"),
             (types.Mouse.SCROLL_DOWN, "SCROLL_DOWN"),
         ),
+        _utils=mock_utils,
     )
 
     for button in [
@@ -99,11 +102,11 @@ async def test_backlight_module_click_handler(tmpdir):
         "SCROLL_UP",
         "SCROLL_DOWN",
     ]:
-        with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
-            shell_mock.return_value = (
-                b"stdout\n",
-                b"stderr\n",
-                misc.AttributeDict(returncode=0),
-            )
-            await instance.click_handler(getattr(types.Mouse, button))
-            shell_mock.assert_has_calls([call(button)])
+        mock_utils.shell_run = CoroutineMock()
+        mock_utils.shell_run.return_value = (
+            b"stdout\n",
+            b"stderr\n",
+            misc.AttributeDict(returncode=0),
+        )
+        await instance.click_handler(getattr(types.Mouse, button))
+        mock_utils.shell_run.assert_has_calls([call(button)])

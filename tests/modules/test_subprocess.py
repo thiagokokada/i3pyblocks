@@ -1,6 +1,6 @@
 import pytest
 from asynctest import CoroutineMock
-from unittest.mock import call, patch
+from unittest.mock import call, MagicMock
 
 from i3pyblocks import types
 from i3pyblocks.modules import subprocess as m_sub
@@ -31,6 +31,7 @@ async def test_shell_module():
 
 @pytest.mark.asyncio
 async def test_shell_module_click_handler():
+    mock_utils = MagicMock()
     instance = m_sub.ShellModule(
         command="exit 0",
         command_on_click=(
@@ -40,6 +41,7 @@ async def test_shell_module_click_handler():
             (types.Mouse.SCROLL_UP, "SCROLL_UP"),
             (types.Mouse.SCROLL_DOWN, "SCROLL_DOWN"),
         ),
+        _utils=mock_utils,
     )
 
     for button in [
@@ -49,43 +51,41 @@ async def test_shell_module_click_handler():
         "SCROLL_UP",
         "SCROLL_DOWN",
     ]:
-        with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
-            shell_mock.return_value = (
-                b"stdout\n",
-                b"stderr\n",
-                misc.AttributeDict(returncode=0),
-            )
-            await instance.click_handler(getattr(types.Mouse, button))
-            shell_mock.assert_has_calls([call(button)])
+
+        mock_utils.shell_run = CoroutineMock()
+        mock_utils.shell_run.return_value = (
+            b"stdout\n",
+            b"stderr\n",
+            misc.AttributeDict(returncode=0),
+        )
+        await instance.click_handler(getattr(types.Mouse, button))
+        mock_utils.shell_run.assert_has_calls([call(button)])
 
 
 @pytest.mark.asyncio
-async def test_toggle_module():
+async def test_toggle_module(tmpdir):
     instance = m_sub.ToggleModule(
-        command_state="echo", command_on="state on", command_off="state off"
+        command_state="echo",
+        command_on=f"touch {tmpdir}/on",
+        command_off=f"touch {tmpdir}/off",
     )
 
     await instance.run()
 
     result = instance.result()
-    assert result["full_text"] == "OFF"  # OFF since it is an empty echo
+    # OFF since it is an empty echo
+    assert result["full_text"] == "OFF"
 
-    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
-        shell_mock.return_value = (
-            b"stdout\n",
-            b"\n",
-            misc.AttributeDict(returncode=0),
-        )
-        await instance.click_handler()
-        result = instance.result()
-        assert result["full_text"] == "ON"
+    await instance.click_handler()
+    # Will call command_off since the state == False
+    assert (tmpdir / "on").exists()
 
-    with patch("i3pyblocks.utils.shell_run", new=CoroutineMock()) as shell_mock:
-        shell_mock.return_value = (
-            b"\n",
-            b"\n",
-            misc.AttributeDict(returncode=0),
-        )
-        await instance.click_handler()
-        result = instance.result()
-        assert result["full_text"] == "OFF"
+    instance.command_state = "echo ON"
+
+    await instance.click_handler()
+    # Will call command_on since the state == True
+    assert (tmpdir / "off").exists()
+
+    result = instance.result()
+    # ON since it is an non-empty echo
+    assert result["full_text"] == "ON"
