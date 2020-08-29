@@ -29,9 +29,7 @@ class FileWatcherModule(modules.Module):
     async def run(self) -> None:
         pass
 
-    async def start(self, queue: asyncio.Queue = None) -> None:
-        await super().start(queue)
-
+    async def start(self) -> None:
         if not os.path.exists(self.path):
             self.abort(full_text=self.format_file_not_found.format(path=self.path))
             return

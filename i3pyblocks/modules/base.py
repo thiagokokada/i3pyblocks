@@ -90,6 +90,7 @@ class Module(metaclass=abc.ABCMeta):
         self.id = uuid.uuid4()
         self.name = name or self.__class__.__name__
         self.frozen = True
+        self.update_queue: Optional[asyncio.Queue] = None
 
         # Those are default values for properties if they are not overrided
         self._default_state = utils.non_nullable_dict(
@@ -209,12 +210,12 @@ class Module(metaclass=abc.ABCMeta):
 
     def push_update(self) -> None:
         """Push result to queue, so it can be retrieved"""
-        if not self.frozen:
+        if self.update_queue and not self.frozen:
             self.update_queue.put_nowait((self.id, self.result()))
         else:
             core.logger.warn(
                 f"Not pushing update since module {self.name} with "
-                f"id {self.id} is frozen"
+                f"id {self.id} is either not initialized or frozen"
             )
 
     def update(self, *args, **kwargs) -> None:
@@ -250,6 +251,20 @@ class Module(metaclass=abc.ABCMeta):
         """
         self.update(*args, **kwargs)
         self.frozen = True
+
+    def setup(self, queue: asyncio.Queue) -> None:
+        """Setup a Module
+
+        This method is called just before start() to setup some things
+        necessary to make the Module work. While you may put your own
+        initialization code here, don't forget to call this function from
+        your children, so the Module works correctly.
+
+          - *queue*: asyncio.Queue instance that will be used to notify
+        updates from this Module
+        """
+        self.update_queue = queue
+        self.frozen = False
 
     async def click_handler(
         self,
@@ -297,21 +312,17 @@ class Module(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    async def start(self, queue: asyncio.Queue = None) -> None:
+    async def start(self) -> None:
         """Starts a Module
 
         This is an abstract method, so it should be overriden by any children.
-        However it is also recommended to call this function from any
-        children, since it does some necessary setup so the Module works
-        correctly.
 
-          - *queue*: asyncio.Queue instance that will be used to notify
-        updates from this Module
+        In this function is where you generally wants to put your main loop to
+        update the state of the module. This loop can either be triggered by
+        events or can be an infinity loop. It can even be a single call
+        to update(), but in this case your Module will only be updated once.
         """
-        if not queue:
-            queue = asyncio.Queue()
-        self.update_queue = queue
-        self.frozen = False
+        pass
 
 
 class PollingModule(Module):
@@ -358,8 +369,7 @@ class PollingModule(Module):
     async def signal_handler(self, *, sig: signal.Signals) -> None:
         await self.run()
 
-    async def start(self, queue: asyncio.Queue = None) -> None:
-        await super().start(queue)
+    async def start(self) -> None:
         try:
             while True:
                 await self.run()
@@ -406,8 +416,7 @@ class ExecutorModule(Module):
         """
         pass
 
-    async def start(self, queue: asyncio.Queue = None) -> None:
-        await super().start(queue)
+    async def start(self) -> None:
         try:
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(self.executor, self.run)

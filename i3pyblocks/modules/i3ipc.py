@@ -1,5 +1,3 @@
-import asyncio
-
 import i3ipc
 from i3ipc.aio import Connection
 
@@ -29,9 +27,7 @@ class WindowTitleModule(modules.Module):
 
         self.update(self.format.format(window_title=window.name))
 
-    async def start(self, queue: asyncio.Queue = None) -> None:
-        await super().start(queue)
-
+    async def start(self) -> None:
         # https://git.io/Jft7j
         connection = self.i3ipc_connection(auto_reconnect=True)
         await connection.connect()

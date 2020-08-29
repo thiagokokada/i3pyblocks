@@ -96,10 +96,13 @@ class Runner:
           - *signums*: any iterable containing signal numbers, can be either
         an int or a signal.Signals' enum
         """
+        # Setup the module before starting it
+        module.setup(self.queue)
+
         self.modules[module.id] = module
         # This only works correctly because from Python 3.7+ dict is ordered
         self.results[module.id] = None
-        self.register_task(module.start(self.queue))
+        self.register_task(module.start())
 
         if signals:
             self.register_signal(module, signals)
