@@ -89,7 +89,7 @@ class Module(metaclass=abc.ABCMeta):
     ) -> None:
         self.id = uuid.uuid4()
         self.name = name or self.__class__.__name__
-        self.freeze = True
+        self.frozen = True
 
         # Those are default values for properties if they are not overrided
         self._default_state = utils.non_nullable_dict(
@@ -209,7 +209,7 @@ class Module(metaclass=abc.ABCMeta):
 
     def push_update(self) -> None:
         """Push result to queue, so it can be retrieved"""
-        if not self.freeze:
+        if not self.frozen:
             self.update_queue.put_nowait((self.id, self.result()))
         else:
             core.logger.warn(
@@ -249,7 +249,7 @@ class Module(metaclass=abc.ABCMeta):
         **See also**: `Module.update_state()` parameters.
         """
         self.update(*args, **kwargs)
-        self.freeze = True
+        self.frozen = True
 
     async def click_handler(
         self,
@@ -311,7 +311,7 @@ class Module(metaclass=abc.ABCMeta):
         if not queue:
             queue = asyncio.Queue()
         self.update_queue = queue
-        self.freeze = False
+        self.frozen = False
 
 
 class PollingModule(Module):

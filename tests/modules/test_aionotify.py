@@ -45,6 +45,27 @@ async def test_file_watcher_module(tmpdir):
 
 
 @pytest.mark.asyncio
+async def test_file_watcher_module_with_non_existing_path():
+    class EmptyFileWatcherModule(m_aionotify.FileWatcherModule):
+        def __init__(self):
+            super().__init__(path="/non/existing/path")
+
+        async def run(self):
+            pass
+
+    module = EmptyFileWatcherModule()
+    module_task = asyncio.create_task(module.start())
+
+    await asyncio.wait([module_task], timeout=0.5)
+
+    module_task.cancel()
+
+    assert module.frozen
+    result = module.result()
+    assert result["full_text"] == "File not found /non/existing/path"
+
+
+@pytest.mark.asyncio
 async def test_backlight_module(tmpdir):
     brightness_tmpfile = str(tmpdir / "brightness")
     with open(brightness_tmpfile, "w") as f:
@@ -77,6 +98,24 @@ async def test_backlight_module(tmpdir):
 
     result = module.result()
     assert result["full_text"] == "36.7 550 1500"
+
+
+@pytest.mark.asyncio
+async def test_backlight_module_without_backlight(tmpdir):
+    module = m_aionotify.BacklightModule(
+        format="{percent:.1f} {brightness} {max_brightness}",
+        path=str(tmpdir / "file_not_existing"),
+    )
+
+    module_task = asyncio.create_task(module.start())
+
+    await asyncio.wait([module_task], timeout=0.5)
+
+    module_task.cancel()
+
+    assert module.frozen
+    result = module.result()
+    assert result["full_text"] == "No backlight found"
 
 
 @pytest.mark.asyncio
