@@ -5,6 +5,8 @@ import pytest
 
 from i3pyblocks import modules, types
 
+from helpers import task
+
 
 def test_invalid_module():
     class InvalidModule(modules.Module):
@@ -152,11 +154,7 @@ async def test_valid_polling_module():
 
     module = ValidPollingModule()
 
-    task = asyncio.create_task(module.start())
-
-    await asyncio.wait([task], timeout=0.5)
-
-    task.cancel()
+    await task.runner([module.start()])
 
     assert module.result() == {
         "full_text": "5",
@@ -228,11 +226,7 @@ async def test_valid_executor_module():
 
     module = ValidExecutorModule()
 
-    task = asyncio.create_task(module.start())
-
-    await asyncio.wait([task])
-
-    task.cancel()
+    await task.runner([module.start()])
 
     assert module.result() == {
         "full_text": "1",
@@ -253,11 +247,7 @@ async def test_executor_module_with_error():
 
     module = ExecutorModuleWithError()
 
-    task = asyncio.create_task(module.start())
-
-    await asyncio.wait([task])
-
-    task.cancel()
+    await task.runner([module.start()])
 
     assert module.result() == {
         "full_text": "Exception in ExecutorModuleWithError: Boom!",

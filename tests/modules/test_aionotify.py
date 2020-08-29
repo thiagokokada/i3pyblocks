@@ -8,7 +8,7 @@ from unittest.mock import call, MagicMock
 from i3pyblocks import types
 from i3pyblocks.modules import aionotify as m_aionotify
 
-from helpers import misc
+from helpers import misc, task
 
 
 @pytest.mark.asyncio
@@ -32,13 +32,8 @@ async def test_file_watcher_module(tmpdir):
                 self.update(contents)
 
     module = ValidFileWatcherModule()
-    module_task = asyncio.create_task(module.start())
-    update_file_task = asyncio.create_task(update_file())
 
-    await asyncio.wait([module_task, update_file_task], timeout=0.5)
-
-    module_task.cancel()
-    update_file_task.cancel()
+    await task.runner([module.start(), update_file()])
 
     result = module.result()
     assert result["full_text"] == "Hello World!"
@@ -54,11 +49,8 @@ async def test_file_watcher_module_with_non_existing_path():
             pass
 
     module = EmptyFileWatcherModule()
-    module_task = asyncio.create_task(module.start())
 
-    await asyncio.wait([module_task], timeout=0.5)
-
-    module_task.cancel()
+    await task.runner([module.start()])
 
     assert module.frozen
     result = module.result()
@@ -88,13 +80,7 @@ async def test_backlight_module(tmpdir):
     result = module.result()
     assert result["full_text"] == "30.0 450 1500"
 
-    module_task = asyncio.create_task(module.start())
-    update_file_task = asyncio.create_task(update_file())
-
-    await asyncio.wait([module_task, update_file_task], timeout=0.5)
-
-    module_task.cancel()
-    update_file_task.cancel()
+    await task.runner([module.start(), update_file()])
 
     result = module.result()
     assert result["full_text"] == "36.7 550 1500"
@@ -107,11 +93,7 @@ async def test_backlight_module_without_backlight(tmpdir):
         path=str(tmpdir / "file_not_existing"),
     )
 
-    module_task = asyncio.create_task(module.start())
-
-    await asyncio.wait([module_task], timeout=0.5)
-
-    module_task.cancel()
+    await task.runner([module.start()])
 
     assert module.frozen
     result = module.result()
