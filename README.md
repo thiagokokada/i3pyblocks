@@ -9,8 +9,8 @@ For Python 3.7+.
 
 ## Installation
 
-First, it is recommended to create [venv][https://docs.python.org/3/library/venv.html]
-so this package is isolated from other Python packages in your system.
+First, it is recommended to create [venv][3] so this package is isolated
+from other Python packages in your system.
 
 ```shell
 python3 -m venv venv
@@ -26,8 +26,7 @@ pip install .
 This will install a barebones version of `i3pyblocks`, but since the
 dependencies are not installed not many modules will work. Each module is
 inside a namespace with its our own name, so for example if you want to use
-`i3pyblocks.modules.aionotify` you would need to install
-[aionotify][https://github.com/rbarrois/aionotify] first:
+`i3pyblocks.modules.aionotify` you would need to install `aionotify` first:
 
 ```shell
 pip install aionotify
@@ -41,10 +40,10 @@ pip install '.[aionotify]'
 ```
 
 The current available module dependencies:
-- [aionotify][https://github.com/rbarrois/aionotify]
-- [i3ipc][https://github.com/altdesktop/i3ipc-python]
-- [psutil][https://github.com/giampaolo/psutil]
-- [pulsectl][https://github.com/mk-fg/python-pulse-control]
+- [aionotify](https://github.com/rbarrois/aionotify)
+- [i3ipc](https://github.com/altdesktop/i3ipc-python)
+- [psutil](https://github.com/giampaolo/psutil)
+- [pulsectl](https://github.com/mk-fg/python-pulse-control)
 
 After installing the dependencies, you can run (assuming you installed all
 dependencies):
@@ -113,7 +112,7 @@ make tests
 Look at the included `Makefile` for more available commands.
 
 
-If you're using [NixOS][https://nixos.org/] or nix, an alternative way to get a
+If you're using [NixOS](https://nixos.org/) or nix, an alternative way to get a
 working environment variable is using the `shell.nix` file included in this
 repo:
 
@@ -127,4 +126,4 @@ nix-shell shell.nix
 
 [1]: https://www.python.org/
 [2]: https://docs.python.org/3/library/asyncio.html
-[3]: https://python-poetry.org/
+[3]: https://docs.python.org/3/library/venv.html
