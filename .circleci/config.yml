@@ -18,45 +18,46 @@ commands:
       - run: sudo apt-get install libpulse-dev
       - restore_cache:
           keys:
-            - py<< parameters.version >>-dependencies-{{ checksum "poetry.lock" }}
+            - py<< parameters.version >>-deps-{{ checksum "setup.py" }}-{{ checksum "requirements_dev.txt" }}
             # fallback to using the latest cache if no exact match is found
-            - py<< parameters.version >>-dependencies-
+            - py<< parameters.version >>-deps-
       - run:
           name: Install Python deps in a venv
           command: |
-            sudo pip install --upgrade poetry
-            poetry install -E all_deps
+            python3 -m venv venv
+            . venv/bin/activate
+            make dev-install
       - save_cache:
           paths:
-            - /home/circleci/.cache/pypoetry/virtualenvs
-          key: py<< parameters.version >>-dependencies-{{ checksum "poetry.lock" }}
+            - "venv"
+          key: py<< parameters.version >>-deps-{{ checksum "setup.py" }}-{{ checksum "requirements_dev.txt" }}
 
 jobs:
   black-lint:
     docker:
-      - image: circleci/python:3.7.7
+      - image: circleci/python:3.7.9
     working_directory: ~/i3pyblocks
     steps:
       - setup_python
       - run:
           name : Run lint
           command: |
-            poetry run black --check .
+            make format-check
 
   flake8-lint:
     docker:
-      - image: circleci/python:3.7.7
+      - image: circleci/python:3.7.9
     working_directory: ~/i3pyblocks
     steps:
       - setup_python
       - run:
           name : Run lint
           command: |
-            poetry run flake8 .
+            make lint
 
   build-python37:
     docker:
-      - image: circleci/python:3.7.7
+      - image: circleci/python:3.7.9
     working_directory: ~/i3pyblocks
     steps:
       - setup_python:
@@ -64,13 +65,13 @@ jobs:
       - run:
           name : Run tests
           command: |
-            poetry run pytest -vv --mypy-ignore-missing-imports --cov=i3pyblocks --cov-report=term --cov-report=xml tests/
+            make tests-with-coverage
       - codecov/upload:
           file: coverage.xml
 
   build-python38:
     docker:
-      - image: circleci/python:3.8.2
+      - image: circleci/python:3.8.5
     working_directory: ~/i3pyblocks
     steps:
       - setup_python:
@@ -78,7 +79,7 @@ jobs:
       - run:
           name : Run tests
           command: |
-            poetry run pytest -vv --mypy-ignore-missing-imports --cov=i3pyblocks --cov-report=term --cov-report=xml tests/
+            make tests-with-coverage
       - codecov/upload:
           file: coverage.xml
 

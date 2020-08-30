@@ -1,8 +1,10 @@
 *.egg-info/
 *.log
 .coverage
+.eggs/
 .mypy_cache/
 __pycache__/
+build/
 coverage.xml
 htmlcov/
 pip-wheel-metadata/
