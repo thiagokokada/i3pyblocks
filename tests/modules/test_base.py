@@ -21,7 +21,7 @@ async def test_valid_module():
     class ValidModule(modules.Module):
         async def start(self):
             await super().start()
-            self.update("Done!", color=None, urgent=False, markup=types.Markup.NONE)
+            self.update("Done!", color=None, urgent=False, markup=types.MarkupText.NONE)
 
     module = ValidModule(
         name="Name",
@@ -33,11 +33,11 @@ async def test_valid_module():
         border_bottom=1,
         border_left=1,
         min_width=10,
-        align=types.Align.CENTER,
+        align=types.AlignText.CENTER,
         urgent=True,
         separator=False,
         separator_block_width=9,
-        markup=types.Markup.PANGO,
+        markup=types.MarkupText.PANGO,
     )
 
     module.setup(asyncio.Queue())
@@ -167,7 +167,7 @@ async def test_valid_polling_module():
     await module.click_handler(
         x=1,
         y=1,
-        button=1,
+        button=types.MouseButton.LEFT_BUTTON,
         relative_x=1,
         relative_y=1,
         width=1,

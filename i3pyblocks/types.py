@@ -6,23 +6,39 @@ Result = Dict[str, Union[str, int, bool]]
 Dictable = Union[Dict[object, Any], Iterable[Tuple[object, Any]]]
 
 
-class Align:
+class AlignText:
     CENTER: str = "center"
     RIGHT: str = "right"
     LEFT: str = "left"
 
 
-class Markup:
+class MarkupText:
     NONE: str = "none"
     PANGO: str = "pango"
 
 
-class Mouse:
+class MouseButton:
     LEFT_BUTTON: int = 1
     MIDDLE_BUTTON: int = 2
     RIGHT_BUTTON: int = 3
     SCROLL_UP: int = 4
     SCROLL_DOWN: int = 5
+    BACK: int = 8
+    FORWARD: int = 9
+
+
+class KeyModifier:
+    MOD1: str = "Mod1"
+    MOD2: str = "Mod2"
+    MOD3: str = "Mod3"
+    MOD4: str = "Mod4"
+    SHIFT: str = "Shift"
+
+    # Some alias to make things easier to use
+    ALT = MOD1
+    NUM_LOCK = MOD2
+    SCROLL_LOCK = MOD3
+    SUPER = MOD4
 
 
 class Color:

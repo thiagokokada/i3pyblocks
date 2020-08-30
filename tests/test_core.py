@@ -7,7 +7,7 @@ import pytest
 from asynctest import CoroutineMock
 from unittest.mock import patch
 
-from i3pyblocks import core, modules
+from i3pyblocks import core, modules, types
 
 
 # TODO: Validate if we can actually read from stdin here
@@ -241,8 +241,8 @@ async def test_runner_with_click_event():
         {
             "name": "ValidPollingModuleWithClickHandler",
             "instance": str(instance.id),
-            "button": 1,
-            "modifiers": ["Mod1"],
+            "button": types.MouseButton.LEFT_BUTTON,
+            "modifiers": [types.KeyModifier.ALT, types.KeyModifier.SUPER],
             "x": 123,
             "y": 456,
             "relative_x": 12,
@@ -259,7 +259,7 @@ async def test_runner_with_click_event():
     assert result == {
         "name": "ValidPollingModuleWithClickHandler",
         "instance": str(instance.id),
-        "full_text": "123-456-1-12-34-20-40-['Mod1']",
+        "full_text": "123-456-1-12-34-20-40-['Mod1', 'Mod4']",
     }
 
 
