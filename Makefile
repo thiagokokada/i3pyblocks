@@ -1,5 +1,6 @@
 SRC_PATHS := i3pyblocks tests run.py
-.PHONY: tests clean format lint mypy
+PYTHON := venv/bin/python
+.PHONY: clean dev-install format format-check lint mypy tests tests-with-coverage
 
 all: run
 
@@ -7,21 +8,25 @@ clean:
 	git clean -fxd
 
 tests:
-	poetry run python3 -m pytest tests
+	$(PYTHON) -m pytest tests/
+
+tests-with-coverage:
+	$(PYTHON) -m pytest --cov=i3pyblocks --cov-report=term --cov-report=xml tests/
 
 format:
-	poetry run black $(SRC_PATHS)
+	$(PYTHON) -m black $(SRC_PATHS)
+
+format-check:
+	$(PYTHON) -m black --check $(SRC_PATHS)
 
 lint:
-	poetry run flake8 $(SRC_PATHS)
+	$(PYTHON) -m flake8 $(SRC_PATHS)
 
 mypy:
-	poetry run mypy $(SRC_PATHS)
+	$(PYTHON) -m mypy $(SRC_PATHS)
 
-deps:
-	poetry lock
-	poetry export -f requirements.txt -E all_deps -o requirements.txt
-	poetry export -f requirements.txt --dev -o requirements-dev.txt
+dev-install:
+	$(PYTHON) -m pip install -e '.[aionotify,i3ipc,psutil,pulsectl,dev]'
 
 run:
-	@poetry run "./run.py"
+	$(PYTHON) "./run.py"
