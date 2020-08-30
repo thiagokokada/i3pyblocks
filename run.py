@@ -81,8 +81,8 @@ async def main():
             command="xkblayout-state print %s",
             format=" {output}",
             command_on_click=(
-                (types.Mouse.SCROLL_UP, "xkblayout-state set +1"),
-                (types.Mouse.SCROLL_DOWN, "xkblayout-state set -1"),
+                (types.MouseButton.SCROLL_UP, "xkblayout-state set +1"),
+                (types.MouseButton.SCROLL_DOWN, "xkblayout-state set -1"),
             ),
         )
     )
@@ -91,8 +91,8 @@ async def main():
             format=" {percent:.0f}%",
             format_no_backlight="",
             command_on_click=(
-                (types.Mouse.SCROLL_UP, "light -A 5%"),
-                (types.Mouse.SCROLL_DOWN, "light -U 5"),
+                (types.MouseButton.SCROLL_UP, "light -A 5%"),
+                (types.MouseButton.SCROLL_DOWN, "light -U 5"),
             ),
         )
     )

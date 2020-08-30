@@ -108,14 +108,14 @@ async def test_pulse_audio_module_click_handler(pulsectl_mocker):
         command=("command", "-c"), _pulsectl=mock_pulsectl, _subprocess=mock_subprocess
     )
 
-    await instance.click_handler(types.Mouse.LEFT_BUTTON)
+    await instance.click_handler(types.MouseButton.LEFT_BUTTON)
     mock_subprocess.Popen.assert_called_once_with(("command", "-c"))
 
     mute_mock = mock_pulse.mute
-    await instance.click_handler(types.Mouse.RIGHT_BUTTON)
+    await instance.click_handler(types.MouseButton.RIGHT_BUTTON)
     mute_mock.assert_called_once_with(SINK, mute=True)
 
     volume_change_mock = mock_pulse.volume_change_all_chans
-    await instance.click_handler(types.Mouse.SCROLL_UP)
-    await instance.click_handler(types.Mouse.SCROLL_DOWN)
+    await instance.click_handler(types.MouseButton.SCROLL_UP)
+    await instance.click_handler(types.MouseButton.SCROLL_DOWN)
     volume_change_mock.assert_has_calls([call(SINK, 0.05), call(SINK, -0.05)])

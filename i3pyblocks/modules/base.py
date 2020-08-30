@@ -81,11 +81,11 @@ class Module(metaclass=abc.ABCMeta):
         border_bottom: Optional[int] = None,
         border_left: Optional[int] = None,
         min_width: Optional[int] = None,
-        align: Optional[str] = types.Align.LEFT,
+        align: Optional[str] = types.AlignText.LEFT,
         urgent: Optional[bool] = False,
         separator: Optional[bool] = True,
         separator_block_width: Optional[int] = None,
-        markup: Optional[str] = types.Markup.NONE,
+        markup: Optional[str] = types.MarkupText.NONE,
     ) -> None:
         self.id = uuid.uuid4()
         self.name = name or self.__class__.__name__

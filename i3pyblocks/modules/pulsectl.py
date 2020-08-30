@@ -111,13 +111,13 @@ class PulseAudioModule(modules.ExecutorModule):
             self.pulse.mute(self.sink, mute=True)
 
     async def click_handler(self, button: int, *_, **__) -> None:
-        if button == types.Mouse.LEFT_BUTTON:
+        if button == types.MouseButton.LEFT_BUTTON:
             self.subprocess.Popen(self.command)
-        elif button == types.Mouse.RIGHT_BUTTON:
+        elif button == types.MouseButton.RIGHT_BUTTON:
             self.toggle_mute()
-        elif button == types.Mouse.SCROLL_UP:
+        elif button == types.MouseButton.SCROLL_UP:
             self.pulse.volume_change_all_chans(self.sink, 0.05)
-        elif button == types.Mouse.SCROLL_DOWN:
+        elif button == types.MouseButton.SCROLL_DOWN:
             self.pulse.volume_change_all_chans(self.sink, -0.05)
 
         self.update_status()

@@ -35,11 +35,11 @@ async def test_shell_module_click_handler():
     instance = m_sub.ShellModule(
         command="exit 0",
         command_on_click=(
-            (types.Mouse.LEFT_BUTTON, "LEFT_BUTTON"),
-            (types.Mouse.MIDDLE_BUTTON, "MIDDLE_BUTTON"),
-            (types.Mouse.RIGHT_BUTTON, "RIGHT_BUTTON"),
-            (types.Mouse.SCROLL_UP, "SCROLL_UP"),
-            (types.Mouse.SCROLL_DOWN, "SCROLL_DOWN"),
+            (types.MouseButton.LEFT_BUTTON, "LEFT_BUTTON"),
+            (types.MouseButton.MIDDLE_BUTTON, "MIDDLE_BUTTON"),
+            (types.MouseButton.RIGHT_BUTTON, "RIGHT_BUTTON"),
+            (types.MouseButton.SCROLL_UP, "SCROLL_UP"),
+            (types.MouseButton.SCROLL_DOWN, "SCROLL_DOWN"),
         ),
         _utils=mock_utils,
     )
@@ -56,7 +56,7 @@ async def test_shell_module_click_handler():
             b"stderr\n",
             misc.AttributeDict(returncode=0),
         )
-        await instance.click_handler(getattr(types.Mouse, button))
+        await instance.click_handler(getattr(types.MouseButton, button))
         mock_utils.shell_run.assert_called_once_with(button)
         mock_utils.shell_run.reset_mock()
 
