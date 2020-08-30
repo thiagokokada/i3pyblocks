@@ -18,5 +18,10 @@ lint:
 mypy:
 	poetry run mypy $(SRC_PATHS)
 
+deps:
+	poetry lock
+	poetry export -f requirements.txt -E all_deps -o requirements.txt
+	poetry export -f requirements.txt --dev -o requirements-dev.txt
+
 run:
 	@poetry run "./run.py"
