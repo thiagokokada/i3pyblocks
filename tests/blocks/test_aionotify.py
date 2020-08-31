@@ -5,13 +5,13 @@ import pytest
 from asynctest import Mock
 
 from i3pyblocks import types, utils
-from i3pyblocks.modules import aionotify as m_aionotify
+from i3pyblocks.blocks import aionotify as m_aionotify
 
 from helpers import misc, task
 
 
 @pytest.mark.asyncio
-async def test_file_watcher_module(tmpdir):
+async def test_file_watcher_block(tmpdir):
     tmpfile = str(tmpdir / "tmpfile.txt")
     with open(tmpfile, "w"):
         pass
@@ -21,7 +21,7 @@ async def test_file_watcher_module(tmpdir):
         with open(tmpfile, "w") as f:
             f.write("Hello World!")
 
-    class ValidFileWatcherModule(m_aionotify.FileWatcherModule):
+    class ValidFileWatcherBlock(m_aionotify.FileWatcherBlock):
         def __init__(self):
             super().__init__(path=tmpfile, flags=aionotify.Flags.MODIFY)
 
@@ -30,34 +30,34 @@ async def test_file_watcher_module(tmpdir):
                 contents = f.readline().strip()
                 self.update(contents)
 
-    module = ValidFileWatcherModule()
+    block = ValidFileWatcherBlock()
 
-    await task.runner([module.start(), update_file()], timeout=0.2)
+    await task.runner([block.start(), update_file()], timeout=0.2)
 
-    result = module.result()
+    result = block.result()
     assert result["full_text"] == "Hello World!"
 
 
 @pytest.mark.asyncio
-async def test_file_watcher_module_with_non_existing_path():
-    class EmptyFileWatcherModule(m_aionotify.FileWatcherModule):
+async def test_file_watcher_block_with_non_existing_path():
+    class EmptyFileWatcherBlock(m_aionotify.FileWatcherBlock):
         def __init__(self):
             super().__init__(path="/non/existing/path")
 
         async def run(self):
             pass
 
-    module = EmptyFileWatcherModule()
+    block = EmptyFileWatcherBlock()
 
-    await task.runner([module.start()])
+    await task.runner([block.start()])
 
-    assert module.frozen
-    result = module.result()
+    assert block.frozen
+    result = block.result()
     assert result["full_text"] == "File not found /non/existing/path"
 
 
 @pytest.mark.asyncio
-async def test_backlight_module(tmpdir):
+async def test_backlight_block(tmpdir):
     brightness_tmpfile = str(tmpdir / "brightness")
     with open(brightness_tmpfile, "w") as f:
         f.write("450")
@@ -71,39 +71,39 @@ async def test_backlight_module(tmpdir):
         with open(brightness_tmpfile, "w") as f:
             f.write("550")
 
-    module = m_aionotify.BacklightModule(
+    block = m_aionotify.BacklightBlock(
         format="{percent:.1f} {brightness} {max_brightness}", path=str(tmpdir)
     )
 
-    await module.run()
-    result = module.result()
+    await block.run()
+    result = block.result()
     assert result["full_text"] == "30.0 450 1500"
 
-    await task.runner([module.start(), update_file()], timeout=0.2)
+    await task.runner([block.start(), update_file()], timeout=0.2)
 
-    result = module.result()
+    result = block.result()
     assert result["full_text"] == "36.7 550 1500"
 
 
 @pytest.mark.asyncio
-async def test_backlight_module_without_backlight(tmpdir):
-    module = m_aionotify.BacklightModule(
+async def test_backlight_block_without_backlight(tmpdir):
+    block = m_aionotify.BacklightBlock(
         format="{percent:.1f} {brightness} {max_brightness}",
         path=str(tmpdir / "file_not_existing"),
     )
 
-    await task.runner([module.start()])
+    await task.runner([block.start()])
 
-    assert module.frozen
-    result = module.result()
+    assert block.frozen
+    result = block.result()
     assert result["full_text"] == "No backlight found"
 
 
 @pytest.mark.asyncio
-async def test_backlight_module_click_handler(tmpdir):
+async def test_backlight_block_click_handler(tmpdir):
     mock_utils = Mock(utils)
 
-    instance = m_aionotify.BacklightModule(
+    instance = m_aionotify.BacklightBlock(
         path=str(tmpdir),
         command_on_click=(
             (types.MouseButton.LEFT_BUTTON, "LEFT_BUTTON"),

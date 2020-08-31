@@ -8,7 +8,7 @@ from pathlib import Path
 import psutil as ps
 
 from i3pyblocks import Runner, types
-from i3pyblocks.modules import aionotify, i3ipc, datetime, psutil, pulsectl, subprocess
+from i3pyblocks.blocks import aionotify, i3ipc, datetime, psutil, pulsectl, subprocess
 
 logging.basicConfig(filename=Path.home() / ".i3pyblocks.log", level=logging.DEBUG)
 
@@ -22,35 +22,35 @@ async def main():
     cpu_count = ps.cpu_count()
     runner = Runner()
 
-    runner.register_module(i3ipc.WindowTitleModule(format=" {window_title:.41s}"))
-    runner.register_module(
-        psutil.NetworkSpeedModule(
+    runner.register_block(i3ipc.WindowTitleBlock(format=" {window_title:.41s}"))
+    runner.register_block(
+        psutil.NetworkSpeedBlock(
             format_up=" {interface:.2s}:  {upload}  {download}",
             format_down="",
             interface_regex="en*|wl*",
         )
     )
     for partition in partitions():
-        runner.register_module(
-            psutil.DiskUsageModule(
+        runner.register_block(
+            psutil.DiskUsageBlock(
                 format=" {label}: {free:.1f}GiB",
                 path=partition.mountpoint,
                 short_label=True,
             )
         )
-    runner.register_module(psutil.VirtualMemoryModule(format=" {available:.1f}GiB"))
-    runner.register_module(
-        psutil.SensorsTemperaturesModule(
+    runner.register_block(psutil.VirtualMemoryBlock(format=" {available:.1f}GiB"))
+    runner.register_block(
+        psutil.SensorsTemperaturesBlock(
             format="{icon} {current:.0f}°C",
             icons=((0, ""), (25, ""), (50, ""), (75, "")),
         )
     )
-    runner.register_module(
-        psutil.CpuPercentModule(format=" {percent}%"),
+    runner.register_block(
+        psutil.CpuPercentBlock(format=" {percent}%"),
         signals=(signal.SIGUSR1, signal.SIGUSR2),
     )
-    runner.register_module(
-        psutil.LoadAvgModule(
+    runner.register_block(
+        psutil.LoadAvgBlock(
             format=" {load1}",
             colors=(
                 (0, None),
@@ -59,16 +59,16 @@ async def main():
             ),
         )
     )
-    runner.register_module(
-        psutil.SensorsBatteryModule(
+    runner.register_block(
+        psutil.SensorsBatteryBlock(
             format_plugged=" {percent:.0f}%",
             format_unplugged="{icon} {percent:.0f}% {remaining_time}",
             format_unknown="{icon} {percent:.0f}%",
             icons=((0, ""), (10, ""), (25, ""), (50, ""), (75, "")),
         )
     )
-    runner.register_module(
-        subprocess.ToggleModule(
+    runner.register_block(
+        subprocess.ToggleBlock(
             command_state="xset q | grep -Fo 'DPMS is Enabled'",
             command_on="xset s on +dpms",
             command_off="xset s off -dpms",
@@ -76,8 +76,8 @@ async def main():
             format_off="  ",
         )
     )
-    runner.register_module(
-        subprocess.ShellModule(
+    runner.register_block(
+        subprocess.ShellBlock(
             command="xkblayout-state print %s",
             format=" {output}",
             command_on_click=(
@@ -86,8 +86,8 @@ async def main():
             ),
         )
     )
-    runner.register_module(
-        aionotify.BacklightModule(
+    runner.register_block(
+        aionotify.BacklightBlock(
             format=" {percent:.0f}%",
             format_no_backlight="",
             command_on_click=(
@@ -96,11 +96,11 @@ async def main():
             ),
         )
     )
-    runner.register_module(
-        pulsectl.PulseAudioModule(format=" {volume:.0f}%", format_mute=" mute")
+    runner.register_block(
+        pulsectl.PulseAudioBlock(format=" {volume:.0f}%", format_mute=" mute")
     )
-    runner.register_module(
-        datetime.DateTimeModule(format_time=" %T", format_date=" %a, %d/%m")
+    runner.register_block(
+        datetime.DateTimeBlock(format_time=" %T", format_date=" %a, %d/%m")
     )
     await runner.start()
 

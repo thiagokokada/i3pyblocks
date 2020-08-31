@@ -4,17 +4,17 @@ import psutil
 import pytest
 
 from i3pyblocks import types
-from i3pyblocks.modules import psutil as m_psutil
+from i3pyblocks.blocks import psutil as m_psutil
 
 from helpers import misc
 
 
 @pytest.mark.asyncio
-async def test_cpu_percent_module():
+async def test_cpu_percent_block():
     mock_psutil = Mock(psutil)
     mock_psutil.cpu_percent.return_value = 75.5
 
-    instance = m_psutil.CpuPercentModule(format="{percent}", _psutil=mock_psutil)
+    instance = m_psutil.CpuPercentBlock(format="{percent}", _psutil=mock_psutil)
     await instance.run()
 
     result = instance.result()
@@ -24,13 +24,13 @@ async def test_cpu_percent_module():
 
 
 @pytest.mark.asyncio
-async def test_disk_usage_module():
+async def test_disk_usage_block():
     mock_psutil = Mock(psutil)
     mock_psutil.disk_usage.return_value = misc.AttributeDict(
         total=226227036160, used=49354395648, free=165309575168, percent=91.3
     )
 
-    instance = m_psutil.DiskUsageModule(
+    instance = m_psutil.DiskUsageBlock(
         format="{icon} {label} {total:.1f} {used:.1f} {free:.1f} {percent}",
         _psutil=mock_psutil,
     )
@@ -43,11 +43,11 @@ async def test_disk_usage_module():
 
 
 @pytest.mark.asyncio
-async def test_load_avg_module():
+async def test_load_avg_block():
     mock_psutil = Mock(psutil)
     mock_psutil.getloadavg.return_value = (2.5, 5, 15)
 
-    instance = m_psutil.LoadAvgModule(
+    instance = m_psutil.LoadAvgBlock(
         format="{load1} {load5} {load15}", _psutil=mock_psutil
     )
 
@@ -60,7 +60,7 @@ async def test_load_avg_module():
 
 
 @pytest.mark.asyncio
-async def test_network_speed_module_down():
+async def test_network_speed_block_down():
     mock_psutil = Mock(psutil)
     mock_psutil.net_if_stats.return_value = {
         "lo": misc.AttributeDict(
@@ -71,7 +71,7 @@ async def test_network_speed_module_down():
         ),
     }
 
-    instance = m_psutil.NetworkSpeedModule(
+    instance = m_psutil.NetworkSpeedBlock(
         format_up="{interface} {upload} {download}", _psutil=mock_psutil
     )
 
@@ -84,7 +84,7 @@ async def test_network_speed_module_down():
 
 
 @pytest.mark.asyncio
-async def test_network_speed_module_up():
+async def test_network_speed_block_up():
     mock_psutil = Mock(psutil)
     mock_psutil.net_if_stats.return_value = {
         "lo": misc.AttributeDict(
@@ -126,7 +126,7 @@ async def test_network_speed_module_up():
         },
     ]
 
-    instance = m_psutil.NetworkSpeedModule(
+    instance = m_psutil.NetworkSpeedBlock(
         format_up="{interface} {upload} {download}", _psutil=mock_psutil
     )
 
@@ -139,11 +139,11 @@ async def test_network_speed_module_up():
 
 
 @pytest.mark.asyncio
-async def test_sensors_battery_module_without_battery():
+async def test_sensors_battery_block_without_battery():
     mock_psutil = Mock(psutil)
     mock_psutil.sensors_battery.return_value = None
 
-    instance = m_psutil.SensorsBatteryModule(_psutil=mock_psutil)
+    instance = m_psutil.SensorsBatteryBlock(_psutil=mock_psutil)
 
     await instance.run()
 
@@ -153,7 +153,7 @@ async def test_sensors_battery_module_without_battery():
 
 
 @pytest.mark.asyncio
-async def test_sensors_battery_module_with_battery():
+async def test_sensors_battery_block_with_battery():
     mock_psutil = Mock(psutil)
     mock_psutil.sensors_battery.side_effect = [
         misc.AttributeDict(
@@ -165,7 +165,7 @@ async def test_sensors_battery_module_with_battery():
         ),
     ]
 
-    instance = m_psutil.SensorsBatteryModule(_psutil=mock_psutil)
+    instance = m_psutil.SensorsBatteryBlock(_psutil=mock_psutil)
 
     await instance.run()
 
@@ -189,7 +189,7 @@ async def test_sensors_battery_module_with_battery():
 
 
 @pytest.mark.asyncio
-async def test_sensors_temperature_module():
+async def test_sensors_temperature_block():
     mock_psutil = Mock(psutil)
     mock_psutil.sensors_temperatures.return_value = {
         "coretemp": [
@@ -210,7 +210,7 @@ async def test_sensors_temperature_module():
         ],
     }
 
-    instance_default = m_psutil.SensorsTemperaturesModule(
+    instance_default = m_psutil.SensorsTemperaturesBlock(
         format="{icon} {label} {current} {high} {critical}", _psutil=mock_psutil
     )
 
@@ -221,7 +221,7 @@ async def test_sensors_temperature_module():
     assert result["full_text"] == "▇ Package id 0 78.0 82.0 100.0"
     assert result["color"] == types.Color.WARN
 
-    instance_acpitz = m_psutil.SensorsTemperaturesModule(
+    instance_acpitz = m_psutil.SensorsTemperaturesBlock(
         sensor="acpitz", _psutil=mock_psutil
     )
 
@@ -233,7 +233,7 @@ async def test_sensors_temperature_module():
 
 
 @pytest.mark.asyncio
-async def test_virtual_memory_module():
+async def test_virtual_memory_block():
     mock_psutil = Mock(psutil)
     mock_psutil.virtual_memory.return_value = misc.AttributeDict(
         total=16758484992,
@@ -243,7 +243,7 @@ async def test_virtual_memory_module():
         free=10560126976,
     )
 
-    instance = m_psutil.VirtualMemoryModule(
+    instance = m_psutil.VirtualMemoryBlock(
         format="{icon} {total:.1f} {available:.1f} {used:.1f} {free:.1f} {percent}",
         _psutil=mock_psutil,
     )

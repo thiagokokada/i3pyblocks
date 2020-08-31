@@ -5,11 +5,11 @@ from typing import Sequence
 import pulsectl
 from pulsectl import PulseError, PulseLoopStop
 
-from i3pyblocks import modules, utils, types
+from i3pyblocks import blocks, utils, types
 
 
 # Based on: https://git.io/fjbHp
-class PulseAudioModule(modules.ExecutorModule):
+class PulseAudioBlock(blocks.ExecutorBlock):
     def __init__(
         self,
         format: str = "V: {volume:.0f}%",

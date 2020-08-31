@@ -3,27 +3,27 @@ import signal
 
 import pytest
 
-from i3pyblocks import modules, types
+from i3pyblocks import blocks, types
 
 from helpers import task
 
 
-def test_invalid_module():
-    class InvalidModule(modules.Module):
+def test_invalid_block():
+    class InvalidBlock(blocks.Block):
         pass
 
     with pytest.raises(TypeError):
-        InvalidModule()
+        InvalidBlock()
 
 
 @pytest.mark.asyncio
-async def test_valid_module():
-    class ValidModule(modules.Module):
+async def test_valid_block():
+    class ValidBlock(blocks.Block):
         async def start(self):
             await super().start()
             self.update("Done!", color=None, urgent=False, markup=types.MarkupText.NONE)
 
-    module = ValidModule(
+    block = ValidBlock(
         name="Name",
         color="#000000",
         background="#FFFFFF",
@@ -40,9 +40,9 @@ async def test_valid_module():
         markup=types.MarkupText.PANGO,
     )
 
-    module.setup(asyncio.Queue())
+    block.setup(asyncio.Queue())
 
-    assert module.result() == {
+    assert block.result() == {
         "align": "center",
         "background": "#FFFFFF",
         "border": "#FF0000",
@@ -52,7 +52,7 @@ async def test_valid_module():
         "border_top": 1,
         "color": "#000000",
         "full_text": "",
-        "instance": str(module.id),
+        "instance": str(block.id),
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -61,9 +61,9 @@ async def test_valid_module():
         "markup": "pango",
     }
 
-    await module.start()
+    await block.start()
 
-    assert module.result() == {
+    assert block.result() == {
         "align": "center",
         "background": "#FFFFFF",
         "border": "#FF0000",
@@ -73,7 +73,7 @@ async def test_valid_module():
         "border_top": 1,
         "color": "#000000",
         "full_text": "Done!",
-        "instance": str(module.id),
+        "instance": str(block.id),
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -82,9 +82,9 @@ async def test_valid_module():
         "markup": "none",
     }
 
-    id_, result = await module.update_queue.get()
+    id_, result = await block.update_queue.get()
 
-    assert id_ == module.id
+    assert id_ == block.id
     assert result == {
         "align": "center",
         "background": "#FFFFFF",
@@ -95,7 +95,7 @@ async def test_valid_module():
         "border_top": 1,
         "color": "#000000",
         "full_text": "Done!",
-        "instance": str(module.id),
+        "instance": str(block.id),
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -104,9 +104,9 @@ async def test_valid_module():
         "markup": "none",
     }
 
-    module.abort("Aborted!")
+    block.abort("Aborted!")
 
-    _, result = await module.update_queue.get()
+    _, result = await block.update_queue.get()
 
     assert result == {
         "align": "center",
@@ -118,7 +118,7 @@ async def test_valid_module():
         "border_top": 1,
         "color": "#000000",
         "full_text": "Aborted!",
-        "instance": str(module.id),
+        "instance": str(block.id),
         "min_width": 10,
         "name": "Name",
         "separator": False,
@@ -127,23 +127,23 @@ async def test_valid_module():
         "markup": "pango",
     }
 
-    module.update("Shouldn't update since aborted")
+    block.update("Shouldn't update since aborted")
 
     with pytest.raises(asyncio.QueueEmpty):
-        await module.update_queue.get_nowait()
+        await block.update_queue.get_nowait()
 
 
-def test_invalid_polling_module():
-    class InvalidPollingModule(modules.PollingModule):
+def test_invalid_polling_block():
+    class InvalidPollingBlock(blocks.PollingBlock):
         pass
 
     with pytest.raises(TypeError):
-        InvalidPollingModule()
+        InvalidPollingBlock()
 
 
 @pytest.mark.asyncio
-async def test_valid_polling_module():
-    class ValidPollingModule(modules.PollingModule):
+async def test_valid_polling_block():
+    class ValidPollingBlock(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             self.count = 0
             super().__init__(
@@ -154,17 +154,17 @@ async def test_valid_polling_module():
             self.count += 1
             self.update(str(self.count))
 
-    module = ValidPollingModule()
+    block = ValidPollingBlock()
 
-    await task.runner([module.start()], timeout=0.5)
+    await task.runner([block.start()], timeout=0.5)
 
-    assert module.result() == {
+    assert block.result() == {
         "full_text": "5",
-        "instance": str(module.id),
-        "name": "ValidPollingModule",
+        "instance": str(block.id),
+        "name": "ValidPollingBlock",
     }
 
-    await module.click_handler(
+    await block.click_handler(
         x=1,
         y=1,
         button=types.MouseButton.LEFT_BUTTON,
@@ -175,24 +175,24 @@ async def test_valid_polling_module():
         modifiers=[],
     )
 
-    assert module.result() == {
+    assert block.result() == {
         "full_text": "6",
-        "instance": str(module.id),
-        "name": "ValidPollingModule",
+        "instance": str(block.id),
+        "name": "ValidPollingBlock",
     }
 
-    await module.signal_handler(sig=signal.SIGHUP)
+    await block.signal_handler(sig=signal.SIGHUP)
 
-    assert module.result() == {
+    assert block.result() == {
         "full_text": "7",
-        "instance": str(module.id),
-        "name": "ValidPollingModule",
+        "instance": str(block.id),
+        "name": "ValidPollingBlock",
     }
 
 
 @pytest.mark.asyncio
-async def test_polling_module_with_error():
-    class PollingModuleWithError(modules.PollingModule):
+async def test_polling_block_with_error():
+    class PollingBlockWithError(blocks.PollingBlock):
         def __init__(self, sleep=1):
             self.count = 0
             super().__init__(
@@ -202,30 +202,30 @@ async def test_polling_module_with_error():
         def run(self):
             raise Exception("Boom!")
 
-    module = PollingModuleWithError()
+    block = PollingBlockWithError()
 
     with pytest.raises(Exception):
-        await module.start()
+        await block.start()
 
-    assert module.result() == {
-        "full_text": "Exception in PollingModuleWithError: Boom!",
-        "instance": str(module.id),
-        "name": "PollingModuleWithError",
+    assert block.result() == {
+        "full_text": "Exception in PollingBlockWithError: Boom!",
+        "instance": str(block.id),
+        "name": "PollingBlockWithError",
         "urgent": True,
     }
 
 
-def test_invalid_executor_module():
-    class InvalidExecutorModule(modules.ExecutorModule):
+def test_invalid_executor_block():
+    class InvalidExecutorBlock(blocks.ExecutorBlock):
         pass
 
     with pytest.raises(TypeError):
-        InvalidExecutorModule()
+        InvalidExecutorBlock()
 
 
 @pytest.mark.asyncio
-async def test_valid_executor_module():
-    class ValidExecutorModule(modules.ExecutorModule):
+async def test_valid_executor_block():
+    class ValidExecutorBlock(blocks.ExecutorBlock):
         def __init__(self):
             self.count = 0
             super().__init__(separator=None, urgent=None, align=None, markup=None)
@@ -234,20 +234,20 @@ async def test_valid_executor_module():
             self.count += 1
             self.update(str(self.count))
 
-    module = ValidExecutorModule()
+    block = ValidExecutorBlock()
 
-    await task.runner([module.start()])
+    await task.runner([block.start()])
 
-    assert module.result() == {
+    assert block.result() == {
         "full_text": "1",
-        "instance": str(module.id),
-        "name": "ValidExecutorModule",
+        "instance": str(block.id),
+        "name": "ValidExecutorBlock",
     }
 
 
 @pytest.mark.asyncio
-async def test_executor_module_with_error():
-    class ExecutorModuleWithError(modules.ExecutorModule):
+async def test_executor_block_with_error():
+    class ExecutorBlockWithError(blocks.ExecutorBlock):
         def __init__(self):
             self.count = 0
             super().__init__(separator=None, urgent=None, align=None, markup=None)
@@ -255,13 +255,13 @@ async def test_executor_module_with_error():
         def run(self):
             raise Exception("Boom!")
 
-    module = ExecutorModuleWithError()
+    block = ExecutorBlockWithError()
 
-    await task.runner([module.start()])
+    await task.runner([block.start()])
 
-    assert module.result() == {
-        "full_text": "Exception in ExecutorModuleWithError: Boom!",
-        "instance": str(module.id),
-        "name": "ExecutorModuleWithError",
+    assert block.result() == {
+        "full_text": "Exception in ExecutorBlockWithError: Boom!",
+        "instance": str(block.id),
+        "name": "ExecutorBlockWithError",
         "urgent": True,
     }

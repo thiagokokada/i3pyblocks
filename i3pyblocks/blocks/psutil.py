@@ -5,10 +5,10 @@ from typing import Optional, Tuple
 import psutil
 from psutil._common import bytes2human
 
-from i3pyblocks import modules, utils, types
+from i3pyblocks import blocks, utils, types
 
 
-class CpuPercentModule(modules.PollingModule):
+class CpuPercentBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "C: {percent}%",
@@ -35,7 +35,7 @@ class CpuPercentModule(modules.PollingModule):
         self.update(self.format.format(percent=percent), color=color)
 
 
-class DiskUsageModule(modules.PollingModule):
+class DiskUsageBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "{label}: {free:.1f}GiB",
@@ -99,7 +99,7 @@ class DiskUsageModule(modules.PollingModule):
         )
 
 
-class LoadAvgModule(modules.PollingModule):
+class LoadAvgBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "L: {load1}",
@@ -128,7 +128,7 @@ class LoadAvgModule(modules.PollingModule):
         )
 
 
-class NetworkSpeedModule(modules.PollingModule):
+class NetworkSpeedBlock(blocks.PollingBlock):
     def __init__(
         self,
         format_up: str = "{interface}:  U {upload} D {download}",
@@ -199,7 +199,7 @@ class NetworkSpeedModule(modules.PollingModule):
         self.previous = now
 
 
-class SensorsBatteryModule(modules.PollingModule):
+class SensorsBatteryBlock(blocks.PollingBlock):
     def __init__(
         self,
         format_plugged: str = "B: PLUGGED {percent:.0f}%",
@@ -263,7 +263,7 @@ class SensorsBatteryModule(modules.PollingModule):
         )
 
 
-class SensorsTemperaturesModule(modules.PollingModule):
+class SensorsTemperaturesBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "T: {current:.0f}°C",
@@ -319,7 +319,7 @@ class SensorsTemperaturesModule(modules.PollingModule):
         )
 
 
-class VirtualMemoryModule(modules.PollingModule):
+class VirtualMemoryBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "M: {available:.1f}GiB",

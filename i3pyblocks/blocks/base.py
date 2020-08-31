@@ -8,20 +8,20 @@ from typing import List, Optional
 from i3pyblocks import core, utils, types
 
 
-class Module(metaclass=abc.ABCMeta):
-    """Base Module
+class Block(metaclass=abc.ABCMeta):
+    """Base Block
 
-    This is an abstract class defining the interface for what a Module is.
+    This is an abstract class defining the interface for what a Block is.
     It should not be used directly.
 
-    Each of this method parameters defines the default state of the Module,
-    that is, the value that will be shown unless overriden by Module's
-    update_state() method. For example, let's say you want a module that
+    Each of this method parameters defines the default state of the Block,
+    that is, the value that will be shown unless overriden by Block's
+    update_state() method. For example, let's say you want a block that
     has a permanent green background (unless overriden), so you can do
     something like:
 
     ```python
-    module_instance = Module(background="#008000")
+    block_instance = Block(background="#008000")
     ```
 
     The parameters are based on [i3bar's protocol specification][1],
@@ -131,16 +131,16 @@ class Module(metaclass=abc.ABCMeta):
         separator_block_width: Optional[int] = None,
         markup: Optional[str] = None,
     ) -> None:
-        """Updates Module's state
+        """Updates Block's state
 
-        The state is what will be shown by the Module in the next update,
-        unless another update occur before a Module's `push_update()` method
+        The state is what will be shown by the Block in the next update,
+        unless another update occur before a Block's `push_update()` method
         is called.
 
         Each of this method arguments is from
         [i3bar's protocol specification][1], since they're mapped directly
         (so a `full_text="foo"` results in a `{"full_text": "foo"}`), except
-        for `name` (that is defined once in Module's constructor) and
+        for `name` (that is defined once in Block's constructor) and
         `instance` (that is generate randomly).
 
           - *full*_text: the full_text will be displayed by i3bar on the
@@ -201,10 +201,10 @@ class Module(metaclass=abc.ABCMeta):
         )
 
     def result(self) -> types.Result:
-        """Returns the current state of Module as a Result map
+        """Returns the current state of Block as a Result map
 
         This will combine both the default state and the current state to
-        generate the current state of the Module.
+        generate the current state of the Block.
         """
         return {**self._default_state, **self._state}
 
@@ -214,54 +214,54 @@ class Module(metaclass=abc.ABCMeta):
             self.update_queue.put_nowait((self.id, self.result()))
         else:
             core.logger.warn(
-                f"Not pushing update since module {self.name} with "
+                f"Not pushing update since block {self.name} with "
                 f"id {self.id} is either not initialized or frozen"
             )
 
     def update(self, *args, **kwargs) -> None:
-        """Updates a Module
+        """Updates a Block
 
-        This method will immediately updates a Module, so its new contents
+        This method will immediately updates a Block, so its new contents
         should be shown in the next redraw of i3bar. It is basically the
         equivalent of calling Method's `update_state()` followed by
         `push_update()`.
 
-        The parameters of this method is passed as-is to Module's
+        The parameters of this method is passed as-is to Block's
         `update_state()`.
 
-        **See also**: `Module.update_state()` parameters.
+        **See also**: `Block.update_state()` parameters.
         """
         self.update_state(*args, **kwargs)
         self.push_update()
 
     def abort(self, *args, **kwargs) -> None:
-        """Aborts a Module
+        """Aborts a Block
 
-        This method will do one last update of the Module, and disable all
+        This method will do one last update of the Block, and disable all
         further updates on it. Useful to show errors.
 
-        Note that this does not necessary stops the Module from working
+        Note that this does not necessary stops the Block from working
         (i.e.: its loop may still be running), it just stops the updates
         from showing in i3bar.
 
-        The parameters of this method is passed as-is to Module's
+        The parameters of this method is passed as-is to Block's
         `update_state()`.
 
-        **See also**: `Module.update_state()` parameters.
+        **See also**: `Block.update_state()` parameters.
         """
         self.update(*args, **kwargs)
         self.frozen = True
 
     def setup(self, queue: asyncio.Queue) -> None:
-        """Setup a Module
+        """Setup a Block
 
         This method is called just before start() to setup some things
-        necessary to make the Module work. While you may put your own
+        necessary to make the Block work. While you may put your own
         initialization code here, don't forget to call this function from
-        your children, so the Module works correctly.
+        your children, so the Block works correctly.
 
           - *queue*: asyncio.Queue instance that will be used to notify
-        updates from this Module
+        updates from this Block
         """
         self.update_queue = queue
         self.frozen = False
@@ -278,12 +278,12 @@ class Module(metaclass=abc.ABCMeta):
         height: int,
         modifiers: List[Optional[str]],
     ) -> None:
-        """Callback called when a click event happens to this Module
+        """Callback called when a click event happens to this Block
 
         Each of this method arguments is from
         [i3bar's protocol specification][1], since they're mapped directly
         (so a `{"x": 1}` results in a `x=1`), except for `name` (that is
-        defined once in Module's constructor) and `instance` (that is
+        defined once in Block's constructor) and `instance` (that is
         generate randomly).
 
           - *x*: X11 root window coordinates where the click occurred
@@ -304,7 +304,7 @@ class Module(metaclass=abc.ABCMeta):
         pass
 
     async def signal_handler(self, *, sig: signal.Signals) -> None:
-        """Callback called when a signal event happens to this Module
+        """Callback called when a signal event happens to this Block
 
           - *sig*: signals.Signals' enum with the signal that originated
         this event
@@ -313,22 +313,22 @@ class Module(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     async def start(self) -> None:
-        """Starts a Module
+        """Starts a Block
 
         This is an abstract method, so it should be overriden by any children.
 
         In this function is where you generally wants to put your main loop to
-        update the state of the module. This loop can either be triggered by
+        update the state of the block. This loop can either be triggered by
         events or can be an infinity loop. It can even be a single call
-        to update(), but in this case your Module will only be updated once.
+        to update(), but in this case your Block will only be updated once.
         """
         pass
 
 
-class PollingModule(Module):
-    """Polling Module
+class PollingBlock(Block):
+    """Polling Block
 
-    This is the most simple Module implementation. It is a module that runs
+    This is the most simple Block implementation. It is a block that runs
     a loop where it executes `run()` method and sleeps for `sleep` seconds.
 
     You must not instantiate this class directly, instead you should
@@ -336,7 +336,7 @@ class PollingModule(Module):
 
       - *sleep*: sleep in seconds between update
 
-    **See also:** `Module()` parameters.
+    **See also:** `Block()` parameters.
     """
 
     def __init__(self, sleep: int = 1, **kwargs) -> None:
@@ -345,7 +345,7 @@ class PollingModule(Module):
 
     @abc.abstractmethod
     async def run(self) -> None:
-        """Main loop in PollingModule
+        """Main loop in PollingBlock
 
         This is the method that will be run at each X `sleep` seconds. Since
         this is an abstract method, it should be overriden by its children.
@@ -380,14 +380,14 @@ class PollingModule(Module):
             raise e
 
 
-class ExecutorModule(Module):
-    """Executor Module
+class ExecutorBlock(Block):
+    """Executor Block
 
-    This is a special Module implementation to be used when it is not possible
+    This is a special Block implementation to be used when it is not possible
     to implement functionality using asyncio, for example, when a external
     library uses its own event loop.
 
-    What this module does is to call `run()` method inside a [executor][1],
+    What this block does is to call `run()` method inside a [executor][1],
     that is run in a separate thread or process depending of the selected
     executor. Since it is running in a separate thread/process, it does not
     interfere with the main asyncio loop.
@@ -398,7 +398,7 @@ class ExecutorModule(Module):
       - *executor*: an optional [`Executor`][2] instance. If not passed it
     will use the default one
 
-    **See also:** `Module()` parameters.
+    **See also:** `Block()` parameters.
 
     [1]: https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor
     [2]: https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor
@@ -410,7 +410,7 @@ class ExecutorModule(Module):
 
     @abc.abstractmethod
     def run(self) -> None:
-        """Main loop in PollingModule
+        """Main loop in PollingBlock
 
         This is the method that will be run inside a executor. Since this
         is an abstract method, it should be overriden by its children.

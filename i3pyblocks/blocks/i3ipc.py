@@ -1,10 +1,10 @@
 import i3ipc
 import i3ipc.aio
 
-from i3pyblocks import core, modules
+from i3pyblocks import core, blocks
 
 
-class WindowTitleModule(modules.Module):
+class WindowTitleBlock(blocks.Block):
     def __init__(
         self,
         format: str = "{window_title:.81s}",

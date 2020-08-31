@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from i3pyblocks import modules
+from i3pyblocks import blocks
 
 
-class DateTimeModule(modules.PollingModule):
+class DateTimeBlock(blocks.PollingBlock):
     def __init__(
         self,
         format_date: str = "%D",
