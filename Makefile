@@ -26,7 +26,24 @@ mypy:
 	$(PYTHON) -m mypy $(SRC_PATHS)
 
 dev-install:
-	$(PYTHON) -m pip install -e '.[aionotify,i3ipc,psutil,pulsectl,dev]'
+	$(PYTHON) -m pip install -r requirements.txt
+
+deps: deps-compile deps-sync
+
+deps-compile:
+	CUSTOM_COMPILE_COMMAND="make deps-compile"\
+		$(PYTHON) -m piptools compile requirements/*.in -qo - |\
+		sed 's|^-e .*$$|-e .|g' |\
+		tee requirements.txt
+
+deps-upgrade:
+	CUSTOM_COMPILE_COMMAND="make deps-compile"\
+		$(PYTHON) -m piptools compile -U requirements/*.in -qo - |\
+		sed 's|^-e .*$$|-e .|g' |\
+		tee requirements.txt
+
+deps-sync:
+	$(PYTHON) -m piptools sync requirements.txt
 
 run:
 	$(PYTHON) "./run.py"

@@ -18,7 +18,7 @@ commands:
       - run: sudo apt-get install libpulse-dev
       - restore_cache:
           keys:
-            - py<< parameters.version >>-deps-{{ checksum "setup.py" }}-{{ checksum "requirements_dev.txt" }}
+            - py<< parameters.version >>-deps-{{ checksum "requirements.txt" }}
             # fallback to using the latest cache if no exact match is found
             - py<< parameters.version >>-deps-
       - run:
@@ -30,7 +30,7 @@ commands:
       - save_cache:
           paths:
             - "venv"
-          key: py<< parameters.version >>-deps-{{ checksum "setup.py" }}-{{ checksum "requirements_dev.txt" }}
+          key: py<< parameters.version >>-deps-{{ checksum "requirements.txt" }}
 
 jobs:
   black-lint:

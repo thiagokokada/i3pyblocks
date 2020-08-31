@@ -1,0 +1,3 @@
+# This is an workaround until this issue is fixed:
+# https://github.com/jazzband/pip-tools/issues/625
+-e .[aionotify,i3ipc,psutil,pulsectl]
