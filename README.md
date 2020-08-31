@@ -24,9 +24,9 @@ pip install .
 ```
 
 This will install a barebones version of `i3pyblocks`, but since the
-dependencies are not installed not many modules will work. Each module is
+dependencies are not installed not many blocks will work. Each block is
 inside a namespace with its our own name, so for example if you want to use
-`i3pyblocks.modules.aionotify` you would need to install `aionotify` first:
+`i3pyblocks.blocks.aionotify` you would need to install `aionotify` first:
 
 ```shell
 pip install aionotify
@@ -41,7 +41,7 @@ pip install '.[aionotify]'
 pip install '.[aionotify,i3ipc,psutil,pulsectl]'
 ```
 
-The current available module dependencies:
+The current available block dependencies:
 - [aionotify](https://github.com/rbarrois/aionotify)
 - [i3ipc](https://github.com/altdesktop/i3ipc-python)
 - [psutil](https://github.com/giampaolo/psutil)
@@ -76,12 +76,12 @@ A very basic configuration file for `i3pyblocks` is shown below:
 import asyncio
 
 from i3pyblocks import core
-from i3pyblocks.modules import time
+from i3pyblocks.blocks import time
 
 async def main():
     runner = core.Runner()
 
-    runner.register_module(time.DateTimeModule())
+    runner.register_block(time.DateTimeBlock())
 
     await runner.start()
 

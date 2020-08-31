@@ -7,7 +7,7 @@ import pytest
 from asynctest import CoroutineMock
 from unittest.mock import patch
 
-from i3pyblocks import core, modules, types
+from i3pyblocks import core, blocks, types
 
 
 # TODO: Validate if we can actually read from stdin here
@@ -25,7 +25,7 @@ async def test_get_aio_reader(capsys):
 
 @pytest.mark.asyncio
 async def test_runner(capsys, mock_stdin):
-    class ValidPollingModule(modules.PollingModule):
+    class ValidPollingBlock(blocks.PollingBlock):
         def __init__(self, name, sleep=0.1):
             self.count = 0
             super().__init__(
@@ -43,13 +43,13 @@ async def test_runner(capsys, mock_stdin):
 
     runner = core.Runner()
 
-    instance_1 = ValidPollingModule(name="instance_1")
-    instance_2 = ValidPollingModule(name="instance_2")
-    instance_3 = ValidPollingModule(name="instance_3")
+    instance_1 = ValidPollingBlock(name="instance_1")
+    instance_2 = ValidPollingBlock(name="instance_2")
+    instance_3 = ValidPollingBlock(name="instance_3")
 
-    runner.register_module(instance_1)
-    runner.register_module(instance_2)
-    runner.register_module(instance_3)
+    runner.register_block(instance_1)
+    runner.register_block(instance_2)
+    runner.register_block(instance_3)
 
     await runner.start(timeout=0.5)
 
@@ -73,8 +73,8 @@ async def test_runner(capsys, mock_stdin):
 
 
 @pytest.mark.asyncio
-async def test_runner_with_fault_module(capsys, mock_stdin):
-    class FaultPollingModule(modules.PollingModule):
+async def test_runner_with_fault_block(capsys, mock_stdin):
+    class FaultPollingBlock(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             self.count = 0
             super().__init__(
@@ -88,8 +88,8 @@ async def test_runner_with_fault_module(capsys, mock_stdin):
             self.update(str(self.count))
 
     runner = core.Runner()
-    instance = FaultPollingModule()
-    runner.register_module(instance)
+    instance = FaultPollingBlock()
+    runner.register_block(instance)
 
     await runner.start(timeout=0.5)
 
@@ -102,7 +102,7 @@ async def test_runner_with_fault_module(capsys, mock_stdin):
     for i, result in enumerate(results[:4], start=1):
         assert result == [
             {
-                "name": "FaultPollingModule",
+                "name": "FaultPollingBlock",
                 "instance": str(instance.id),
                 "full_text": str(i),
             },
@@ -110,9 +110,9 @@ async def test_runner_with_fault_module(capsys, mock_stdin):
 
     assert results[4] == [
         {
-            "name": "FaultPollingModule",
+            "name": "FaultPollingBlock",
             "instance": str(instance.id),
-            "full_text": "Exception in FaultPollingModule: Boom!",
+            "full_text": "Exception in FaultPollingBlock: Boom!",
             "urgent": True,
         }
     ]
@@ -128,7 +128,7 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
         await asyncio.sleep(0.2)
         os.kill(os.getpid(), signal.SIGUSR2)
 
-    class ValidPollingModuleWithSignalHandler(modules.PollingModule):
+    class ValidPollingBlockWithSignalHandler(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             self.count = 0
             super().__init__(
@@ -147,8 +147,8 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
                 raise Exception("This shouldn't happen")
 
     runner = core.Runner()
-    instance = ValidPollingModuleWithSignalHandler()
-    runner.register_module(instance, signals=[signal.SIGUSR1, signal.SIGUSR2])
+    instance = ValidPollingBlockWithSignalHandler()
+    runner.register_block(instance, signals=[signal.SIGUSR1, signal.SIGUSR2])
 
     runner.register_task(send_signal())
     runner.register_task(send_another_signal())
@@ -163,7 +163,7 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
 
     assert results[0] == [
         {
-            "name": "ValidPollingModuleWithSignalHandler",
+            "name": "ValidPollingBlockWithSignalHandler",
             "instance": str(instance.id),
             "full_text": "received_signal",
         }
@@ -171,7 +171,7 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
 
     assert results[1] == [
         {
-            "name": "ValidPollingModuleWithSignalHandler",
+            "name": "ValidPollingBlockWithSignalHandler",
             "instance": str(instance.id),
             "full_text": "received_another_signal",
         }
@@ -184,7 +184,7 @@ async def test_runner_with_signal_handler_exception(capsys, mock_stdin):
         await asyncio.sleep(0.1)
         os.kill(os.getpid(), signal.SIGUSR1)
 
-    class InvalidPollingModuleWithSignalHandler(modules.PollingModule):
+    class InvalidPollingBlockWithSignalHandler(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             self.count = 0
             super().__init__(
@@ -198,8 +198,8 @@ async def test_runner_with_signal_handler_exception(capsys, mock_stdin):
             raise Exception("Boom!")
 
     runner = core.Runner()
-    instance = InvalidPollingModuleWithSignalHandler()
-    runner.register_module(instance, signals=[signal.SIGUSR1])
+    instance = InvalidPollingBlockWithSignalHandler()
+    runner.register_block(instance, signals=[signal.SIGUSR1])
 
     runner.register_task(send_signal())
 
@@ -209,7 +209,7 @@ async def test_runner_with_signal_handler_exception(capsys, mock_stdin):
 
     assert (
         result["full_text"]
-        == "Exception in InvalidPollingModuleWithSignalHandler signal handler: Boom!"
+        == "Exception in InvalidPollingBlockWithSignalHandler signal handler: Boom!"
     )
 
     assert result["urgent"] is True
@@ -217,7 +217,7 @@ async def test_runner_with_signal_handler_exception(capsys, mock_stdin):
 
 @pytest.mark.asyncio
 async def test_runner_with_click_event():
-    class ValidPollingModuleWithClickHandler(modules.PollingModule):
+    class ValidPollingBlockWithClickHandler(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             super().__init__(
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
@@ -234,12 +234,12 @@ async def test_runner_with_click_event():
             )
 
     runner = core.Runner()
-    instance = ValidPollingModuleWithClickHandler()
-    runner.register_module(instance)
+    instance = ValidPollingBlockWithClickHandler()
+    runner.register_block(instance)
 
     click_event = json.dumps(
         {
-            "name": "ValidPollingModuleWithClickHandler",
+            "name": "ValidPollingBlockWithClickHandler",
             "instance": str(instance.id),
             "button": types.MouseButton.LEFT_BUTTON,
             "modifiers": [types.KeyModifier.ALT, types.KeyModifier.SUPER],
@@ -257,7 +257,7 @@ async def test_runner_with_click_event():
     result = instance.result()
 
     assert result == {
-        "name": "ValidPollingModuleWithClickHandler",
+        "name": "ValidPollingBlockWithClickHandler",
         "instance": str(instance.id),
         "full_text": "123-456-1-12-34-20-40-['Mod1', 'Mod4']",
     }
@@ -265,7 +265,7 @@ async def test_runner_with_click_event():
 
 @pytest.mark.asyncio
 async def test_runner_with_click_event_exception():
-    class InvalidPollingModuleWithClickHandler(modules.PollingModule):
+    class InvalidPollingBlockWithClickHandler(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             super().__init__(
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
@@ -280,11 +280,11 @@ async def test_runner_with_click_event_exception():
             raise Exception("Boom!")
 
     runner = core.Runner()
-    instance = InvalidPollingModuleWithClickHandler()
-    runner.register_module(instance)
+    instance = InvalidPollingBlockWithClickHandler()
+    runner.register_block(instance)
 
     click_event = json.dumps(
-        {"name": "InvalidPollingModuleWithClickHandler", "instance": str(instance.id)}
+        {"name": "InvalidPollingBlockWithClickHandler", "instance": str(instance.id)}
     ).encode()
 
     await runner.click_event(click_event)
@@ -293,7 +293,7 @@ async def test_runner_with_click_event_exception():
 
     assert (
         result["full_text"]
-        == "Exception in InvalidPollingModuleWithClickHandler click handler: Boom!"
+        == "Exception in InvalidPollingBlockWithClickHandler click handler: Boom!"
     )
 
     assert result["urgent"] is True
@@ -301,7 +301,7 @@ async def test_runner_with_click_event_exception():
 
 @pytest.mark.asyncio
 async def test_runner_with_click_events(capsys):
-    class ValidPollingModuleWithClickHandler(modules.PollingModule):
+    class ValidPollingBlockWithClickHandler(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             super().__init__(
                 sleep=sleep, separator=None, urgent=None, align=None, markup=None
@@ -318,12 +318,12 @@ async def test_runner_with_click_events(capsys):
             )
 
     runner = core.Runner()
-    instance = ValidPollingModuleWithClickHandler()
-    runner.register_module(instance)
+    instance = ValidPollingBlockWithClickHandler()
+    runner.register_block(instance)
 
     click_event = json.dumps(
         {
-            "name": "ValidPollingModuleWithClickHandler",
+            "name": "ValidPollingBlockWithClickHandler",
             "instance": str(instance.id),
             "button": 1,
             "modifiers": ["Mod1"],
@@ -358,7 +358,7 @@ async def test_runner_with_click_events(capsys):
 
     assert results[0] == [
         {
-            "name": "ValidPollingModuleWithClickHandler",
+            "name": "ValidPollingBlockWithClickHandler",
             "instance": str(instance.id),
             "full_text": "123-456-1-12-34-20-40-['Mod1']",
         }

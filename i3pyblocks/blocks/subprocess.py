@@ -1,9 +1,9 @@
 from asyncio import subprocess
 
-from i3pyblocks import modules, types, utils
+from i3pyblocks import blocks, types, utils
 
 
-class ShellModule(modules.PollingModule):
+class ShellBlock(blocks.PollingBlock):
     def __init__(
         self,
         command: str,
@@ -50,7 +50,7 @@ class ShellModule(modules.PollingModule):
         )
 
 
-class ToggleModule(modules.PollingModule):
+class ToggleBlock(blocks.PollingBlock):
     def __init__(
         self,
         command_state: str,

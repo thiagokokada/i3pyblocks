@@ -2,16 +2,16 @@ import pytest
 from asynctest import Mock
 
 from i3pyblocks import types, utils
-from i3pyblocks.modules import subprocess as m_sub
+from i3pyblocks.blocks import subprocess as m_sub
 
 from helpers import misc
 
 
 @pytest.mark.asyncio
-async def test_shell_module():
+async def test_shell_block():
     # This test is not mocked, since basic Linux tools should be available
     # in any place that have an i3 setup
-    instance = m_sub.ShellModule(
+    instance = m_sub.ShellBlock(
         command="""
         echo Hello World | cut -d" " -f1
         echo Someone 1>&2
@@ -29,10 +29,10 @@ async def test_shell_module():
 
 
 @pytest.mark.asyncio
-async def test_shell_module_click_handler():
+async def test_shell_block_click_handler():
     mock_utils = Mock(utils)
 
-    instance = m_sub.ShellModule(
+    instance = m_sub.ShellBlock(
         command="exit 0",
         command_on_click=(
             (types.MouseButton.LEFT_BUTTON, "LEFT_BUTTON"),
@@ -62,13 +62,13 @@ async def test_shell_module_click_handler():
 
 
 @pytest.mark.asyncio
-async def test_toggle_module(tmpdir):
+async def test_toggle_block(tmpdir):
     file_on = tmpdir / "on"
     file_off = tmpdir / "off"
 
     # This test is not mocked, since basic Linux tools should be available
     # in any place that have an i3 setup
-    instance = m_sub.ToggleModule(
+    instance = m_sub.ToggleBlock(
         command_state="echo",
         command_on=f"touch {file_on}",
         command_off=f"touch {file_off}",

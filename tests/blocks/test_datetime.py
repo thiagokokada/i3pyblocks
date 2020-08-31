@@ -3,16 +3,16 @@ import pytest
 from datetime import datetime
 from unittest.mock import Mock
 
-from i3pyblocks.modules import datetime as m_datetime
+from i3pyblocks.blocks import datetime as m_datetime
 
 
 @pytest.mark.asyncio
-async def test_datetime_module():
+async def test_datetime_block():
     mock_datetime = Mock(datetime)
     mock_datetime.now.return_value = datetime(2020, 8, 25, 23, 30, 0)
 
     # Use a non locale dependent format
-    instance = m_datetime.DateTimeModule(
+    instance = m_datetime.DateTimeBlock(
         format_time="%H:%M:%S", format_date="%y-%m-%d", _datetime=mock_datetime
     )
     await instance.run()

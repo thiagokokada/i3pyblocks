@@ -6,10 +6,10 @@ from typing import Optional
 
 import aionotify
 
-from i3pyblocks import core, modules, types, utils
+from i3pyblocks import core, blocks, types, utils
 
 
-class FileWatcherModule(modules.Module):
+class FileWatcherBlock(blocks.Block):
     def __init__(
         self,
         path: str,
@@ -49,7 +49,7 @@ class FileWatcherModule(modules.Module):
             raise e
 
 
-class BacklightModule(FileWatcherModule):
+class BacklightBlock(FileWatcherBlock):
     def __init__(
         self,
         format: str = "{percent:.0f}%",

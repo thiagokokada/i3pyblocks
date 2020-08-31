@@ -5,7 +5,7 @@ import pytest
 import pulsectl
 
 from i3pyblocks import types
-from i3pyblocks.modules import pulsectl as m_pulsectl
+from i3pyblocks.blocks import pulsectl as m_pulsectl
 
 from helpers import misc
 
@@ -32,16 +32,16 @@ def pulsectl_mocker():
     return mock_pulsectl, mock_pulse
 
 
-def mock_event(module_instance, facility):
+def mock_event(block_instance, facility):
     with pytest.raises(pulsectl.PulseLoopStop):
         event = Mock(pulsectl.PulseEventInfo)
         event.facility = facility
-        module_instance._event_callback(event)
+        block_instance._event_callback(event)
 
 
-def test_pulse_audio_module(pulsectl_mocker):
+def test_pulse_audio_block(pulsectl_mocker):
     mock_pulsectl, mock_pulse = pulsectl_mocker
-    instance = m_pulsectl.PulseAudioModule(_pulsectl=mock_pulsectl)
+    instance = m_pulsectl.PulseAudioBlock(_pulsectl=mock_pulsectl)
 
     # If volume is 10%, returns Colors.WARN
     mock_pulse.volume_get_all_chans.return_value = 0.1
@@ -82,9 +82,9 @@ def test_pulse_audio_module(pulsectl_mocker):
     mock_pulse.mute.assert_called_with(SINK_MUTE, mute=False)
 
 
-def test_pulse_audio_module_exception(pulsectl_mocker):
+def test_pulse_audio_block_exception(pulsectl_mocker):
     mock_pulsectl, mock_pulse = pulsectl_mocker
-    instance = m_pulsectl.PulseAudioModule(_pulsectl=mock_pulsectl)
+    instance = m_pulsectl.PulseAudioBlock(_pulsectl=mock_pulsectl)
 
     # Simulate an event going wrong
     mock_event(instance, facility="server")
@@ -100,11 +100,11 @@ def test_pulse_audio_module_exception(pulsectl_mocker):
 
 
 @pytest.mark.asyncio
-async def test_pulse_audio_module_click_handler(pulsectl_mocker):
+async def test_pulse_audio_block_click_handler(pulsectl_mocker):
     mock_pulsectl, mock_pulse = pulsectl_mocker
     mock_subprocess = Mock(subprocess)
 
-    instance = m_pulsectl.PulseAudioModule(
+    instance = m_pulsectl.PulseAudioBlock(
         command=("command", "-c"), _pulsectl=mock_pulsectl, _subprocess=mock_subprocess
     )
 
