@@ -35,8 +35,10 @@ pip install aionotify
 Another option is to use the optional dependencies declared by `i3pyblocks`:
 
 ```shell
-# You can also pass multiple dependencies separated by ','
+# To install only aionotify
 pip install '.[aionotify]'
+# You can also pass multiple dependencies separated by ',', for example
+pip install '.[aionotify,i3ipc,psutil,pulsectl]'
 ```
 
 The current available module dependencies:
@@ -45,7 +47,7 @@ The current available module dependencies:
 - [psutil](https://github.com/giampaolo/psutil)
 - [pulsectl](https://github.com/mk-fg/python-pulse-control)
 
-After installing the dependencies, you can run (assuming you installed all
+After installing the dependencies, you can run (assuming you have installed all
 dependencies):
 
 ```shell
@@ -88,13 +90,6 @@ asyncio.run(main())
 
 Look in `run.py` file for a more detailed usage.
 
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to
-discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
-
 ## Development
 
 To setup a development environment, setup a create a venv first and run:
@@ -119,6 +114,13 @@ repo:
 ```shell
 nix-shell shell.nix
 ```
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to
+discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
 
 ## License
 
