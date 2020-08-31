@@ -47,9 +47,8 @@ setuptools.setup(
         "i3ipc": ["i3ipc>=2.0.1"],
         "psutil": ["psutil>=5.6.0"],
         "pulsectl": ["pulsectl>=19.9.1"],
-        "dev": requirements_from_pip("requirements_dev.txt"),
     },
-    tests_require=requirements_from_pip("requirements_dev.txt"),
+    tests_require=requirements_from_pip("requirements/dev.in"),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
