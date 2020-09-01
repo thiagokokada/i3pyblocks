@@ -1,4 +1,5 @@
-SRC_PATHS := i3pyblocks tests run.py
+SRC_PATHS := i3pyblocks tests example.py
+TEST_PATHS := tests
 PYTHON := venv/bin/python
 .PHONY: clean dev-install format format-check lint mypy tests tests-with-coverage
 
@@ -8,10 +9,10 @@ clean:
 	git clean -fxd
 
 tests:
-	$(PYTHON) -m pytest tests/
+	$(PYTHON) -m pytest $(TEST_PATHS)
 
 tests-with-coverage:
-	$(PYTHON) -m pytest --cov=i3pyblocks --cov-report=term --cov-report=xml tests/
+	$(PYTHON) -m pytest --cov=i3pyblocks --cov-report=term --cov-report=xml $(TEST_PATHS)
 
 format:
 	$(PYTHON) -m black $(SRC_PATHS)

@@ -48,7 +48,13 @@ async def test_load_avg_block():
     mock_psutil.getloadavg.return_value = (2.5, 5, 15)
 
     instance = m_psutil.LoadAvgBlock(
-        format="{load1} {load5} {load15}", _psutil=mock_psutil
+        format="{load1} {load5} {load15}",
+        colors=(
+            (0, types.Color.NEUTRAL),
+            (2, types.Color.WARN),
+            (4, types.Color.URGENT),
+        ),
+        _psutil=mock_psutil,
     )
 
     await instance.run()

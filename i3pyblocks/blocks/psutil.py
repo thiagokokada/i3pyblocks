@@ -7,6 +7,9 @@ from psutil._common import bytes2human
 
 from i3pyblocks import blocks, utils, types
 
+# Default CPU count to be used in LoadAvgBlock
+_CPU_COUNT = psutil.cpu_count()
+
 
 class CpuPercentBlock(blocks.PollingBlock):
     def __init__(
@@ -105,8 +108,8 @@ class LoadAvgBlock(blocks.PollingBlock):
         format: str = "L: {load1}",
         colors: types.Dictable = (
             (0, types.Color.NEUTRAL),
-            (2, types.Color.WARN),
-            (4, types.Color.URGENT),
+            (_CPU_COUNT // 2, types.Color.WARN),
+            (_CPU_COUNT, types.Color.URGENT),
         ),
         sleep: int = 5,
         *,

@@ -47,16 +47,19 @@ The current available block dependencies:
 - [psutil](https://github.com/giampaolo/psutil)
 - [pulsectl](https://github.com/mk-fg/python-pulse-control)
 
+## Usage
+
 After installing the dependencies, you can run (assuming you have installed all
 dependencies):
 
 ```shell
-python ./run.py
+python ./example.py
 ```
 
 It will run an example configuration of `i3pyblocks` that should be sufficient
-to demonstrate its capabilities. However you can customize this file as you
-want.
+to demonstrate its capabilities. This file also has comments explaining how
+the basics of `i3pyblocks` works, so it serves as a great start point for your
+own configuration file.
 
 Afterwards, you can put something like this in your `$HOME/.config/i3/config`
 file:
@@ -64,31 +67,9 @@ file:
 ```
 bar {
     position top
-    status_command /path/to/venv/python /path/to/your/run.py
+    status_command /path/to/venv/python /path/to/your/my_i3pyblocks_config.py
 }
 ```
-
-## Usage
-
-A very basic configuration file for `i3pyblocks` is shown below:
-
-```python
-import asyncio
-
-from i3pyblocks import core
-from i3pyblocks.blocks import time
-
-async def main():
-    runner = core.Runner()
-
-    runner.register_block(time.DateTimeBlock())
-
-    await runner.start()
-
-asyncio.run(main())
-```
-
-Look in `run.py` file for a more detailed usage.
 
 ## Development
 
