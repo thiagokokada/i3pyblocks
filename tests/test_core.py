@@ -34,9 +34,13 @@ async def test_get_aio_reader(capsys):
 @pytest.mark.asyncio
 async def test_runner(capsys, mock_stdin):
     class ValidPollingBlock(blocks.PollingBlock):
-        def __init__(self, name, sleep=0.1):
+        def __init__(self, block_name, sleep=0.1):
             self.count = 0
-            super().__init__(name=name, sleep=sleep, default_state=DEFAULT_STATE)
+            super().__init__(
+                block_name=block_name,
+                sleep=sleep,
+                default_state=DEFAULT_STATE,
+            )
 
         async def run(self):
             self.count += 1
@@ -44,9 +48,9 @@ async def test_runner(capsys, mock_stdin):
 
     runner = core.Runner()
 
-    instance_1 = ValidPollingBlock(name="instance_1")
-    instance_2 = ValidPollingBlock(name="instance_2")
-    instance_3 = ValidPollingBlock(name="instance_3")
+    instance_1 = ValidPollingBlock(block_name="instance_1")
+    instance_2 = ValidPollingBlock(block_name="instance_2")
+    instance_3 = ValidPollingBlock(block_name="instance_3")
 
     runner.register_block(instance_1)
     runner.register_block(instance_2)

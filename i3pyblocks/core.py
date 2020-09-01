@@ -58,13 +58,13 @@ class Runner:
         async def signal_handler(sig: signal.Signals):
             try:
                 logger.debug(
-                    f"Block {block.name} with id {block.id} received a signal {sig.name}"
+                    f"Block {block.block_name} with id {block.id} received a signal {sig.name}"
                 )
                 await block.signal_handler(sig=sig)
             except Exception as e:
-                logger.exception(f"Exception in {block.name} signal handler")
+                logger.exception(f"Exception in {block.block_name} signal handler")
                 block.abort(
-                    f"Exception in {block.name} signal handler: {e}", urgent=True
+                    f"Exception in {block.block_name} signal handler: {e}", urgent=True
                 )
 
         def callback_fn(sig: signal.Signals):
@@ -73,7 +73,7 @@ class Runner:
         for signum in signums:
             sig = signal.Signals(signum)  # Make sure this is a Signals instance
             self.loop.add_signal_handler(sig, callback_fn, sig)
-            logger.debug(f"Registered signal {sig.name} for {block.name}")
+            logger.debug(f"Registered signal {sig.name} for {block.block_name}")
 
     def register_task(self, awaitable: Awaitable) -> None:
         """Register a task that will be run in Runner's loop."""
@@ -149,7 +149,7 @@ class Runner:
             block = self.blocks[id_]
 
             logger.debug(
-                f"Block {block.name} with id {block.id} received"
+                f"Block {block.block_name} with id {block.id} received"
                 f" a click event: {click_event}"
             )
 
@@ -164,8 +164,10 @@ class Runner:
                 modifiers=click_event.get("modifiers"),
             )
         except Exception as e:
-            logger.exception(f"Error in {block.name} click handler")
-            block.abort(f"Exception in {block.name} click handler: {e}", urgent=True)
+            logger.exception(f"Error in {block.block_name} click handler")
+            block.abort(
+                f"Exception in {block.block_name} click handler: {e}", urgent=True
+            )
 
     # Based on: https://git.io/fjbHx
     async def click_events(self) -> None:

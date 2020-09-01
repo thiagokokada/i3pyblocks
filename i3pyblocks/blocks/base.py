@@ -40,7 +40,7 @@ class Block(metaclass=abc.ABCMeta):
     def __init__(
         self,
         *,
-        name: Optional[str] = None,
+        block_name: Optional[str] = None,
         default_state: types.Dictable = (
             ("color", None),
             ("background", None),
@@ -58,13 +58,13 @@ class Block(metaclass=abc.ABCMeta):
         ),
     ) -> None:
         self.id = uuid.uuid4()
-        self.name = name or self.__class__.__name__
+        self.block_name = block_name or self.__class__.__name__
         self.frozen = True
         self.update_queue: Optional[asyncio.Queue] = None
 
         # Those are default values for properties if they are not overriden
         self._default_state = utils.non_nullable_dict(
-            name=self.name, instance=str(self.id), **dict(default_state)
+            name=self.block_name, instance=str(self.id), **dict(default_state)
         )
 
         self.update_state()
@@ -170,7 +170,7 @@ class Block(metaclass=abc.ABCMeta):
             self.update_queue.put_nowait((self.id, self.result()))
         else:
             core.logger.warn(
-                f"Not pushing update since block {self.name} with "
+                f"Not pushing update since block {self.block_name} with "
                 f"id {self.id} is either not initialized or frozen"
             )
 
@@ -331,8 +331,8 @@ class PollingBlock(Block):
                 await self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:
-            core.logger.exception(f"Exception in {self.name}")
-            self.abort(f"Exception in {self.name}: {e}", urgent=True)
+            core.logger.exception(f"Exception in {self.block_name}")
+            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
             raise e
 
 
@@ -378,6 +378,6 @@ class ExecutorBlock(Block):
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(self.executor, self.run)
         except Exception as e:
-            core.logger.exception(f"Exception in {self.name}")
-            self.abort(f"Exception in {self.name}: {e}", urgent=True)
+            core.logger.exception(f"Exception in {self.block_name}")
+            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
             raise e

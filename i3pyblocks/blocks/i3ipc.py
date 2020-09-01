@@ -42,6 +42,6 @@ class WindowTitleBlock(blocks.Block):
             await self.update_title(connection)
             await connection.main()
         except Exception as e:
-            core.logger.exception(f"Exception in {self.name}")
-            self.abort(f"Exception in {self.name}: {e}", urgent=True)
+            core.logger.exception(f"Exception in {self.block_name}")
+            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
             raise e

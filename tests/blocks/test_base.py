@@ -36,7 +36,7 @@ async def test_valid_block():
             )
 
     block = ValidBlock(
-        name="Name",
+        block_name="Name",
         default_state=dict(
             color="#000000",
             background="#FFFFFF",
