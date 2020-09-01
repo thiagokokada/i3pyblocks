@@ -12,103 +12,59 @@ class Block(metaclass=abc.ABCMeta):
     """Base Block
 
     This is an abstract class defining the interface for what a Block is.
-    It should not be used directly.
+    It should not be used directly, instead it should be derivated and its
+    abstract methods should be implemented.
 
-    Each of this method parameters defines the default state of the Block,
-    that is, the value that will be shown unless overriden by Block's
-    update_state() method. For example, let's say you want a block that
-    has a permanent green background (unless overriden), so you can do
-    something like:
+      - *name*: allows you to set a custom internal representation for
+    the class. This should only be useful if you need to differentiate
+    between multiple instances of the same module in a consistent way
+    (i.e.: you can't rely on something random like the `Module.id`)
+    If not passed this will use by default the string representation
+    of the class name.
+      - *default_state*: it is a dict that defines the default state of
+    the Block, that is, the value that will be shown unless the state
+    is updated by Block's `update_state()` method.
+    For example, let's say you want a block that has a permanent green
+    background (unless overriden), so you can do something like:
 
-    ```python
-    block_instance = Block(background="#008000")
-    ```
+        ```python
+        block_instance = Block(background="#008000")
+        ```
 
-    The parameters are based on [i3bar's protocol specification][1],
-    since they're mapped directly (so a `full_text="foo"` results in a
-    `{"full_text": "foo"}`), except for `instance` that is generated
-    randomly.
-
-      - *full*_text: the full_text will be displayed by i3bar on the
-    status line. This is the only required parameter. If full_text is an
-    empty string, the block will be skipped
-      - *short*_text: it will be used in case the status line needs
-    to be shortened because it uses more space than your screen provides
-      - *color*: to make the current state of the information easy to spot,
-    colors can be used. Colors are specified in hex (like in HTML),
-    starting with a leading hash sign. For example, #ff0000 means red
-      - *background*: overrides the background color for this particular
-    block
-      - *border*: overrides the border color for this particular block
-      - *border*_top: defines the width (in pixels) of the top border of
-    this block. Defaults to 1
-      - *border*_right: defines the width (in pixels) of the right border
-    of this block. Defaults to 1
-      - *border*_bottom: defines the width (in pixels) of the bottom
-    border of this block. Defaults to 1
-      - *border*_left: defines the width (in pixels) of the left border of
-    this block. Defaults to 1
-      - *min*_width: The minimum width (in pixels) of the block. If the
-    content of the full_text key take less space than the specified
-    min_width, the block will be padded to the left and/or the right side,
-    according to the align key
-      - *align*: align text on the center, right or left (default) of the
-    block, when the minimum width of the latter, specified by the
-    min_width key, is not reached
-      - *urgent*: a boolean which specifies whether the current value is
-    urgent
-      - *separator*: a boolean which specifies whether a separator line
-    should be drawn after this block. The default is true, meaning the
-    separator line will be drawn
-      - *separator*_block_width: the amount of pixels to leave blank
-    after the block. In the middle of this gap, a separator line will
-    be drawn unless separator is disabled.
-      - *markup*: a string that indicates how the text of the block
-    should be parsed. Pango markup only works if you use a pango font.
+    **See also:** for details about each of the keys available in
+    `default_state`, see `update_state()` documentation.
 
     [1]: https://i3wm.org/docs/i3bar-protocol.html#_blocks_in_detail
     """
 
     def __init__(
         self,
-        name: Optional[str] = None,
         *,
-        color: Optional[str] = None,
-        background: Optional[str] = None,
-        border: Optional[str] = None,
-        border_top: Optional[int] = None,
-        border_right: Optional[int] = None,
-        border_bottom: Optional[int] = None,
-        border_left: Optional[int] = None,
-        min_width: Optional[int] = None,
-        align: Optional[str] = types.AlignText.LEFT,
-        urgent: Optional[bool] = False,
-        separator: Optional[bool] = True,
-        separator_block_width: Optional[int] = None,
-        markup: Optional[str] = types.MarkupText.NONE,
+        block_name: Optional[str] = None,
+        default_state: types.Dictable = (
+            ("color", None),
+            ("background", None),
+            ("border", None),
+            ("border_top", None),
+            ("border_right", None),
+            ("border_bottom", None),
+            ("border_left", None),
+            ("min_width", None),
+            ("align", types.AlignText.LEFT),
+            ("urgent", False),
+            ("separator", True),
+            ("separator_block_width", None),
+            ("markup", types.MarkupText.NONE),
+        ),
     ) -> None:
         self.id = uuid.uuid4()
-        self.name = name or self.__class__.__name__
+        self.block_name = block_name or self.__class__.__name__
         self.frozen = True
         self.update_queue: Optional[asyncio.Queue] = None
 
-        # Those are default values for properties if they are not overrided
+        # Those are default values for properties if they are not overriden
         self._default_state = utils.non_nullable_dict(
-            name=self.name,
-            instance=str(self.id),
-            color=color,
-            background=background,
-            border=border,
-            border_top=border_top,
-            border_right=border_right,
-            border_left=border_left,
-            border_bottom=border_bottom,
-            min_width=min_width,
-            align=align,
-            urgent=urgent,
-            separator=separator,
-            separator_block_width=separator_block_width,
-            markup=markup,
+            name=self.block_name, instance=str(self.id), **dict(default_state)
         )
 
         self.update_state()
@@ -214,7 +170,7 @@ class Block(metaclass=abc.ABCMeta):
             self.update_queue.put_nowait((self.id, self.result()))
         else:
             core.logger.warn(
-                f"Not pushing update since block {self.name} with "
+                f"Not pushing update since block {self.block_name} with "
                 f"id {self.id} is either not initialized or frozen"
             )
 
@@ -375,8 +331,8 @@ class PollingBlock(Block):
                 await self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:
-            core.logger.exception(f"Exception in {self.name}")
-            self.abort(f"Exception in {self.name}: {e}", urgent=True)
+            core.logger.exception(f"Exception in {self.block_name}")
+            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
             raise e
 
 
@@ -422,6 +378,6 @@ class ExecutorBlock(Block):
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(self.executor, self.run)
         except Exception as e:
-            core.logger.exception(f"Exception in {self.name}")
-            self.abort(f"Exception in {self.name}: {e}", urgent=True)
+            core.logger.exception(f"Exception in {self.block_name}")
+            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
             raise e

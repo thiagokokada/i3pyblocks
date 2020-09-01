@@ -44,8 +44,8 @@ class FileWatcherBlock(blocks.Block):
                 await self.run()
                 self.event = await watcher.get_event()
         except Exception as e:
-            core.logger.exception(f"Exception in {self.name}")
-            self.abort(f"Exception in {self.name}: {e}", urgent=True)
+            core.logger.exception(f"Exception in {self.block_name}")
+            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
             raise e
 
 

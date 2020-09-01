@@ -1,6 +1,6 @@
 import subprocess
 import time
-from typing import Sequence
+from typing import Sequence, NoReturn
 
 import pulsectl
 from pulsectl import PulseError, PulseLoopStop
@@ -78,7 +78,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
             time.sleep(0.5)
             self._initialize_pulse()
 
-    def _event_callback(self, event):
+    def _event_callback(self, event) -> NoReturn:
         self.event = event
         raise PulseLoopStop()
 
