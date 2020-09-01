@@ -7,6 +7,13 @@ from i3pyblocks import blocks, types
 
 from helpers import task
 
+DEFAULT_STATE = dict(
+    separator=None,
+    urgent=None,
+    align=None,
+    markup=None,
+)
+
 
 def test_invalid_block():
     class InvalidBlock(blocks.Block):
@@ -21,23 +28,30 @@ async def test_valid_block():
     class ValidBlock(blocks.Block):
         async def start(self):
             await super().start()
-            self.update("Done!", color=None, urgent=False, markup=types.MarkupText.NONE)
+            self.update(
+                "Done!",
+                color=None,
+                urgent=False,
+                markup=types.MarkupText.NONE,
+            )
 
     block = ValidBlock(
         name="Name",
-        color="#000000",
-        background="#FFFFFF",
-        border="#FF0000",
-        border_top=1,
-        border_right=1,
-        border_bottom=1,
-        border_left=1,
-        min_width=10,
-        align=types.AlignText.CENTER,
-        urgent=True,
-        separator=False,
-        separator_block_width=9,
-        markup=types.MarkupText.PANGO,
+        default_state=dict(
+            color="#000000",
+            background="#FFFFFF",
+            border="#FF0000",
+            border_top=1,
+            border_right=1,
+            border_bottom=1,
+            border_left=1,
+            min_width=10,
+            align=types.AlignText.CENTER,
+            urgent=True,
+            separator=False,
+            separator_block_width=9,
+            markup=types.MarkupText.PANGO,
+        ),
     )
 
     block.setup(asyncio.Queue())
@@ -146,9 +160,7 @@ async def test_valid_polling_block():
     class ValidPollingBlock(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             self.count = 0
-            super().__init__(
-                sleep=sleep, separator=None, urgent=None, align=None, markup=None
-            )
+            super().__init__(sleep=sleep, default_state=DEFAULT_STATE)
 
         async def run(self):
             self.count += 1
@@ -195,9 +207,7 @@ async def test_polling_block_with_error():
     class PollingBlockWithError(blocks.PollingBlock):
         def __init__(self, sleep=1):
             self.count = 0
-            super().__init__(
-                sleep=sleep, separator=None, urgent=None, align=None, markup=None
-            )
+            super().__init__(sleep=sleep, default_state=DEFAULT_STATE)
 
         def run(self):
             raise Exception("Boom!")
@@ -228,7 +238,7 @@ async def test_valid_executor_block():
     class ValidExecutorBlock(blocks.ExecutorBlock):
         def __init__(self):
             self.count = 0
-            super().__init__(separator=None, urgent=None, align=None, markup=None)
+            super().__init__(default_state=DEFAULT_STATE)
 
         def run(self):
             self.count += 1
@@ -250,7 +260,7 @@ async def test_executor_block_with_error():
     class ExecutorBlockWithError(blocks.ExecutorBlock):
         def __init__(self):
             self.count = 0
-            super().__init__(separator=None, urgent=None, align=None, markup=None)
+            super().__init__(default_state=DEFAULT_STATE)
 
         def run(self):
             raise Exception("Boom!")

@@ -10,6 +10,14 @@ from unittest.mock import patch
 from i3pyblocks import core, blocks, types
 
 
+DEFAULT_STATE = dict(
+    separator=None,
+    urgent=None,
+    align=None,
+    markup=None,
+)
+
+
 # TODO: Validate if we can actually read from stdin here
 @pytest.mark.asyncio
 async def test_get_aio_reader(capsys):
@@ -28,14 +36,7 @@ async def test_runner(capsys, mock_stdin):
     class ValidPollingBlock(blocks.PollingBlock):
         def __init__(self, name, sleep=0.1):
             self.count = 0
-            super().__init__(
-                name=name,
-                sleep=sleep,
-                separator=None,
-                urgent=None,
-                align=None,
-                markup=None,
-            )
+            super().__init__(name=name, sleep=sleep, default_state=DEFAULT_STATE)
 
         async def run(self):
             self.count += 1
@@ -77,9 +78,7 @@ async def test_runner_with_fault_block(capsys, mock_stdin):
     class FaultPollingBlock(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             self.count = 0
-            super().__init__(
-                sleep=sleep, separator=None, urgent=None, align=None, markup=None
-            )
+            super().__init__(sleep=sleep, default_state=DEFAULT_STATE)
 
         async def run(self):
             self.count += 1
@@ -131,9 +130,7 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
     class ValidPollingBlockWithSignalHandler(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             self.count = 0
-            super().__init__(
-                sleep=sleep, separator=None, urgent=None, align=None, markup=None
-            )
+            super().__init__(sleep=sleep, default_state=DEFAULT_STATE)
 
         async def run(self):
             pass
@@ -187,9 +184,7 @@ async def test_runner_with_signal_handler_exception(capsys, mock_stdin):
     class InvalidPollingBlockWithSignalHandler(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
             self.count = 0
-            super().__init__(
-                sleep=sleep, separator=None, urgent=None, align=None, markup=None
-            )
+            super().__init__(sleep=sleep, default_state=DEFAULT_STATE)
 
         async def run(self):
             pass
@@ -219,9 +214,7 @@ async def test_runner_with_signal_handler_exception(capsys, mock_stdin):
 async def test_runner_with_click_event():
     class ValidPollingBlockWithClickHandler(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
-            super().__init__(
-                sleep=sleep, separator=None, urgent=None, align=None, markup=None
-            )
+            super().__init__(sleep=sleep, default_state=DEFAULT_STATE)
 
         async def run(self):
             pass
@@ -267,9 +260,7 @@ async def test_runner_with_click_event():
 async def test_runner_with_click_event_exception():
     class InvalidPollingBlockWithClickHandler(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
-            super().__init__(
-                sleep=sleep, separator=None, urgent=None, align=None, markup=None
-            )
+            super().__init__(sleep=sleep, default_state=DEFAULT_STATE)
 
         async def run(self):
             pass
@@ -303,9 +294,7 @@ async def test_runner_with_click_event_exception():
 async def test_runner_with_click_events(capsys):
     class ValidPollingBlockWithClickHandler(blocks.PollingBlock):
         def __init__(self, sleep=0.1):
-            super().__init__(
-                sleep=sleep, separator=None, urgent=None, align=None, markup=None
-            )
+            super().__init__(sleep=sleep, default_state=DEFAULT_STATE)
 
         async def run(self):
             pass
