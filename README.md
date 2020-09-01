@@ -23,22 +23,23 @@ Clone this repository and run:
 pip install .
 ```
 
-This will install a barebones version of `i3pyblocks`, but since the
-dependencies are not installed not many blocks will work. Each block is
-inside a namespace with its our own name, so for example if you want to use
-`i3pyblocks.blocks.aionotify` you would need to install `aionotify` first:
+This will install a barebones version of `i3pyblocks`, but since the optional
+dependencies are not installed most blocks won't work.
+
+Each block is inside a namespace with the name of its main dependency, so for
+example if you want to use `i3pyblocks.blocks.aionotify` you would need to
+install `aionotify` first:
 
 ```shell
-pip install aionotify
+# This install aionotify feature, including all dependencies necessary to work
+pip install '.[aionotify]'
 ```
 
-Another option is to use the optional dependencies declared by `i3pyblocks`:
+Another option is to install each dependency manually:
 
 ```shell
-# To install only aionotify
-pip install '.[aionotify]'
-# You can also pass multiple dependencies separated by ',', for example
-pip install '.[aionotify,i3ipc,psutil,pulsectl]'
+# Not recommended since you need to track each dependency manually
+pip install aionotify
 ```
 
 The current available block dependencies:
@@ -46,6 +47,14 @@ The current available block dependencies:
 - [i3ipc](https://github.com/altdesktop/i3ipc-python)
 - [psutil](https://github.com/giampaolo/psutil)
 - [pulsectl](https://github.com/mk-fg/python-pulse-control)
+
+So to install all available dependencies:
+
+```shell
+# To install multiple dependencies, you can also pass multiple dependencies
+# separated by ',', for example
+pip install '.[aionotify,i3ipc,psutil,pulsectl]'
+```
 
 ## Usage
 
