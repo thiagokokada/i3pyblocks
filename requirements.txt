@@ -4,7 +4,7 @@
 #
 #    make deps-compile
 #
--e .
+
 aionotify==0.2.0          # via i3pyblocks
 appdirs==1.4.4            # via black
 asynctest==0.13.0         # via -r requirements/dev.in
