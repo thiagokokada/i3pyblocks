@@ -1,5 +1,5 @@
 import subprocess
-from unittest.mock import Mock, call
+from unittest.mock import MagicMock, Mock, call
 
 import pulsectl
 import pytest
@@ -18,7 +18,8 @@ ANOTHER_SINK = misc.AttributeDict(
 
 @pytest.fixture
 def pulsectl_mocker():
-    mock_pulsectl = Mock(pulsectl)
+    # TODO: Using Mock(pulsectl) here missed mock to __enter__()
+    mock_pulsectl = MagicMock()
     # Mock Pulse instance class
     mock_pulse = mock_pulsectl.Pulse.return_value
     # Mock pulse.server_list()
@@ -114,7 +115,14 @@ async def test_pulse_audio_block_click_handler(pulsectl_mocker):
     await instance.click_handler(types.MouseButton.RIGHT_BUTTON)
     mute_mock.assert_called_once_with(SINK, mute=True)
 
-    volume_change_mock = mock_pulse.volume_change_all_chans
+    context_manager_mock = mock_pulsectl.Pulse.return_value.__enter__
     await instance.click_handler(types.MouseButton.SCROLL_UP)
     await instance.click_handler(types.MouseButton.SCROLL_DOWN)
-    volume_change_mock.assert_has_calls([call(SINK, 0.05), call(SINK, -0.05)])
+    context_manager_mock.assert_has_calls(
+        [
+            call(),
+            call().volume_change_all_chans(SINK, 0.05),
+            call(),
+            call().volume_change_all_chans(SINK, -0.05),
+        ]
+    )

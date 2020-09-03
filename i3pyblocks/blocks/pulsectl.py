@@ -45,7 +45,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         self.subprocess = _subprocess
 
         # https://pypi.org/project/pulsectl/#event-handling-code-threads
-        self.pulse = self.pulsectl.Pulse(__name__, connect=False, threading_lock=True)
+        self.pulse = self.pulsectl.Pulse(__name__, connect=False)
         self._initialize_pulse()
 
     def _initialize_pulse(self):
@@ -110,15 +110,23 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         else:
             self.pulse.mute(self.sink, mute=True)
 
-    async def click_handler(self, button: int, *_, **__) -> None:
+    def change_volume(self, volume: float):
+        # TODO: Use self.pulse instead of our own Pulse instance here
+        # Using self.pulse.volume_change_all_chans() may cause a deadlock
+        # when successive operations are done
+        # We probably need have better control over loop in pulsectl
+        with self.pulsectl.Pulse("volume-changer") as pulse:
+            pulse.volume_change_all_chans(self.sink, volume)
+
+    async def click_handler(self, button: int, **_kwargs) -> None:
         if button == types.MouseButton.LEFT_BUTTON:
             self.subprocess.Popen(self.command)
         elif button == types.MouseButton.RIGHT_BUTTON:
             self.toggle_mute()
         elif button == types.MouseButton.SCROLL_UP:
-            self.pulse.volume_change_all_chans(self.sink, 0.05)
+            self.change_volume(0.05)
         elif button == types.MouseButton.SCROLL_DOWN:
-            self.pulse.volume_change_all_chans(self.sink, -0.05)
+            self.change_volume(-0.05)
 
         self.update_status()
 

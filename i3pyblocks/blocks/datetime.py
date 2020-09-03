@@ -18,7 +18,7 @@ class DateTimeBlock(blocks.PollingBlock):
         self.format = self.format_time
         self.datetime = _datetime
 
-    async def click_handler(self, *_, **__) -> None:
+    async def click_handler(self, **_kwargs) -> None:
         if self.format == self.format_date:
             self.format = self.format_time
         else:

@@ -90,7 +90,7 @@ class BacklightBlock(FileWatcherBlock):
 
         self.utils = _utils
 
-    async def click_handler(self, button: int, *_, **__) -> None:
+    async def click_handler(self, button: int, **_kwargs) -> None:
         command = self.command_on_click.get(button)
 
         if not command:
