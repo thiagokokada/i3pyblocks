@@ -5,7 +5,7 @@ import uuid
 from concurrent.futures import Executor
 from typing import List, Optional
 
-from i3pyblocks import core, utils, types
+from i3pyblocks import core, types, utils
 
 
 class Block(metaclass=abc.ABCMeta):
@@ -41,7 +41,7 @@ class Block(metaclass=abc.ABCMeta):
         self,
         *,
         block_name: Optional[str] = None,
-        default_state: types.Dictable = (
+        default_state: types.Dictable[str, Optional[types.Value]] = (
             ("color", None),
             ("background", None),
             ("border", None),

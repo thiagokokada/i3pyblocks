@@ -16,7 +16,7 @@ class CpuPercentBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "C: {percent}%",
-        colors: types.Dictable = (
+        colors: types.Dictable[int, Optional[str]] = (
             (0, types.Color.NEUTRAL),
             (75, types.Color.WARN),
             (90, types.Color.URGENT),
@@ -43,12 +43,12 @@ class DiskUsageBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "{label}: {free:.1f}GiB",
-        colors: types.Dictable = (
+        colors: types.Dictable[int, Optional[str]] = (
             (0, types.Color.NEUTRAL),
             (75, types.Color.WARN),
             (90, types.Color.URGENT),
         ),
-        icons: types.Dictable = (
+        icons: types.Dictable[float, str] = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -107,7 +107,7 @@ class LoadAvgBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "L: {load1}",
-        colors: types.Dictable = (
+        colors: types.Dictable[int, Optional[str]] = (
             (0, types.Color.NEUTRAL),
             (_CPU_COUNT // 2, types.Color.WARN),
             (_CPU_COUNT, types.Color.URGENT),
@@ -137,7 +137,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         self,
         format_up: str = "{interface}:  U {upload} D {download}",
         format_down: str = "NO NETWORK",
-        colors: types.Dictable = (
+        colors: types.Dictable[int, Optional[str]] = (
             (0, types.Color.NEUTRAL),
             (2 * types.IECUnit.MiB, types.Color.WARN),
             (5 * types.IECUnit.MiB, types.Color.URGENT),
@@ -209,12 +209,12 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         format_plugged: str = "B: PLUGGED {percent:.0f}%",
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         format_unknown: str = "B: {icon} {percent:.0f}%",
-        colors: types.Dictable = (
+        colors: types.Dictable[int, Optional[str]] = (
             (0, types.Color.URGENT),
             (10, types.Color.WARN),
             (25, types.Color.NEUTRAL),
         ),
-        icons: types.Dictable = (
+        icons: types.Dictable[float, str] = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -271,12 +271,12 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "T: {current:.0f}°C",
-        colors: types.Dictable = (
+        colors: types.Dictable[int, Optional[str]] = (
             (0, types.Color.NEUTRAL),
             (60, types.Color.WARN),
             (85, types.Color.URGENT),
         ),
-        icons: types.Dictable = (
+        icons: types.Dictable[float, str] = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
@@ -327,12 +327,12 @@ class VirtualMemoryBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "M: {available:.1f}GiB",
-        colors: types.Dictable = (
+        colors: types.Dictable[int, Optional[str]] = (
             (0, types.Color.NEUTRAL),
             (75, types.Color.WARN),
             (90, types.Color.URGENT),
         ),
-        icons: types.Dictable = (
+        icons: types.Dictable[float, str] = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),

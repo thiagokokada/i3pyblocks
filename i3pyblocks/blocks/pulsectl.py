@@ -1,11 +1,10 @@
 import subprocess
 import time
-from typing import Sequence, NoReturn
+from typing import NoReturn, Optional, Sequence
 
 import pulsectl
+from i3pyblocks import blocks, types, utils
 from pulsectl import PulseError, PulseLoopStop
-
-from i3pyblocks import blocks, utils, types
 
 
 # Based on: https://git.io/fjbHp
@@ -14,12 +13,12 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         self,
         format: str = "V: {volume:.0f}%",
         format_mute: str = "V: MUTE",
-        colors: types.Dictable = (
+        colors: types.Dictable[int, Optional[str]] = (
             (0, types.Color.URGENT),
             (10, types.Color.WARN),
             (25, types.Color.NEUTRAL),
         ),
-        icons: types.Dictable = (
+        icons: types.Dictable[float, str] = (
             (0.0, "▁"),
             (12.5, "▂"),
             (25.0, "▃"),
