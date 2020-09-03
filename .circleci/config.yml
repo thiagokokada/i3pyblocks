@@ -43,24 +43,6 @@ commands:
           key: py<< parameters.version >>-deps-{{ checksum "requirements.txt" }}
 
 jobs:
-  black-lint:
-    <<: *python37
-    steps:
-      - setup_python
-      - run:
-          name : Run lint
-          command: |
-            make format-check
-
-  flake8-lint:
-    <<: *python37
-    steps:
-      - setup_python
-      - run:
-          name : Run lint
-          command: |
-            make lint
-
   build-python37:
     <<: *python37
     steps:
@@ -86,7 +68,5 @@ jobs:
 workflows:
   build:
     jobs:
-      - black-lint
-      - flake8-lint
       - build-python37
       - build-python38
