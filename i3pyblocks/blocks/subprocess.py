@@ -26,7 +26,7 @@ class ShellBlock(blocks.PollingBlock):
         self.color_by_returncode = dict(color_by_returncode)
         self.utils = _utils
 
-    async def click_handler(self, button: int, *_, **__) -> None:
+    async def click_handler(self, button: int, **_kwargs) -> None:
         command = self.command_on_click.get(button)
 
         if not command:
@@ -77,7 +77,7 @@ class ToggleBlock(blocks.PollingBlock):
 
         return bool(output)
 
-    async def click_handler(self, *_, **__) -> None:
+    async def click_handler(self, **_kwargs) -> None:
         state = await self.get_state()
 
         if not state:
