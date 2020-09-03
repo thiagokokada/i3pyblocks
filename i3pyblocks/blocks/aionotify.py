@@ -99,14 +99,14 @@ class BacklightBlock(FileWatcherBlock):
         await self.utils.shell_run(command)
 
     def _get_max_brightness(self) -> int:
-        if self.base_path:
+        if self.device_path:
             with open(self.device_path / "max_brightness") as f:
                 return int(f.readline().strip())
         else:
             return 1
 
     def _get_brightness(self) -> int:
-        if self.path:
+        if self.device_path:
             with open(self.device_path / "brightness") as f:
                 return int(f.readline().strip())
         else:

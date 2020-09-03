@@ -75,7 +75,7 @@ class DiskUsageBlock(blocks.PollingBlock):
         if short_label:
             self.label = self._get_short_label()
         else:
-            self.label = self.path
+            self.label = str(self.path)
         self.psutil = _psutil
 
     def _convert(self, dividend: float) -> float:
