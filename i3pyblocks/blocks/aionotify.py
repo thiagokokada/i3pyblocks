@@ -1,8 +1,7 @@
 import abc
 import asyncio
-import glob
-import os
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Union
 
 import aionotify
 
@@ -12,7 +11,7 @@ from i3pyblocks import core, blocks, types, utils
 class FileWatcherBlock(blocks.Block):
     def __init__(
         self,
-        path: str,
+        path: Union[Path, str, None],
         flags: Optional[aionotify.Flags] = None,
         format_file_not_found: str = "File not found {path}",
         *,
@@ -21,7 +20,7 @@ class FileWatcherBlock(blocks.Block):
     ):
         super().__init__(**kwargs)
         self.flags = flags
-        self.path = path
+        self.path = Path(path) if path else None
         self.format_file_not_found = format_file_not_found
         self.aionotify = _aionotify
 
@@ -30,12 +29,12 @@ class FileWatcherBlock(blocks.Block):
         pass
 
     async def start(self) -> None:
-        if not os.path.exists(self.path):
+        if not self.path or not self.path.exists():
             self.abort(full_text=self.format_file_not_found.format(path=self.path))
             return
 
         watcher = self.aionotify.Watcher()
-        watcher.watch(self.path, flags=self.flags)
+        watcher.watch(str(self.path), flags=self.flags)
 
         try:
             loop = asyncio.get_running_loop()
@@ -54,7 +53,8 @@ class BacklightBlock(FileWatcherBlock):
         self,
         format: str = "{percent:.0f}%",
         format_no_backlight: str = "No backlight found",
-        path: str = "/sys/class/backlight/*",
+        base_path: Union[Path, str] = "/sys/class/backlight/",
+        device_glob: Optional[str] = "*",
         command_on_click: types.Dictable = (
             (types.MouseButton.LEFT_BUTTON, None),
             (types.MouseButton.MIDDLE_BUTTON, None),
@@ -67,20 +67,26 @@ class BacklightBlock(FileWatcherBlock):
         _utils=utils,
         **kwargs,
     ) -> None:
-        self.base_path = next(glob.iglob(path), None)
+        self.base_path = Path(base_path)
+
+        if device_glob:
+            self.device_path = next(self.base_path.glob(device_glob), None)
+        else:
+            self.device_path = self.base_path
+
         self.format = format
         self.format_no_backlight = format_no_backlight
         self.command_on_click = dict(command_on_click)
 
-        if self.base_path:
+        if self.device_path:
             super().__init__(
-                path=os.path.join(self.base_path, "brightness"),
+                path=self.device_path / "brightness",
                 flags=_aionotify.Flags.MODIFY,
                 _aionotify=_aionotify,
                 **kwargs,
             )
         else:
-            super().__init__(path="", format_file_not_found=format_no_backlight)
+            super().__init__(path=None, format_file_not_found=format_no_backlight)
 
         self.utils = _utils
 
@@ -94,14 +100,14 @@ class BacklightBlock(FileWatcherBlock):
 
     def _get_max_brightness(self) -> int:
         if self.base_path:
-            with open(os.path.join(self.base_path, "max_brightness")) as f:
+            with open(self.device_path / "max_brightness") as f:
                 return int(f.readline().strip())
         else:
             return 1
 
     def _get_brightness(self) -> int:
         if self.path:
-            with open(self.path) as f:
+            with open(self.device_path / "brightness") as f:
                 return int(f.readline().strip())
         else:
             return 0

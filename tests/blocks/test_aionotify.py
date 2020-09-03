@@ -12,7 +12,7 @@ from helpers import misc, task
 
 @pytest.mark.asyncio
 async def test_file_watcher_block(tmpdir):
-    tmpfile = str(tmpdir / "tmpfile.txt")
+    tmpfile = tmpdir / "tmpfile.txt"
     with open(tmpfile, "w"):
         pass
 
@@ -58,11 +58,11 @@ async def test_file_watcher_block_with_non_existing_path():
 
 @pytest.mark.asyncio
 async def test_backlight_block(tmpdir):
-    brightness_tmpfile = str(tmpdir / "brightness")
+    brightness_tmpfile = tmpdir / "brightness"
     with open(brightness_tmpfile, "w") as f:
         f.write("450")
 
-    max_brightness_tmpfile = str(tmpdir / "max_brightness")
+    max_brightness_tmpfile = tmpdir / "max_brightness"
     with open(max_brightness_tmpfile, "w") as f:
         f.write("1500")
 
@@ -72,7 +72,9 @@ async def test_backlight_block(tmpdir):
             f.write("550")
 
     block = m_aionotify.BacklightBlock(
-        format="{percent:.1f} {brightness} {max_brightness}", path=str(tmpdir)
+        format="{percent:.1f} {brightness} {max_brightness}",
+        base_path=tmpdir,
+        device_glob=None,
     )
 
     await block.run()
@@ -86,10 +88,35 @@ async def test_backlight_block(tmpdir):
 
 
 @pytest.mark.asyncio
+async def test_backlight_block_with_device_glob(tmpdir):
+    device_path = tmpdir.mkdir("test_device")
+
+    brightness_tmpfile = device_path / "brightness"
+    with open(brightness_tmpfile, "w") as f:
+        f.write("350")
+
+    max_brightness_tmpfile = device_path / "max_brightness"
+    with open(max_brightness_tmpfile, "w") as f:
+        f.write("2500")
+
+    block = m_aionotify.BacklightBlock(
+        format="{percent:.1f} {brightness} {max_brightness}",
+        base_path=str(tmpdir),
+        device_glob="test_*",
+    )
+
+    await block.run()
+    result = block.result()
+    assert result["full_text"] == "14.0 350 2500"
+
+    await task.runner([block.start()], timeout=0.2)
+
+
+@pytest.mark.asyncio
 async def test_backlight_block_without_backlight(tmpdir):
     block = m_aionotify.BacklightBlock(
         format="{percent:.1f} {brightness} {max_brightness}",
-        path=str(tmpdir / "file_not_existing"),
+        path=tmpdir / "file_not_existing",
     )
 
     await task.runner([block.start()])
@@ -104,7 +131,7 @@ async def test_backlight_block_click_handler(tmpdir):
     mock_utils = Mock(utils)
 
     instance = m_aionotify.BacklightBlock(
-        path=str(tmpdir),
+        path=tmpdir,
         command_on_click=(
             (types.MouseButton.LEFT_BUTTON, "LEFT_BUTTON"),
             (types.MouseButton.MIDDLE_BUTTON, "MIDDLE_BUTTON"),

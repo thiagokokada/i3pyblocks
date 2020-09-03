@@ -1,11 +1,12 @@
 import datetime
 import re
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
+from pathlib import Path
 
 import psutil
 from psutil._common import bytes2human
 
-from i3pyblocks import blocks, utils, types
+from i3pyblocks import blocks, types, utils
 
 # Default CPU count to be used in LoadAvgBlock
 _CPU_COUNT = psutil.cpu_count()
@@ -59,7 +60,7 @@ class DiskUsageBlock(blocks.PollingBlock):
         ),
         divisor: int = types.IECUnit.GiB,
         sleep: int = 5,
-        path: str = "/",
+        path: Union[Path, str] = "/",
         short_label: bool = False,
         *,
         _psutil=psutil,
@@ -70,9 +71,9 @@ class DiskUsageBlock(blocks.PollingBlock):
         self.colors = dict(colors)
         self.icons = dict(icons)
         self.divisor = divisor
-        self.path = path
+        self.path = Path(path)
         if short_label:
-            self.label = self._get_short_label(self.path)
+            self.label = self._get_short_label()
         else:
             self.label = self.path
         self.psutil = _psutil
@@ -80,11 +81,11 @@ class DiskUsageBlock(blocks.PollingBlock):
     def _convert(self, dividend: float) -> float:
         return dividend / self.divisor
 
-    def _get_short_label(self, path: str) -> str:
-        return "/" + "/".join(x[0] for x in self.path.split("/") if x)
+    def _get_short_label(self) -> str:
+        return "/" + "/".join(x[0] for x in str(self.path).split("/") if x)
 
     async def run(self) -> None:
-        disk = self.psutil.disk_usage(self.path)
+        disk = self.psutil.disk_usage(str(self.path))
 
         color = utils.calculate_threshold(self.colors, disk.percent)
         icon = utils.calculate_threshold(self.icons, disk.percent)

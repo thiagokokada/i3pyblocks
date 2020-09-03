@@ -1,4 +1,5 @@
 from unittest.mock import Mock
+from pathlib import Path
 
 import psutil
 import pytest
@@ -40,6 +41,30 @@ async def test_disk_usage_block():
 
     assert result["full_text"] == "█ / 210.7 46.0 154.0 91.3"
     assert result["color"] == types.Color.URGENT
+
+
+@pytest.mark.asyncio
+async def test_disk_usage_block_with_short_label():
+    mock_psutil = Mock(psutil)
+    mock_psutil.disk_usage.return_value = misc.AttributeDict(
+        total=226227036160, used=49354395648, free=165309575168, percent=91.3
+    )
+    path_str = "/media/backup/Downloads"
+
+    instance = m_psutil.DiskUsageBlock(
+        path=Path(path_str),
+        format="{label}",
+        short_label=True,
+        _psutil=mock_psutil,
+    )
+    await instance.run()
+
+    # Making sure that we call psutil.disk_usage with str instead of Path
+    mock_psutil.disk_usage.assert_called_once_with(path_str)
+
+    result = instance.result()
+
+    assert result["full_text"] == "/m/b/D"
 
 
 @pytest.mark.asyncio
