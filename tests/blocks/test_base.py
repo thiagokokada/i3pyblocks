@@ -2,10 +2,9 @@ import asyncio
 import signal
 
 import pytest
+from helpers import task
 
 from i3pyblocks import blocks, types
-
-from helpers import task
 
 DEFAULT_STATE = dict(
     separator=None,

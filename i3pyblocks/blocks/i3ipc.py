@@ -1,7 +1,7 @@
 import i3ipc
 import i3ipc.aio
 
-from i3pyblocks import core, blocks
+from i3pyblocks import blocks, core
 
 
 class WindowTitleBlock(blocks.Block):

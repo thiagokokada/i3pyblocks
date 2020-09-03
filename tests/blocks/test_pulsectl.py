@@ -1,13 +1,12 @@
 import subprocess
-from unittest.mock import call, Mock
+from unittest.mock import Mock, call
 
-import pytest
 import pulsectl
+import pytest
+from helpers import misc
 
 from i3pyblocks import types
 from i3pyblocks.blocks import pulsectl as m_pulsectl
-
-from helpers import misc
 
 # Stub some PulseAudio sinks
 SINK = misc.AttributeDict(description="description", index=1, name="sink", mute=0)

@@ -1,10 +1,9 @@
 import pytest
 from asynctest import Mock
+from helpers import misc
 
 from i3pyblocks import types, utils
 from i3pyblocks.blocks import subprocess as m_sub
-
-from helpers import misc
 
 
 @pytest.mark.asyncio

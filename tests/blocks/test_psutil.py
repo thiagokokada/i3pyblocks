@@ -1,13 +1,12 @@
-from unittest.mock import Mock
 from pathlib import Path
+from unittest.mock import Mock
 
 import psutil
 import pytest
+from helpers import misc
 
 from i3pyblocks import types
 from i3pyblocks.blocks import psutil as m_psutil
-
-from helpers import misc
 
 
 @pytest.mark.asyncio

@@ -1,6 +1,6 @@
-import setuptools
 import sys
 
+import setuptools
 from setuptools.command.test import test as TestCommand
 
 

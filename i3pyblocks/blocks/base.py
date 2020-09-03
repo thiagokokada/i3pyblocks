@@ -5,7 +5,7 @@ import uuid
 from concurrent.futures import Executor
 from typing import List, Optional
 
-from i3pyblocks import core, utils, types
+from i3pyblocks import core, types, utils
 
 
 class Block(metaclass=abc.ABCMeta):
@@ -41,7 +41,7 @@ class Block(metaclass=abc.ABCMeta):
         self,
         *,
         block_name: Optional[str] = None,
-        default_state: types.Dictable = (
+        default_state: types.Dictable[str, Optional[types.Value]] = (
             ("color", None),
             ("background", None),
             ("border", None),
@@ -169,7 +169,7 @@ class Block(metaclass=abc.ABCMeta):
         if self.update_queue and not self.frozen:
             self.update_queue.put_nowait((self.id, self.result()))
         else:
-            core.logger.warn(
+            core.logger.warning(
                 f"Not pushing update since block {self.block_name} with "
                 f"id {self.id} is either not initialized or frozen"
             )

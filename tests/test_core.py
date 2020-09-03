@@ -2,13 +2,12 @@ import asyncio
 import json
 import os
 import signal
+from unittest.mock import patch
 
 import pytest
 from asynctest import CoroutineMock
-from unittest.mock import patch
 
-from i3pyblocks import core, blocks, types
-
+from i3pyblocks import blocks, core, types
 
 DEFAULT_STATE = dict(
     separator=None,

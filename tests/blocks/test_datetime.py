@@ -1,7 +1,7 @@
-import pytest
-
 from datetime import datetime
 from unittest.mock import Mock
+
+import pytest
 
 from i3pyblocks.blocks import datetime as m_datetime
 
