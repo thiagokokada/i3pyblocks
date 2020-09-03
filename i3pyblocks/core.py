@@ -181,7 +181,6 @@ class Runner:
     def stop(self) -> None:
         """Stops the Runner"""
         for task in self.tasks:
-            "Test"
             task.cancel()
 
     async def start(self, timeout: Optional[int] = None) -> None:
