@@ -3,11 +3,10 @@ import asyncio
 import aionotify
 import pytest
 from asynctest import Mock
+from helpers import misc, task
 
 from i3pyblocks import types, utils
 from i3pyblocks.blocks import aionotify as m_aionotify
-
-from helpers import misc, task
 
 
 @pytest.mark.asyncio

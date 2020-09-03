@@ -20,6 +20,9 @@ format:
 format-check:
 	$(PYTHON) -m black --check $(SRC_PATHS)
 
+isort:
+	$(PYTHON) -m isort $(SRC_PATHS)
+
 lint:
 	$(PYTHON) -m flake8 $(SRC_PATHS)
 

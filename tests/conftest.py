@@ -1,5 +1,5 @@
-import sys
 import io
+import sys
 
 import pytest
 

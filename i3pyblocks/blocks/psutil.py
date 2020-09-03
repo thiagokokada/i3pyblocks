@@ -1,7 +1,7 @@
 import datetime
 import re
-from typing import Optional, Tuple, Union
 from pathlib import Path
+from typing import Optional, Tuple, Union
 
 import psutil
 from psutil._common import bytes2human

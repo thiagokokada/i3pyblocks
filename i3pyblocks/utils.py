@@ -1,6 +1,6 @@
 import asyncio
 from asyncio import subprocess
-from typing import Dict, Optional, Union, Tuple
+from typing import Dict, Optional, Tuple, Union
 
 from i3pyblocks import types
 

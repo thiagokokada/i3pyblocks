@@ -3,8 +3,9 @@ import time
 from typing import NoReturn, Optional, Sequence
 
 import pulsectl
-from i3pyblocks import blocks, types, utils
 from pulsectl import PulseError, PulseLoopStop
+
+from i3pyblocks import blocks, types, utils
 
 
 # Based on: https://git.io/fjbHp

@@ -8,7 +8,7 @@ from pathlib import Path
 import psutil as ps
 
 from i3pyblocks import Runner, types
-from i3pyblocks.blocks import aionotify, i3ipc, datetime, psutil, pulsectl, subprocess
+from i3pyblocks.blocks import aionotify, datetime, i3ipc, psutil, pulsectl, subprocess
 
 # Configure logging, so we can have debug information available in
 # ~/.i3pyblocks.log

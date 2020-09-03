@@ -1,12 +1,10 @@
-import pytest
-from asynctest import CoroutineMock, Mock
-
 import i3ipc
 import i3ipc.aio
+import pytest
+from asynctest import CoroutineMock, Mock
+from helpers import misc, task
 
 from i3pyblocks.blocks import i3ipc as m_i3ipc
-
-from helpers import misc, task
 
 
 @pytest.mark.asyncio

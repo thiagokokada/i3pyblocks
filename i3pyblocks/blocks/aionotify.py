@@ -5,7 +5,7 @@ from typing import Optional, Union
 
 import aionotify
 
-from i3pyblocks import core, blocks, types, utils
+from i3pyblocks import blocks, core, types, utils
 
 
 class FileWatcherBlock(blocks.Block):
