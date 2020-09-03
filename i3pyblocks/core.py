@@ -111,15 +111,13 @@ class Runner:
         """Get updated results from registed Blocks"""
         id_, result = await self.queue.get()
         self.results[id_] = result
+        self.queue.task_done()
 
         # To reduce the number of redraws, let's empty the queue here
-        # and draw all updates at the same time
-        while True:
-            try:
-                id_, result = self.queue.get_nowait()
-                self.results[id_] = result
-            except asyncio.QueueEmpty:
-                break
+        # and draw all available updates
+        while self.queue.qsize() > 0:
+            id_, result = self.queue.get_nowait()
+            self.results[id_] = result
 
     async def write_results(self) -> None:
         """Writes results to stdout

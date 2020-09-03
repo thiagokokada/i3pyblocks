@@ -115,7 +115,8 @@ async def test_backlight_block_with_device_glob(tmpdir):
 async def test_backlight_block_without_backlight(tmpdir):
     block = m_aionotify.BacklightBlock(
         format="{percent:.1f} {brightness} {max_brightness}",
-        path=tmpdir / "file_not_existing",
+        base_path=tmpdir,
+        device_path="file_not_existing",
     )
 
     await task.runner([block.start()])
@@ -130,7 +131,7 @@ async def test_backlight_block_click_handler(tmpdir):
     mock_utils = Mock(utils)
 
     instance = m_aionotify.BacklightBlock(
-        path=tmpdir,
+        base_path=tmpdir,
         command_on_click=(
             (types.MouseButton.LEFT_BUTTON, "LEFT_BUTTON"),
             (types.MouseButton.MIDDLE_BUTTON, "MIDDLE_BUTTON"),
