@@ -1,8 +1,9 @@
-import aiohttp
 import asyncio
 from typing import Any, Awaitable, Callable
 
-from i3pyblocks import core, blocks, types
+import aiohttp
+
+from i3pyblocks import blocks, core, types
 
 DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=5)
 

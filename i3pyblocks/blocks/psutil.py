@@ -6,7 +6,8 @@ from typing import Optional, Tuple, Union
 import psutil
 from psutil._common import bytes2human
 
-from i3pyblocks import blocks, types, utils
+from i3pyblocks import blocks, types
+from i3pyblocks._internal import utils
 
 # Default CPU count to be used in LoadAvgBlock
 _CPU_COUNT = psutil.cpu_count()

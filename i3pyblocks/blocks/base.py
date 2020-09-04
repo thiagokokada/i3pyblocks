@@ -5,7 +5,8 @@ import uuid
 from concurrent.futures import Executor
 from typing import List, Optional
 
-from i3pyblocks import core, types, utils
+from i3pyblocks import core, types
+from i3pyblocks._internal import utils
 
 
 class Block(metaclass=abc.ABCMeta):
