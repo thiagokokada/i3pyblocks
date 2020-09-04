@@ -1,5 +1,5 @@
 import subprocess
-from unittest.mock import MagicMock, Mock, call
+from unittest.mock import Mock, call
 
 import pulsectl
 import pytest
@@ -18,8 +18,13 @@ ANOTHER_SINK = misc.AttributeDict(
 
 @pytest.fixture
 def pulsectl_mocker():
-    # TODO: Using Mock(pulsectl) here missed mock to __enter__()
-    mock_pulsectl = MagicMock()
+    mock_pulsectl = Mock(pulsectl)
+    mock_pulsectl.configure_mock(
+        **{
+            "Pulse.return_value.__enter__": Mock(),
+            "Pulse.return_value.__exit__": Mock(),
+        }
+    )
     # Mock Pulse instance class
     mock_pulse = mock_pulsectl.Pulse.return_value
     # Mock pulse.server_list()
@@ -115,7 +120,7 @@ async def test_pulse_audio_block_click_handler(pulsectl_mocker):
     await instance.click_handler(types.MouseButton.RIGHT_BUTTON)
     mute_mock.assert_called_once_with(SINK, mute=True)
 
-    context_manager_mock = mock_pulsectl.Pulse.return_value.__enter__
+    context_manager_mock = mock_pulse.__enter__
     await instance.click_handler(types.MouseButton.SCROLL_UP)
     await instance.click_handler(types.MouseButton.SCROLL_DOWN)
     context_manager_mock.assert_has_calls(
