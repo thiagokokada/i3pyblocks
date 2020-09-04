@@ -5,7 +5,8 @@ from typing import NoReturn, Optional, Sequence
 import pulsectl
 from pulsectl import PulseError, PulseLoopStop
 
-from i3pyblocks import blocks, types, utils
+from i3pyblocks import blocks, types
+from i3pyblocks._internal import utils
 
 
 # Based on: https://git.io/fjbHp

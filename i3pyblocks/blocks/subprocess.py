@@ -1,6 +1,7 @@
 from asyncio import subprocess
 
-from i3pyblocks import blocks, types, utils
+from i3pyblocks import blocks, types
+from i3pyblocks._internal import utils
 
 
 class ShellBlock(blocks.PollingBlock):

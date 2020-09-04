@@ -1,39 +1,29 @@
-import asyncio
-from asyncio import subprocess
-from typing import Dict, Optional, Tuple, Union
-
-from i3pyblocks import types
+from xml.etree import ElementTree as Tree
 
 
-def calculate_threshold(
-    items: types.Dictable, value: Union[int, float]
-) -> Optional[str]:
-    selected_item = None
+def pango_markup(text: str, tag: str = "span", **attrib) -> str:
+    """Helper to generate Pango markup for text
 
-    for threshold, item in dict(items).items():
-        if value >= threshold:  # type: ignore
-            selected_item = item
-        else:
-            break
+    This helper makes it easier to generate Pango markup for arbitrary text,
+    allowing for greater customization of text than the default attributes
+    offered by i3bar protocol.
 
-    return selected_item
+    For example:
+    >>> pango_markup("Hello, world!", font_weight="bold")
+    '<span font_weight="bold">Hello, world!</span>'
 
+    It can also generate markups for other tags supported in Pango:
+    >>> pango_markup("Italic text", tag="i")
+    '<i>Italic text</i>'
 
-def non_nullable_dict(**kwargs) -> Dict:
-    return {k: v for k, v in kwargs.items() if v is not None}
+    Keep in mind that there is no checks if your code is correct, so you can
+    pass completely nonsense attributes/tags that will be ignored by Pango:
+    >>> pango_markup("Italic text", foo="bar")
+    '<span foo="bar">Italic text</span>'
 
-
-async def shell_run(
-    command: str,
-    input: Optional[bytes] = None,
-    stdin: int = subprocess.DEVNULL,
-    stdout: int = subprocess.DEVNULL,
-    stderr: int = subprocess.DEVNULL,
-) -> Tuple[bytes, bytes, subprocess.Process]:
-    process = await asyncio.create_subprocess_shell(
-        command, stdin=stdin, stdout=stdout, stderr=stderr
-    )
-
-    stdout_data, stderr_data = await process.communicate(input=input)
-
-    return stdout_data, stderr_data, process
+    Look at https://developer.gnome.org/pango/stable/pango-Markup.html for
+    information about the available tags and attributes.
+    """
+    e = Tree.Element(tag, attrib=attrib)
+    e.text = text
+    return Tree.tostring(e, encoding="unicode")
