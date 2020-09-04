@@ -150,7 +150,10 @@ async def main():
     )
 
     runner.register_block(
-        aiohttp.RequestBlock("https://wttr.in/?format=%c+%t"),
+        aiohttp.RequestBlock(
+            "https://wttr.in/?format=%c+%t",
+            format_error="",
+        ),
     )
 
     runner.register_block(
