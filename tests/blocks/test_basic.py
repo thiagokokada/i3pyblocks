@@ -16,3 +16,10 @@ async def test_basic_block():
     assert instance.block_name == "foo"
     assert instance.result()["full_text"] == "Hello World"
     assert instance.result()["short_text"] == "Hello"
+
+    instance = basic.TextBlock("Another hello")
+
+    await instance.start()
+
+    assert instance.block_name == "TextBlock"
+    assert instance.result()["full_text"] == "Another hello"
