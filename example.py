@@ -150,11 +150,11 @@ async def main():
     )
 
     runner.register_block(
-        datetime.DateTimeBlock(format_time=" %T", format_date=" %a, %d/%m")
+        aiohttp.RequestBlock("https://wttr.in/?format=%c+%t"),
     )
 
     runner.register_block(
-        aiohttp.RequestBlock("https://wttr.in/?format=%c+%t"),
+        datetime.DateTimeBlock(format_time=" %T", format_date=" %a, %d/%m")
     )
 
     # Start the Runner instance
