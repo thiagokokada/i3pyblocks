@@ -46,8 +46,8 @@ setuptools.setup(
         "aiohttp": ["aiohttp>=3.4.0"],
         "aionotify": ["aionotify>=0.1.0"],
         "i3ipc": ["i3ipc>=2.0.1"],
-        "psutil": ["psutil>=5.6.0"],
-        "pulsectl": ["pulsectl>=19.9.1"],
+        "psutil": ["psutil>=5.4.8"],
+        "pulsectl": ["pulsectl>=18.10.5"],
     },
     tests_require=requirements_from_pip("requirements/dev.in"),
     classifiers=[
