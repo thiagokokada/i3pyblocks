@@ -1,7 +1,10 @@
 import aiohttp
+import asyncio
 from typing import Any, Awaitable, Callable
 
-from i3pyblocks import blocks, types
+from i3pyblocks import core, blocks, types
+
+DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=5)
 
 
 async def empty_callback(_resp: aiohttp.ClientResponse) -> str:
@@ -14,7 +17,8 @@ class RequestBlock(blocks.PollingBlock):
         url: str,
         method: str = "get",
         format: str = "{text}",
-        request_opts: types.Dictable[str, Any] = (),
+        format_error: str = "ERROR",
+        request_opts: types.Dictable[str, Any] = (("timeout", DEFAULT_TIMEOUT),),
         response_callback: Callable[
             [aiohttp.ClientResponse], Awaitable[str]
         ] = empty_callback,
@@ -25,6 +29,7 @@ class RequestBlock(blocks.PollingBlock):
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
+        self.format_error = format_error
         self.url = url
         self.method = method
         self.response_callback = response_callback
@@ -32,23 +37,31 @@ class RequestBlock(blocks.PollingBlock):
         self.aiohttp = _aiohttp
 
     async def run(self) -> None:
-        async with self.aiohttp.ClientSession() as session:
-            async with session.request(
-                method=self.method,
-                url=self.url,
-                **self.request_opts,
-            ) as resp:
-                response_callback = await self.response_callback(resp)
+        try:
+            async with self.aiohttp.ClientSession() as session:
+                async with session.request(
+                    method=self.method,
+                    url=self.url,
+                    **self.request_opts,
+                ) as resp:
+                    response_callback = await self.response_callback(resp)
 
-                if "{text}" in self.format:
-                    text = await resp.text()
-                else:
-                    text = None
+                    if "{text}" in self.format:
+                        text = await resp.text()
+                    else:
+                        text = None
 
-                self.update(
-                    self.format.format(
-                        response_callback=response_callback,
-                        text=text,
-                        status=resp.status,
+                    self.update(
+                        self.format.format(
+                            response_callback=response_callback,
+                            text=text,
+                            status=resp.status,
+                        )
                     )
-                )
+        except (
+            aiohttp.ClientResponseError,
+            aiohttp.ClientConnectorError,
+            asyncio.TimeoutError,
+        ) as exception:
+            self.update(self.format_error.format(exception=str(exception)))
+            core.logger.exception(exception)

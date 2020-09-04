@@ -43,6 +43,7 @@ pip install aionotify
 ```
 
 The current available block dependencies:
+- [aiohttp](https://github.com/aio-libs/aiohttp)
 - [aionotify](https://github.com/rbarrois/aionotify)
 - [i3ipc](https://github.com/altdesktop/i3ipc-python)
 - [psutil](https://github.com/giampaolo/psutil)
