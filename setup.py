@@ -43,6 +43,7 @@ setuptools.setup(
     url="https://github.com/thiagokokada/i3pyblocks",
     packages=setuptools.find_packages(),
     extras_require={
+        "aiohttp": ["aiohttp>=3.4.0"],
         "aionotify": ["aionotify>=0.1.0"],
         "i3ipc": ["i3ipc>=2.0.1"],
         "psutil": ["psutil>=5.6.0"],
