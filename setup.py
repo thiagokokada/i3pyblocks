@@ -4,26 +4,6 @@ import setuptools
 from setuptools.command.test import test as TestCommand
 
 
-class PyTest(TestCommand):
-    user_options = [("pytest-args=", "a", "Arguments to pass to py.test")]
-
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.pytest_args = []
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        # import here, cause outside the eggs aren't loaded
-        import pytest
-
-        errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
-
-
 def requirements_from_pip(filename):
     with open(filename, "r") as pip:
         return [dep.strip() for dep in pip if not dep.startswith("#") and dep.strip()]
@@ -48,13 +28,15 @@ setuptools.setup(
         "i3ipc": ["i3ipc>=2.0.1"],
         "psutil": ["psutil>=5.4.8"],
         "pulsectl": ["pulsectl>=18.10.5"],
+        "dev": requirements_from_pip("requirements/dev.in"),
     },
-    tests_require=requirements_from_pip("requirements/dev.in"),
     classifiers=[
+        "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: Linux",
+        "Operating System :: POSIX",
     ],
     python_requires=">=3.7",
-    cmdclass={"test": PyTest},
 )
