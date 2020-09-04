@@ -1,6 +1,7 @@
 import asyncio
 from asyncio import subprocess
 from typing import Dict, Optional, Tuple, Union
+from xml.etree import ElementTree as Tree
 
 from i3pyblocks import types
 
@@ -37,3 +38,9 @@ async def shell_run(
     stdout_data, stderr_data = await process.communicate(input=input)
 
     return stdout_data, stderr_data, process
+
+
+def pango_markup(text: str, tag: str = "span", **attrib) -> str:
+    e = Tree.Element(tag, attrib=attrib)
+    e.text = text
+    return Tree.tostring(e, encoding="unicode")
