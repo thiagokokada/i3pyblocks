@@ -7,7 +7,7 @@ from pathlib import Path
 
 import psutil as ps
 
-from i3pyblocks import Runner, types
+from i3pyblocks import Runner, types, utils
 from i3pyblocks.blocks import (
     aiohttp,
     aionotify,
@@ -153,11 +153,20 @@ async def main():
         aiohttp.RequestBlock(
             "https://wttr.in/?format=%c+%t",
             format_error="",
+            sleep=60 * 60,
         ),
     )
 
+    # You can use Pango markup for more control over text formating, as the
+    # example below shows
+    # For a description of how you can customize, look:
+    # https://developer.gnome.org/pango/stable/pango-Markup.html
     runner.register_block(
-        datetime.DateTimeBlock(format_time=" %T", format_date=" %a, %d/%m")
+        datetime.DateTimeBlock(
+            format_time=utils.pango_markup(" %T", font_weight="bold"),
+            format_date=utils.pango_markup(" %a, %d/%m", font_weight="light"),
+            default_state={"markup": types.MarkupText.PANGO},
+        )
     )
 
     # Start the Runner instance
