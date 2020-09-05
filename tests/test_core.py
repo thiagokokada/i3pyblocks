@@ -17,19 +17,6 @@ DEFAULT_STATE = dict(
 )
 
 
-# TODO: Validate if we can actually read from stdin here
-@pytest.mark.asyncio
-async def test_get_aio_reader(capsys):
-    with patch("sys.stdin") as mock_stdin:
-        mock_stdin.return_value = b"Hello!"
-
-        loop = asyncio.get_running_loop()
-
-        with capsys.disabled():
-            reader = await core.get_aio_reader(loop)
-            assert isinstance(reader, asyncio.StreamReader)
-
-
 @pytest.mark.asyncio
 async def test_runner(capsys, mock_stdin):
     class ValidPollingBlock(blocks.PollingBlock):
@@ -332,7 +319,7 @@ async def test_runner_with_click_events(capsys):
     mock_input = [b"[\n", click_event, b","]
 
     with patch(
-        "i3pyblocks.core.get_aio_reader", new=CoroutineMock()
+        "i3pyblocks._internal.utils.get_aio_reader", new=CoroutineMock()
     ) as get_aio_reader_mock:
         reader_mock = get_aio_reader_mock.return_value
         reader_mock.readline = CoroutineMock()
