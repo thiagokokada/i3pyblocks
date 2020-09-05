@@ -110,11 +110,13 @@ async def test_pulse_audio_block_click_handler(pulsectl_mocker):
     mock_subprocess = Mock(subprocess)
 
     instance = m_pulsectl.PulseAudioBlock(
-        command=("command", "-c"), _pulsectl=mock_pulsectl, _subprocess=mock_subprocess
+        command="command -c",
+        _pulsectl=mock_pulsectl,
+        _subprocess=mock_subprocess,
     )
 
     await instance.click_handler(types.MouseButton.LEFT_BUTTON)
-    mock_subprocess.Popen.assert_called_once_with(("command", "-c"))
+    mock_subprocess.Popen.assert_called_once_with("command -c", shell=True)
 
     mute_mock = mock_pulse.mute
     await instance.click_handler(types.MouseButton.RIGHT_BUTTON)
