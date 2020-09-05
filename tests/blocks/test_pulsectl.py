@@ -67,9 +67,6 @@ def test_pulse_audio_block(pulsectl_mocker):
 
     assert result["full_text"] == "V: 50%"
 
-    instance.toggle_mute()
-    mock_pulse.mute.assert_called_with(SINK, mute=True)
-
     # If volume is muted, change text and returns Color.URGENT
     mock_pulse.sink_info.return_value = SINK_MUTE
 
@@ -82,9 +79,6 @@ def test_pulse_audio_block(pulsectl_mocker):
 
     assert result["full_text"] == "V: MUTE"
     assert result["color"] == types.Color.URGENT
-
-    instance.toggle_mute()
-    mock_pulse.mute.assert_called_with(SINK_MUTE, mute=False)
 
 
 def test_pulse_audio_block_exception(pulsectl_mocker):
@@ -115,14 +109,26 @@ async def test_pulse_audio_block_click_handler(pulsectl_mocker):
         _subprocess=mock_subprocess,
     )
 
+    # LEFT_BUTTON should run command
     await instance.click_handler(types.MouseButton.LEFT_BUTTON)
     mock_subprocess.Popen.assert_called_once_with("command -c", shell=True)
 
-    mute_mock = mock_pulse.mute
+    context_manager_mock = mock_pulse.__enter__
+    mute_mock = context_manager_mock.return_value.mute
+
+    # When not mute, pressing RIGHT_BUTTON will mute it
+    instance.sink.mute = 0
     await instance.click_handler(types.MouseButton.RIGHT_BUTTON)
     mute_mock.assert_called_once_with(SINK, mute=True)
 
-    context_manager_mock = mock_pulse.__enter__
+    mute_mock.reset_mock()
+
+    # When not mute, pressing RIGHT_BUTTON will unmute it
+    instance.sink.mute = 1
+    await instance.click_handler(types.MouseButton.RIGHT_BUTTON)
+    mute_mock.assert_called_once_with(SINK, mute=False)
+
+    # Scroll Up/Down should trigger volume increase/decrease
     await instance.click_handler(types.MouseButton.SCROLL_UP)
     await instance.click_handler(types.MouseButton.SCROLL_DOWN)
     context_manager_mock.assert_has_calls(

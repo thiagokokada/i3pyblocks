@@ -106,10 +106,11 @@ class PulseAudioBlock(blocks.ExecutorBlock):
             self.update(self.format.format(volume=volume, icon=icon), color=color)
 
     def toggle_mute(self):
-        if self.sink.mute:
-            self.pulse.mute(self.sink, mute=False)
-        else:
-            self.pulse.mute(self.sink, mute=True)
+        with self.pulsectl.Pulse("toggle-mute") as pulse:
+            if self.sink.mute:
+                pulse.mute(self.sink, mute=False)
+            else:
+                pulse.mute(self.sink, mute=True)
 
     def change_volume(self, volume: float):
         # TODO: Use self.pulse instead of our own Pulse instance here
