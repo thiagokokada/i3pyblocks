@@ -56,17 +56,25 @@ The current available block dependencies:
 
 ## Usage
 
-After installing the dependencies, you can run (assuming you have installed all
-dependencies):
+After installing the dependencies, you can run:
 
 ```shell
-python ./example.py
+i3pyblocks
 ```
 
-It will run an example configuration of `i3pyblocks` that should be sufficient
-to demonstrate its capabilities. This file also has comments explaining how
-the basics of `i3pyblocks` works, so it serves as a great start point for your
-own configuration file.
+It will should display a clock example if everything is working as it should.
+For a more elabore example, try to run the `example.py` file included in this
+repository (needs installation of optional dependencies):
+
+
+```shell
+i3pyblocks -c example.py
+```
+
+This will run an example configuration of `i3pyblocks` that should demonstrate
+its capabilities. This file also has comments explaining how the basics of
+`i3pyblocks` works, so it serves as a great start point for your own
+configuration file.
 
 Afterwards, you can put something like this in your `$HOME/.config/i3/config`
 file:
