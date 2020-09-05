@@ -1,7 +1,4 @@
-import sys
-
 import setuptools
-from setuptools.command.test import test as TestCommand
 
 
 def requirements_from_pip(filename):

@@ -1,4 +1,4 @@
-SRC_PATHS := i3pyblocks tests example.py
+SRC_PATHS := i3pyblocks tests *.py
 TEST_PATHS := tests
 PYTHON := venv/bin/python
 .PHONY: clean dev-install format format-check lint mypy tests tests-with-coverage

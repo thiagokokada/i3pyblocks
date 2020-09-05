@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 import signal
-import sys
 import uuid
 from typing import AnyStr, Awaitable, Dict, Iterable, List, Optional, Union
 
