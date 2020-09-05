@@ -15,7 +15,7 @@ async def test_request_block(aiohttp_server):
     instance = m_aiohttp.RequestBlock(
         url=f"http://127.0.0.1:{server.port}",
         method="post",
-        format="{status} {text}",
+        format="{status} {response}",
     )
 
     await instance.run()
@@ -61,7 +61,6 @@ async def test_request_block_with_callback(aiohttp_server):
 
     instance = m_aiohttp.RequestBlock(
         url=f"http://127.0.0.1:{server.port}",
-        format="{response_callback}",
         response_callback=json_callback,
     )
 

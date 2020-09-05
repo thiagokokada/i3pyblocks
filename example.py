@@ -152,7 +152,7 @@ async def main():
     # RequestsBlock do a HTTP request to an url. We are using it here to show
     # the current weather for location, using
     # https://github.com/chubin/wttr.in#one-line-output
-    # For more complex requests, we can also pass a async function
+    # For more complex requests, we can also pass a custom async function
     # `response_callback`, that receives the response of the HTTP request and
     # you can manipulate it the way you want
     runner.register_block(

@@ -8,8 +8,8 @@ from i3pyblocks import blocks, core, types
 DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=5)
 
 
-async def empty_callback(_resp: aiohttp.ClientResponse) -> str:
-    return ""
+async def text_callback(resp: aiohttp.ClientResponse) -> str:
+    return await resp.text()
 
 
 class RequestBlock(blocks.PollingBlock):
@@ -17,12 +17,12 @@ class RequestBlock(blocks.PollingBlock):
         self,
         url: str,
         method: str = "get",
-        format: str = "{text}",
+        format: str = "{response}",
         format_error: str = "ERROR",
         request_opts: types.Dictable[str, Any] = (("timeout", DEFAULT_TIMEOUT),),
         response_callback: Callable[
             [aiohttp.ClientResponse], Awaitable[str]
-        ] = empty_callback,
+        ] = text_callback,
         sleep: int = 60,
         *,
         _aiohttp=aiohttp,
@@ -45,13 +45,11 @@ class RequestBlock(blocks.PollingBlock):
                     url=self.url,
                     **self.request_opts,
                 ) as resp:
-                    response_callback = await self.response_callback(resp)
-                    text = await resp.text()
+                    response = await self.response_callback(resp)
 
                     self.update(
                         self.format.format(
-                            response_callback=response_callback,
-                            text=text,
+                            response=response,
                             status=resp.status,
                         )
                     )
