@@ -27,8 +27,7 @@ jobs:
     - name: Cache pip
       uses: actions/cache@v2
       with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
+        path: $GITHUB_WORKSPACE/venv
         # Look to see if there is a cache hit for the corresponding requirements file
         key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
         restore-keys: |
@@ -39,12 +38,13 @@ jobs:
       run: |
         # Necessary for pulsectl
         sudo apt-get install libpulse-dev
-        python -m pip install --upgrade pip
-        pip install -e . -r requirements.txt
+        python3 -m pip install --upgrade pip
+        python3 -m venv venv
+        make dev-install
 
     - name: Test with pytest
       run: |
-        pytest
+        make tests-with-coverage
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
