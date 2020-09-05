@@ -18,10 +18,10 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-Clone this repository and run:
+Afterwards, run:
 
 ```shell
-pip install .
+pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks'
 ```
 
 This will install a barebones version of `i3pyblocks`, but since the optional
@@ -32,8 +32,10 @@ example if you want to use `i3pyblocks.blocks.aionotify` you would need to
 install `aionotify` first:
 
 ```shell
-# This install aionotify feature, including all dependencies necessary to work
-pip install '.[aionotify]'
+# This will install all dependencies necessary to make aionotify block work
+pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[aiohttp]'
+# You can also pass multiple dependencies separated by comma
+pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[i3ipc,psutil]'
 ```
 
 Another option is to install each dependency manually:
@@ -49,14 +51,6 @@ The current available block dependencies:
 - [i3ipc](https://github.com/altdesktop/i3ipc-python)
 - [psutil](https://github.com/giampaolo/psutil)
 - [pulsectl](https://github.com/mk-fg/python-pulse-control)
-
-So to install all available dependencies:
-
-```shell
-# To install multiple dependencies, you can also pass multiple dependencies
-# separated by ',', for example
-pip install '.[aionotify,i3ipc,psutil,pulsectl]'
-```
 
 ## Usage
 
@@ -84,7 +78,7 @@ bar {
 
 ## Development
 
-To setup a development environment, setup a create a venv first and run:
+To setup a development environment, create a new [venv][3] first and run:
 
 ```shell
 make dev-install
@@ -99,9 +93,9 @@ make tests
 Look at the included `Makefile` for more available commands.
 
 
-If you're using [NixOS](https://nixos.org/) or nix, an alternative way to get a
-working environment variable is using the `shell.nix` file included in this
-repo:
+If you're using [NixOS](https://nixos.org/) or nixpkgs, an alternative way to
+get a working environment variable is using the `shell.nix` file included in
+this repo:
 
 ```shell
 nix-shell shell.nix
