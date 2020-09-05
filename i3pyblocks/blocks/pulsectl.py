@@ -1,6 +1,6 @@
 import subprocess
 import time
-from typing import NoReturn, Optional, Sequence
+from typing import NoReturn, Optional
 
 import pulsectl
 from pulsectl import PulseError, PulseLoopStop
