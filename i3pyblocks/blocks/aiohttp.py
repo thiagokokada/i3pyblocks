@@ -46,11 +46,7 @@ class RequestBlock(blocks.PollingBlock):
                     **self.request_opts,
                 ) as resp:
                     response_callback = await self.response_callback(resp)
-
-                    if "{text}" in self.format:
-                        text = await resp.text()
-                    else:
-                        text = None
+                    text = await resp.text()
 
                     self.update(
                         self.format.format(
