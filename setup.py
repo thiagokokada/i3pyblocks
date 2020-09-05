@@ -1,5 +1,7 @@
 import setuptools
 
+from i3pyblocks.__version__ import __version__
+
 
 def requirements_from_pip(filename):
     with open(filename, "r") as pip:
@@ -11,7 +13,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="i3pyblocks",
-    version="0.1.0",
+    version=__version__,
     author="Thiago Kenji Okada",
     author_email="thiagokokada@gmail.com",
     description="A replacement for i3status, written in Python using asyncio.",
@@ -19,6 +21,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/thiagokokada/i3pyblocks",
     packages=setuptools.find_packages(),
+    entry_points={"console_scripts": ["i3pyblocks = i3pyblocks.__main__:main"]},
     extras_require={
         "aiohttp": ["aiohttp>=3.4.0"],
         "aionotify": ["aionotify>=0.1.0"],
