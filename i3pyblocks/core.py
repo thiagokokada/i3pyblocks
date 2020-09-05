@@ -7,18 +7,10 @@ import uuid
 from typing import AnyStr, Awaitable, Dict, Iterable, List, Optional, Union
 
 from i3pyblocks import blocks, types
+from i3pyblocks._internal import utils
 
 logger = logging.getLogger("i3pyblocks")
 logger.addHandler(logging.NullHandler())
-
-
-async def get_aio_reader(loop: asyncio.AbstractEventLoop) -> asyncio.StreamReader:
-    reader = asyncio.StreamReader()
-    protocol = asyncio.StreamReaderProtocol(reader)
-
-    await loop.connect_read_pipe(lambda: protocol, sys.stdin)
-
-    return reader
 
 
 class Runner:
@@ -170,7 +162,7 @@ class Runner:
     # Based on: https://git.io/fjbHx
     async def click_events(self) -> None:
         """Reads stdin for new click events"""
-        reader = await get_aio_reader(self.loop)
+        reader = await utils.get_aio_reader(self.loop)
         await reader.readline()
 
         while True:
