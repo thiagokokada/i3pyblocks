@@ -30,7 +30,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
             (75.0, "▇"),
             (87.5, "█"),
         ),
-        command: Sequence[str] = ("pavucontrol",),
+        command: str = "pavucontrol",
         *,
         _pulsectl=pulsectl,
         _subprocess=subprocess,
@@ -121,7 +121,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
 
     async def click_handler(self, button: int, **_kwargs) -> None:
         if button == types.MouseButton.LEFT_BUTTON:
-            self.subprocess.Popen(self.command)
+            self.subprocess.Popen(self.command, shell=True)
         elif button == types.MouseButton.RIGHT_BUTTON:
             self.toggle_mute()
         elif button == types.MouseButton.SCROLL_UP:
