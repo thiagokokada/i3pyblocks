@@ -3,7 +3,7 @@ TEST_PATHS := tests
 PYTHON := venv/bin/python
 .PHONY: clean dev-install format format-check lint mypy tests tests-with-coverage
 
-all: run
+all: tests
 
 clean:
 	git clean -fxd
@@ -48,6 +48,3 @@ deps-upgrade:
 
 deps-sync:
 	$(PYTHON) -m piptools sync requirements.txt
-
-run:
-	$(PYTHON) "./run.py"
