@@ -12,7 +12,7 @@ is to be used for things like weather updates, for example::
 
   PollingRequestBlock("https://wttr.in/?format=%c+%t")
 
-But more advantage Blocks could update in response for a Webhook or a system
+But more advanced Blocks could update in response for a Webhook or a system
 event (for example, a network change could trigger a request to get external
 IP).
 
@@ -58,7 +58,7 @@ class PollingRequestBlock(blocks.PollingBlock):
         Format string showed in case of an error in request.
       request_opts:
         A Dictable of options passed directly to the ``request()`` method
-        in ``aiohttp``. The list of available parameters is `here`_.
+        in ``aiohttp``. The list of available parameters is `aiohttp docs`_.
       response_callback:
         A function that will be called after the response is made to format
         the result. For example, consider an endpoiint that returns the JSON
@@ -75,7 +75,7 @@ class PollingRequestBlock(blocks.PollingBlock):
       **kwargs:
         Extra arguments to be passed to ``PollingBlock`` class.
 
-    .. _here:
+    .. _aiohttp docs:
       https://docs.aiohttp.org/en/stable/client_reference.html#aiohttp.ClientSession.request
     """
 

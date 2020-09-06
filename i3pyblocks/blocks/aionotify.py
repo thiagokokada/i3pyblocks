@@ -1,3 +1,21 @@
+"""Blocks based on `aionotify`_.
+
+This module contains FileWatcherBlock, an abstract, highly efficient Block to
+show the contents of an arbitrary file. It uses ``aionotify``, that itself is
+implement using Linux's `inotify`_, so this Block is only updated when the
+event that we registered in this Block occurs in the target file.
+
+For an example implementation, take BacklightBlock. It watches for changes in
+``/sys/class/backlight/*/brightness`` file. So only when the brightness is
+changed, this Block is updated.
+
+.. _aionotify:
+  https://github.com/rbarrois/aionotify
+.. _inotify:
+  https://en.wikipedia.org/wiki/Inotify
+"""
+
+
 import abc
 import asyncio
 from pathlib import Path
@@ -10,6 +28,39 @@ from i3pyblocks._internal import utils
 
 
 class FileWatcherBlock(blocks.Block):
+    """File watcher Block.
+
+    A highly efficient Block to watch for events that happen in a file.
+
+    You must not instantiate this class directly, instead you should
+    subclass it and implement ``run()`` method first.
+
+    Args:
+      path:
+        The file path to watch for events.
+      flags:
+        The modification flags to be watched. A list of flags can be found
+        `in aionotify repo`_. Multiple flags can be passed to, for example::
+
+            from aionotify import Flags
+
+            FileWatcherBlock(
+                path="/some/path",
+                flags=Flags.MODIFY | Flags.CREATE,
+            )
+      format_file_not_found:
+        Format string to shown when the file in passed in ``path`` is not
+        found.
+      **kwargs:
+        Extra arguments to be passed to ``Block`` class.
+
+    See Also:
+      ``Block()`` arguments.
+
+    .. _in aionotify repo:
+      https://github.com/rbarrois/aionotify/blob/master/aionotify/enums.py
+    """
+
     def __init__(
         self,
         path: Union[Path, str, None],
@@ -50,6 +101,38 @@ class FileWatcherBlock(blocks.Block):
 
 
 class BacklightBlock(FileWatcherBlock):
+    """Backlight Block.
+
+    Based on `sysfs backlight interface`_.
+
+    Args:
+      format:
+        Format string to shown. Supports the following placeholders:
+
+          - ``{brightness}``: Current brightness of display
+          - ``{max_brightness}``: Max brightness supported by display
+          - ``{percent}``: Percentage between current and max display
+            brightness
+      base_path:
+        The path where available backlights will be searched.
+      device_glob:
+        `File glob`_ that will be used to search the device inside the
+        ``base_path``. By default it tries to find anything, but if for
+        some reason you want a specific device you can just use
+        ``device_name`` here instead.
+      command_on_click:
+        Dictable with commands to be called when the user interacts with mouse
+        inside this block. Can be useful to adjust the backlight using scroll,
+        for example.
+      **kwargs:
+        Extra arguments to be passed to ``FileWatcherBlock`` class.
+
+    .. _sysfs backlight interface:
+      https://www.kernel.org/doc/Documentation/ABI/stable/sysfs-class-backlight
+    .. _File glob:
+      https://docs.python.org/3/library/glob.html
+    """
+
     def __init__(
         self,
         format: str = "{percent:.0f}%",
@@ -108,6 +191,7 @@ class BacklightBlock(FileWatcherBlock):
 
     def _get_brightness(self) -> int:
         if self.device_path:
+            # TODO: Maybe use actual_brightness here instead?
             with open(self.device_path / "brightness") as f:
                 return int(f.readline().strip())
         else:
