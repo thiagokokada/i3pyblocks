@@ -124,7 +124,7 @@ async def test_backlight_block_without_backlight(tmpdir):
 
     assert block.frozen
     result = block.result()
-    assert result["full_text"] == "No backlight found"
+    assert result["full_text"] == "No backlight"
 
 
 @pytest.mark.asyncio

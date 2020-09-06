@@ -354,7 +354,8 @@ class PollingBlock(Block):
     subclass it and implement ``run()`` method first.
 
     Args:
-      sleep: sleep in seconds between each call to ``run()``.
+      sleep:
+        Sleep in seconds between each call to ``run()``.
 
     See Also:
       ``Block()`` arguments.
@@ -418,8 +419,9 @@ class ExecutorBlock(Block):
     subclass it and implement ``run()`` method first.
 
     Args:
-      executor: an optional `Executor instance`_. If not passed it
-    will use the default one.
+      executor:
+        An optional `Executor instance`_. If not passed it will use the
+        default one.
 
     See also:
       ``Block()`` arguments.

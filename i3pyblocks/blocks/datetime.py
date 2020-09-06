@@ -9,10 +9,11 @@ class DateTimeBlock(blocks.PollingBlock):
         format_date: str = "%D",
         format_time: str = "%T",
         *,
+        sleep: int = 1,
         _datetime=datetime,
         **kwargs
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(sleep=sleep, **kwargs)
         self.format_date = format_date
         self.format_time = format_time
         self.format = self.format_time

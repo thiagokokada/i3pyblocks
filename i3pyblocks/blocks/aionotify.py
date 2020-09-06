@@ -53,7 +53,7 @@ class BacklightBlock(FileWatcherBlock):
     def __init__(
         self,
         format: str = "{percent:.0f}%",
-        format_no_backlight: str = "No backlight found",
+        format_no_backlight: str = "No backlight",
         base_path: Union[Path, str] = "/sys/class/backlight/",
         device_glob: Optional[str] = "*",
         command_on_click: types.Dictable = (

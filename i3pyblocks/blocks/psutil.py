@@ -1,3 +1,23 @@
+"""Blocks based on `psutil`_.
+
+This is a collection of many Blocks based on ``psutil``, a cross-platform
+library for retrieving information on running processes and system utilization
+(CPU, memory, disks, network, sensors) in Python.
+
+Blocks in this module show information about your running system, including
+useful information i.e.: how many memory is in currently use
+(``VirtualMemoryBlock``) or the current speed of the connected Ethernet/Wi-Fi
+interface (``NetworkSpeedBlock``).
+
+All Blocks in this module are based on ``PollingBlock`` since this kinda of
+measurement only makes sense over time (i.e.: memory is always changing so we
+can't just update when memory usage increase/decrease or we would use too much
+resources for it).
+
+.. _psutil:
+  https://github.com/giampaolo/psutil
+"""
+
 import datetime
 import re
 from pathlib import Path
@@ -14,6 +34,34 @@ _CPU_COUNT = psutil.cpu_count()
 
 
 class CpuPercentBlock(blocks.PollingBlock):
+    """Block that shows the current CPU percentage.
+
+    Args:
+      format:
+        Format string to shown. Supports both ``{percent}`` and ``{icon}``
+        placeholders.
+      colors:
+        A Dictable that represents the color that will be shown in each CPU
+        interval. For example::
+
+          {
+             0: "000000",
+             10: "#FF0000",
+             50: "#FFFFFF",
+          }
+
+        When the CPU % is between [0, 10) the color is set to "000000", from
+        [10, 50) is set to "FF0000" and from 50 and beyond it is "#FFFFFF".
+      icons:
+        Similar to ``colors``, but for icons. Can be used to create a graphic
+        representation of the CPU %. Only displayed when ``format`` includes
+        ``{icon}`` placeholder.
+      sleep:
+        Sleep in seconds between each call to ``run()``.
+      **kwargs:
+        Extra arguments to be passed to ``PollingBlock`` class.
+    """
+
     def __init__(
         self,
         format: str = "C: {percent}%",
@@ -21,6 +69,16 @@ class CpuPercentBlock(blocks.PollingBlock):
             (0, types.Color.NEUTRAL),
             (75, types.Color.WARN),
             (90, types.Color.URGENT),
+        ),
+        icons: types.Dictable[float, str] = (
+            (0.0, "▁"),
+            (12.5, "▂"),
+            (25.0, "▃"),
+            (37.5, "▄"),
+            (50.0, "▅"),
+            (62.5, "▆"),
+            (75.0, "▇"),
+            (87.5, "█"),
         ),
         sleep: int = 5,
         *,
@@ -30,20 +88,70 @@ class CpuPercentBlock(blocks.PollingBlock):
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = dict(colors)
+        self.icons = dict(icons)
         self.psutil = _psutil
 
     async def run(self) -> None:
         percent = self.psutil.cpu_percent(interval=None)
 
         color = utils.calculate_threshold(self.colors, percent)
+        icon = utils.calculate_threshold(self.icons, percent)
 
-        self.update(self.format.format(percent=percent), color=color)
+        self.update(
+            self.format.format(
+                percent=percent,
+                icon=icon,
+            ),
+            color=color,
+        )
 
 
 class DiskUsageBlock(blocks.PollingBlock):
+    """Block that shows the current disk usage for path.
+
+    Args:
+      path:
+        Path to the disk to shown.
+      format:
+        Format string to shown. Supports the following placeholders:
+
+        - ``{path}``: Disk path, for example: ``/mnt/backup``
+        - ``{short_path}``: Disk path, but only show the first letter of each
+          directory, for example: ``/m/b``
+        - ``{total}``: Disk total size
+        - ``{used}``: Disk used size
+        - ``{free}``: Disk free size
+        - ``{percent}``: Disk usage in percentage
+        - ``{icon}``: Show disk usage percentage in icon representation
+      colors:
+        A Dictable that represents the color that will be shown in each disk
+        usage in percentage interval. For example::
+
+          {
+             0: "000000",
+             10: "#FF0000",
+             50: "#FFFFFF",
+          }
+
+        When the disk % is between [0, 10) the color is set to "000000", from
+        [10, 50) is set to "FF0000" and from 50 and beyond it is "#FFFFFF".
+      icons:
+        Similar to ``colors``, but for icons. Can be used to create a graphic
+        representation of the disk %. Only displayed when ``format`` includes
+        ``{icon}`` placeholder.
+      divisor:
+        Divisor used for all size reportings for this Block. For example, using
+        ``1024 ** 1024`` here makes all sizes return in MiB.
+      sleep:
+        Sleep in seconds between each call to ``run()``.
+      **kwargs:
+        Extra arguments to be passed to ``PollingBlock`` class.
+    """
+
     def __init__(
         self,
-        format: str = "{label}: {free:.1f}GiB",
+        path: Union[Path, str] = "/",
+        format: str = "{path}: {free:.1f}GiB",
         colors: types.Dictable[int, Optional[str]] = (
             (0, types.Color.NEUTRAL),
             (75, types.Color.WARN),
@@ -61,8 +169,6 @@ class DiskUsageBlock(blocks.PollingBlock):
         ),
         divisor: int = types.IECUnit.GiB,
         sleep: int = 5,
-        path: Union[Path, str] = "/",
-        short_label: bool = False,
         *,
         _psutil=psutil,
         **kwargs,
@@ -73,16 +179,13 @@ class DiskUsageBlock(blocks.PollingBlock):
         self.icons = dict(icons)
         self.divisor = divisor
         self.path = Path(path)
-        if short_label:
-            self.label = self._get_short_label()
-        else:
-            self.label = str(self.path)
+        self.short_path = self._get_short_path()
         self.psutil = _psutil
 
     def _convert(self, dividend: float) -> float:
         return dividend / self.divisor
 
-    def _get_short_label(self) -> str:
+    def _get_short_path(self) -> str:
         return "/" + "/".join(x[0] for x in str(self.path).split("/") if x)
 
     async def run(self) -> None:
@@ -93,7 +196,8 @@ class DiskUsageBlock(blocks.PollingBlock):
 
         self.update(
             self.format.format(
-                label=self.label,
+                path=self.path,
+                short_path=self.short_path,
                 total=self._convert(disk.total),
                 used=self._convert(disk.used),
                 free=self._convert(disk.free),
@@ -105,6 +209,35 @@ class DiskUsageBlock(blocks.PollingBlock):
 
 
 class LoadAvgBlock(blocks.PollingBlock):
+    """Block that shows the current load average, in the last 1, 5 or 15 minutes.
+
+    Args:
+      format:
+        Format string to shown. Supports the ``{load1}``, ``{load5}`` and
+        ``{load15}`` placeholders.
+      colors:
+        A Dictable that represents the color that will be shown in each load1
+        interval. For example::
+
+          {
+             0: "000000",
+             2: "#FF0000",
+             4: "#FFFFFF",
+          }
+
+        When the load1 is between [0, 2) the color is set to "000000", from
+        [2, 4) is set to "FF0000" and from 4 and beyond it is "#FFFFFF".
+
+        Since the load generally only makes sense according to the number of
+        logical CPUs in the system, by default this block returns
+        ``types.Color.WARN`` for ``load1 == <cpu count> / 2`` and
+        ``types.Color.URGENT`` for ``load1 == <cpu count>``.
+      sleep:
+        Sleep in seconds between each call to ``run()``.
+      **kwargs:
+        Extra arguments to be passed to ``PollingBlock`` class.
+    """
+
     def __init__(
         self,
         format: str = "L: {load1}",
@@ -134,6 +267,42 @@ class LoadAvgBlock(blocks.PollingBlock):
 
 
 class NetworkSpeedBlock(blocks.PollingBlock):
+    """Block that shows the current network speed for the connect interface.
+
+    Args:
+      format_up:
+        Format string to shown when there is at least one connected interface.
+        Supports the following placeholders:
+
+        - ``{interface}``: Interface name, for example: ``eno1``
+        - ``{upload}``: Upload speed
+        - ``{download}``: Download speed
+
+        Since upload/download speeds varies greatly during usage, this module
+        automatically finds the most compact speed representation. So instead
+        of showing ``1500K`` it will show ``1.5M``, for example.
+      colors:
+        A Dictable that represents the color that will be shown in each load1
+        interval. For example::
+
+          {
+             0: "000000",
+             2 * types.IECUnit.MIB: "#FF0000",
+             4 * types.IECUnit.MIB: "#FFFFFF",
+          }
+
+        When the network speed is between [0, 2) MiB the color is set to
+        "000000", from [2, 4) is set to "FF0000" and from 4 and beyond it is
+        "#FFFFFF".
+      interface_regex:
+        Regex for which interfaces to use. By default it already includes the
+        most common ones and excludes things like ``lo`` (loopback interface).
+      sleep:
+        Sleep in seconds between each call to ``run()``.
+      **kwargs:
+        Extra arguments to be passed to ``PollingBlock`` class.
+    """
+
     def __init__(
         self,
         format_up: str = "{interface}:  U {upload} D {download}",
@@ -205,11 +374,53 @@ class NetworkSpeedBlock(blocks.PollingBlock):
 
 
 class SensorsBatteryBlock(blocks.PollingBlock):
+    """Block that shows battery information.
+
+    Args:
+      format_plugged:
+        Format string to shown when the battery is plugged (charging).
+        Support the following placeholders:
+
+        - ``{percent}``: Battery capacity in percentage
+        - ``{remaining_time}``: Battery remaining time
+        - ``{icon}``: Show battery capacity percentage in icon representation
+      format_unplugged:
+        Format string to shown when the battery is unplugged (discharging).
+        Supports the same placeholders as ``format_unplugged``.
+      format_unknown:
+        Format string to shown when the battery is an unknown state.
+        Supports the same placeholders as ``format_unplugged``.
+      format_no_battery:
+        Format string to shown when no battery is detected.
+      colors:
+        A Dictable that represents the color that will be shown in each battery
+        percentage interval. For example::
+
+          {
+             0: "000000",
+             10: "#FF0000",
+             25: "#FFFFFF",
+          }
+
+        When the battery percentage is between [0, 10) % the color is set to
+        "000000", from [10, 25) is set to "FF0000" and from 25 and beyond it is
+        "#FFFFFF".
+      icons:
+        Similar to ``colors``, but for icons. Can be used to create a graphic
+        representation of the battery %. Only displayed when ``format`` includes
+        ``{icon}`` placeholder.
+      sleep:
+        Sleep in seconds between each call to ``run()``.
+      **kwargs:
+        Extra arguments to be passed to ``PollingBlock`` class.
+    """
+
     def __init__(
         self,
         format_plugged: str = "B: PLUGGED {percent:.0f}%",
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         format_unknown: str = "B: {icon} {percent:.0f}%",
+        format_no_battery: str = "No battery",
         colors: types.Dictable[int, Optional[str]] = (
             (0, types.Color.URGENT),
             (10, types.Color.WARN),
@@ -225,7 +436,7 @@ class SensorsBatteryBlock(blocks.PollingBlock):
             (75.0, "▇"),
             (87.5, "█"),
         ),
-        sleep=5,
+        sleep: int = 5,
         *,
         _psutil=psutil,
         **kwargs,
@@ -234,6 +445,7 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         self.format_plugged = format_plugged
         self.format_unplugged = format_unplugged
         self.format_unknown = format_unknown
+        self.format_no_battery = format_no_battery
         self.colors = dict(colors)
         self.icons = dict(icons)
         self.psutil = _psutil
@@ -242,6 +454,7 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         battery = self.psutil.sensors_battery()
 
         if not battery:
+            self.abort(self.format_no_battery)
             return
 
         color = utils.calculate_threshold(self.colors, battery.percent)
@@ -269,6 +482,42 @@ class SensorsBatteryBlock(blocks.PollingBlock):
 
 
 class SensorsTemperaturesBlock(blocks.PollingBlock):
+    """Block that shows sensor temperature information.
+
+    Args:
+      format:
+        Format string to shown. Support the following placeholders:
+
+        - ``{label}``: Label of the sensor. Architecture specific
+        - ``{current}``: Current temperature reported by sensor
+        - ``{high}``: Highest temperature reported by sensor
+        - ``{critical}``: Critical temperature reported by sensor
+        - ``{icon}``: Show sensor temperature in icon representation
+      colors:
+        A Dictable that represents the color that will be shown in each temperature
+        interval. For example::
+
+          {
+             0: "000000",
+             50: "#FF0000",
+             80: "#FFFFFF",
+          }
+
+        When the sensor temperature is between [0, 50) % the color is set to
+        "000000", from [50, 80) is set to "FF0000" and from 80 and beyond it is
+        "#FFFFFF".
+      icons:
+        Similar to ``colors``, but for icons. Can be used to create a graphic
+        representation of the temperature. Only displayed when ``format``
+        includes ``{icon}`` placeholder.
+      fahrenheit:
+        Show temperature in in Fahrenheit instead of Celsius.
+      sleep:
+        Sleep in seconds between each call to ``run()``.
+      **kwargs:
+        Extra arguments to be passed to ``PollingBlock`` class.
+    """
+
     def __init__(
         self,
         format: str = "T: {current:.0f}°C",
@@ -325,6 +574,44 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
 
 
 class VirtualMemoryBlock(blocks.PollingBlock):
+    """Block that shows virtual memory information.
+
+    Args:
+      format:
+        Format string to shown. Support the following placeholders:
+
+        - ``{total}``: Total installed memory
+        - ``{available}``: Available memory
+        - ``{used}``: Used memory
+        - ``{free}``: Free memory
+        - ``{percent}``: Percent used memory
+        - ``{icon}``: Show memory percent in icon representation
+      colors:
+        A Dictable that represents the color that will be shown in each used
+        memory percentage. For example::
+
+          {
+             0: "000000",
+             50: "#FF0000",
+             80: "#FFFFFF",
+          }
+
+        When the used memory % is between [0, 50) % the color is set to
+        "000000", from [50, 80) is set to "FF0000" and from 80 and beyond it is
+        "#FFFFFF".
+      divisor:
+        Divisor used for all size reportings for this Block. For example, using
+        ``1024 ** 1024`` here makes all sizes return in MiB.
+      icons:
+        Similar to ``colors``, but for icons. Can be used to create a graphic
+        representation of the used memory. Only displayed when ``format``
+        includes ``{icon}`` placeholder.
+      sleep:
+        Sleep in seconds between each call to ``run()``.
+      **kwargs:
+        Extra arguments to be passed to ``PollingBlock`` class.
+    """
+
     def __init__(
         self,
         format: str = "M: {available:.1f}GiB",

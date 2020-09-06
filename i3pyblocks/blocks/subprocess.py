@@ -17,10 +17,11 @@ class ShellBlock(blocks.PollingBlock):
             (types.MouseButton.SCROLL_DOWN, None),
         ),
         color_by_returncode: types.Dictable = (),
+        sleep: int = 1,
         _utils=utils,
         **kwargs
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.command = command
         self.command_on_click = dict(command_on_click)
@@ -59,11 +60,12 @@ class ToggleBlock(blocks.PollingBlock):
         command_off: str,
         format_on: str = "ON",
         format_off: str = "OFF",
+        sleep: int = 1,
         *,
         _utils=utils,
         **kwargs
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(sleep=sleep, **kwargs)
         self.command_state = command_state
         self.command_on = command_on
         self.command_off = command_off

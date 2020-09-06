@@ -65,8 +65,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         representation of the volume. Only displayed when ``format`` includes
         ``{icon}`` placeholder.
       command:
-        Program to run when this block is right clicked. Defaults to
-        `pavucontrol`_.
+        Program to run when this block is right clicked.
       **kwargs:
         Extra arguments to be passed to ``BlockExecutor`` class.
 

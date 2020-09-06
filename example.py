@@ -52,14 +52,13 @@ async def main():
     )
 
     # For each partition found, add it to the Runner
-    # Using `short_label=True` shows only the first letter of the path
+    # Using `{{short_path}}` shows only the first letter of the path
     # i.e.: /mnt/backup -> /m/b
     for partition in partitions():
         runner.register_block(
             psutil.DiskUsageBlock(
-                format=" {label}: {free:.1f}GiB",
+                format=" {short_path}: {free:.1f}GiB",
                 path=partition.mountpoint,
-                short_label=True,
             )
         )
 
