@@ -155,7 +155,7 @@ async def main():
     # `response_callback`, that receives the response of the HTTP request and
     # you can manipulate it the way you want
     runner.register_block(
-        aiohttp.RequestBlock(
+        aiohttp.PollingRequestBlock(
             "https://wttr.in/?format=%c+%t",
             format_error="",
             sleep=60 * 60,
