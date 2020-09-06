@@ -41,7 +41,11 @@ class Block(metaclass=abc.ABCMeta):
         For example, let's say you want a block that has a permanent green
         background (unless overriden), so you can do something like::
 
-            block_instance = Block(default_state={"background": "#008000"})
+            block_instance = Block(
+                default_state={
+                    "background": "#008000",
+                },
+            )
 
         And all calls to `result()` will have ``background == "#008000"``,
         unless overriden by ``update_status()`` with a different value.
