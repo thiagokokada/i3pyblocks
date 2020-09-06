@@ -33,6 +33,8 @@ setuptools.setup(
             "isort",
             "mypy",
             "pip-tools",
+            "sphinx",
+            "sphinx-autodoc-typehints",
         ],
         "test": [
             "asynctest",
