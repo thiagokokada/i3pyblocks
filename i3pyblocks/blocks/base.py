@@ -1,3 +1,10 @@
+"""i3pyblocks block.
+
+This module includes implementation for the Block class, used to represent a
+i3bar block. It also includes some more advanced implementations of Block
+class, like PollingBlock.
+"""
+
 import abc
 import asyncio
 import signal
@@ -10,32 +17,38 @@ from i3pyblocks._internal import utils
 
 
 class Block(metaclass=abc.ABCMeta):
-    """Base Block
+    """Base Block.
+
+    A Block represents each part that composes an i3pyblocks output. It is
+    responsible extracting, parsing and processing the information, and also
+    formatting so it can be output in i3bar later.
 
     This is an abstract class defining the interface for what a Block is.
     It should not be used directly, instead it should be derivated and its
     abstract methods should be implemented.
 
-      - *name*: allows you to set a custom internal representation for
-    the class. This should only be useful if you need to differentiate
-    between multiple instances of the same module in a consistent way
-    (i.e.: you can't rely on something random like the `Module.id`)
-    If not passed this will use by default the string representation
-    of the class name.
-      - *default_state*: it is a dict that defines the default state of
-    the Block, that is, the value that will be shown unless the state
-    is updated by Block's `update_state()` method.
-    For example, let's say you want a block that has a permanent green
-    background (unless overriden), so you can do something like:
+    Keyword Args:
+      block_name:
+        Allows you to set a custom internal representation for the class.
+        This should only be useful if you need to differentiate between
+        multiple instances of the same module in a consistent way (i.e.:
+        you can't rely on something random like the `Module.id`).
+        If not passed this will use by default the string representation
+        of the class name.
+      default_state:
+        Defines the default state of the Block, that is, the value that will
+        be shown unless the state is updated by Block's `update_state()` method.
+        For example, let's say you want a block that has a permanent green
+        background (unless overriden), so you can do something like::
 
-        ```python
-        block_instance = Block(background="#008000")
-        ```
+            block_instance = Block(default_state={"background": "#008000"})
 
-    **See also:** for details about each of the keys available in
-    `default_state`, see `update_state()` documentation.
+        And all calls to `result()` will have ``background == "#008000"``,
+        unless overriden by ``update_status()`` with a different value.
 
-    [1]: https://i3wm.org/docs/i3bar-protocol.html#_blocks_in_detail
+    See Also:
+      For details about each of the keys available in ``default_state``, see
+      ``update_state()`` documentation.
     """
 
     def __init__(
@@ -88,56 +101,69 @@ class Block(metaclass=abc.ABCMeta):
         separator_block_width: Optional[int] = None,
         markup: Optional[str] = None,
     ) -> None:
-        """Updates Block's state
+        """Updates Block's state.
 
         The state is what will be shown by the Block in the next update,
-        unless another update occur before a Block's `push_update()` method
+        unless another update occurs before a Block's ``push_update()`` method
         is called.
 
-        Each of this method arguments is from
-        [i3bar's protocol specification][1], since they're mapped directly
-        (so a `full_text="foo"` results in a `{"full_text": "foo"}`), except
-        for `name` (that is defined once in Block's constructor) and
-        `instance` (that is generate randomly).
+        Each of this method arguments is from `i3bar's protocol specification`_,
+        since they're mapped directly from it (so a ``full_text="foo"`` results
+        in a ``{"full_text": "foo"}`` in the Block's output).
 
-          - *full*_text: the full_text will be displayed by i3bar on the
-        status line. This is the only required parameter. If full_text is an
-        empty string, the block will be skipped
-          - *short*_text: it will be used in case the status line needs
-        to be shortened because it uses more space than your screen provides
-          - *color*: to make the current state of the information easy to spot,
-        colors can be used. Colors are specified in hex (like in HTML),
-        starting with a leading hash sign. For example, #ff0000 means red
-          - *background*: overrides the background color for this particular
-        block
-          - *border*: overrides the border color for this particular block
-          - *border*_top: defines the width (in pixels) of the top border of
-        this block. Defaults to 1
-          - *border*_right: defines the width (in pixels) of the right border
-        of this block. Defaults to 1
-          - *border*_bottom: defines the width (in pixels) of the bottom
-        border of this block. Defaults to 1
-          - *border*_left: defines the width (in pixels) of the left border of
-        this block. Defaults to 1
-          - *min*_width: The minimum width (in pixels) of the block. If the
-        content of the full_text key take less space than the specified
-        min_width, the block will be padded to the left and/or the right side,
-        according to the align key
-          - *align*: align text on the center, right or left (default) of the
-        block, when the minimum width of the latter, specified by the
-        min_width key, is not reached
-          - *urgent*: a boolean which specifies whether the current value is
-        urgent
-          - *separator*: a boolean which specifies whether a separator line
-        should be drawn after this block. The default is true, meaning the
-        separator line will be drawn
-          - *separator*_block_width: the amount of pixels to leave blank
-        after the block. In the middle of this gap, a separator line will
-        be drawn unless separator is disabled.
-          - *markup*: a string that indicates how the text of the block
-        should be parsed. Pango markup only works if you use a pango font.
+        Args:
+          full_text:
+            The full_text will be displayed by i3bar on the status line. This
+            is the only required parameter. If full_text is an empty string, the
+            block will be skipped.
+          short_text:
+            It will be used in case the status line needs to be shortened because
+            it uses more space than your screen provides.
+          color:
+            To make the current state of the information easy to spot, colors can
+            be used. Colors are specified in hex (like in HTML), starting with a
+            leading hash sign. For example, #ff0000 means red.
+          background:
+            Overrides the background color for this particular block.
+          border:
+            Overrides the border color for this particular block.
+          border_top:
+            Defines the width (in pixels) of the top border of this block.
+            Defaults to 1.
+          border_right:
+            Defines the width (in pixels) of the right border of this block.
+            Defaults to 1.
+          border_bottom:
+            Defines the width (in pixels) of the bottom border of this block.
+            Defaults to 1.
+          border_left:
+            Defines the width (in pixels) of the left border of this block.
+            Defaults to 1.
+          min_width:
+            The minimum width (in pixels) of the block. If the content of the
+            full_text key take less space than the specified min_width, the
+            block will be padded to the left and/or the right side, according
+            to the align key.
+          align:
+            Align text on the center, right or left (default) of the block,
+            when the minimum width of the latter, specified by the min_width
+            key, is not reached.
+          urgent:
+            A boolean which specifies whether the current value is urgent.
+          separator:
+            A boolean which specifies whether a separator line should be
+            drawn after this block. The default is true, meaning the separator
+            line will be drawn.
+          separator_block_width:
+            The amount of pixels to leave blank after the block. In the middle
+            of this gap, a separator line will be drawn unless separator is
+            disabled.
+          markup:
+            A string that indicates how the text of the block should be parsed.
+            Pango markup only works if you use a pango font.
 
-        [1]: https://i3wm.org/docs/i3bar-protocol.html#_blocks_in_detail
+        .. _i3bar's protocol specification:
+          https://i3wm.org/docs/i3bar-protocol.html#_blocks_in_detail
         """
         self._state = utils.non_nullable_dict(
             full_text=full_text,
@@ -158,15 +184,24 @@ class Block(metaclass=abc.ABCMeta):
         )
 
     def result(self) -> types.Result:
-        """Returns the current state of Block as a Result map
+        """Returns the current state of Block as a Result map.
 
         This will combine both the default state and the current state to
         generate the current state of the Block.
+
+        Returns:
+          A ``i3pyblocks.types.Result`` map, ready to be converted to JSON.
+          For example::
+
+            {
+               "full_text": "Some funny text",
+               "background": "#FF0000",
+            }
         """
         return {**self._default_state, **self._state}
 
     def push_update(self) -> None:
-        """Push result to queue, so it can be retrieved"""
+        """Push result to queue, so it can be retrieved by Runner."""
         if self.update_queue and not self.frozen:
             self.update_queue.put_nowait((self.id, self.result()))
         else:
@@ -176,23 +211,24 @@ class Block(metaclass=abc.ABCMeta):
             )
 
     def update(self, *args, **kwargs) -> None:
-        """Updates a Block
+        """Updates a Block.
 
         This method will immediately updates a Block, so its new contents
         should be shown in the next redraw of i3bar. It is basically the
-        equivalent of calling Method's `update_state()` followed by
-        `push_update()`.
+        equivalent of calling Method's ``update_state()`` followed by
+        ``push_update()``.
 
         The parameters of this method is passed as-is to Block's
-        `update_state()`.
+        ``update_state()``.
 
-        **See also**: `Block.update_state()` parameters.
+        See Also:
+          ``Block.update_state()`` arguments.
         """
         self.update_state(*args, **kwargs)
         self.push_update()
 
     def abort(self, *args, **kwargs) -> None:
-        """Aborts a Block
+        """Aborts a Block.
 
         This method will do one last update of the Block, and disable all
         further updates on it. Useful to show errors.
@@ -202,23 +238,28 @@ class Block(metaclass=abc.ABCMeta):
         from showing in i3bar.
 
         The parameters of this method is passed as-is to Block's
-        `update_state()`.
+        ``update_state()``.
 
-        **See also**: `Block.update_state()` parameters.
+        See Also:
+          ``Block.update_state()`` arguments.
         """
         self.update(*args, **kwargs)
         self.frozen = True
 
     def setup(self, queue: asyncio.Queue) -> None:
-        """Setup a Block
+        """Setup a Block.
 
-        This method is called just before start() to setup some things
-        necessary to make the Block work. While you may put your own
-        initialization code here, don't forget to call this function from
-        your children, so the Block works correctly.
+        This method is called just before ``start()`` to setup some things
+        necessary to make the Block work.
 
-          - *queue*: asyncio.Queue instance that will be used to notify
-        updates from this Block
+        While you may put your own initialization code here, don't forget
+        to call ``super().setup(queue=queue)`` after overriding this method,
+        so everything works correctly.
+
+        Args:
+          queue:
+            ``asyncio.Queue`` instance that will be used to notify updates
+            from this Block.
         """
         self.update_queue = queue
         self.frozen = False
@@ -235,77 +276,97 @@ class Block(metaclass=abc.ABCMeta):
         height: int,
         modifiers: List[Optional[str]],
     ) -> None:
-        """Callback called when a click event happens to this Block
+        """Callback called when a click event happens to this Block.
 
-        Each of this method arguments is from
-        [i3bar's protocol specification][1], since they're mapped directly
-        (so a `{"x": 1}` results in a `x=1`), except for `name` (that is
-        defined once in Block's constructor) and `instance` (that is
-        generate randomly).
+        Each of this method arguments is from `i3bar's protocol specification`_,
+        since they're mapped directly (so a ``{"x": 1}`` results in a ``x=1``).
 
-          - *x*: X11 root window coordinates where the click occurred
-          - *y*: X11 root window coordinates where the click occurred
-          - *button*: X11 button ID (for example 1 to 3 for left/middle/right
-        mouse button)
-          - *relative*_x: coordinates where the click occurred, with respect
-        to the top left corner of the block
-          - *relative*_y: coordinates where the click occurred, with respect
-        to the top left corner of the block
-          - *width*: width (in px) of the block
-          - *height*: height (in px) of the block
-          - *modifier*: an array of the modifiers active when the click
-        occurred. The order in which modifiers are listed is not guaranteed.
+        Keyword Args:
+          x:
+            X11 root window coordinates where the click occurred.
+          y:
+            X11 root window coordinates where the click occurred.
+          button:
+            X11 button ID (for example 1 to 3 for left/middle/right mouse
+            button).
+          relative_x:
+            Coordinates where the click occurred, with respect to the top left
+            corner of the block.
+          relative_y:
+            Coordinates where the click occurred, with respect to the top left
+            corner of the block.
+          width:
+            Width (in px) of the block.
+          height:
+            Height (in px) of the block.
+          modifier:
+            A list of the modifiers active when the click occurred. The
+            order in which modifiers are listed is not guaranteed.
 
-        [1]: https://i3wm.org/docs/i3bar-protocol.html#_click_events
+        See Also:
+          ``i3pyblocks.types.MouseButton`` has the mapping of the available
+          mouse button IDs.
+          ``i3pyblocks.types.KeyModifier`` has the mapping of the available
+          modifiers.
+
+        .. i3bar's protocol specification:
+          https://i3wm.org/docs/i3bar-protocol.html#_click_events
         """
         pass
 
     async def signal_handler(self, *, sig: signal.Signals) -> None:
-        """Callback called when a signal event happens to this Block
+        """Callback called when a signal event happens to this Block.
 
-          - *sig*: signals.Signals' enum with the signal that originated
-        this event
+        Keyword Args:
+          sig:
+            Signals enum with the signal that originated this event. This can
+            be used to differentiate between different signals.
         """
         pass
 
     @abc.abstractmethod
     async def start(self) -> None:
-        """Starts a Block
+        """Starts a Block.
 
-        This is an abstract method, so it should be overriden by any children.
+        This is an abstract method, so it should be overriden.
 
-        In this function is where you generally wants to put your main loop to
-        update the state of the block. This loop can either be triggered by
+        This method is where you generally wants to put your main loop to
+        update the state of the Block. This loop can either be triggered by
         events or can be an infinity loop. It can even be a single call
-        to update(), but in this case your Block will only be updated once.
+        to ``update()``, but in this case your Block will only be updated
+        once.
         """
         pass
 
 
 class PollingBlock(Block):
-    """Polling Block
+    """Polling Block.
 
-    This is the most simple Block implementation. It is a block that runs
-    a loop where it executes `run()` method and sleeps for `sleep` seconds.
+    This is the most common Block implementation. It is a Block that runs
+    a loop where it executes ``run()`` method and sleeps for ``sleep`` seconds,
+    afterwards running ``run()`` again, keeping this cycle forever.
 
     You must not instantiate this class directly, instead you should
-    subclass it and implement `run()` method first.
+    subclass it and implement ``run()`` method first.
 
-      - *sleep*: sleep in seconds between update
+    Args:
+      sleep: sleep in seconds between each call to ``run()``.
 
-    **See also:** `Block()` parameters.
+    See Also:
+      ``Block()`` arguments.
     """
 
     def __init__(self, sleep: int = 1, **kwargs) -> None:
-        super().__init__(**kwargs)
         self.sleep = sleep
+        super().__init__(**kwargs)
 
     @abc.abstractmethod
     async def run(self) -> None:
-        """Main loop in PollingBlock
+        """Main loop in PollingBlock.
 
-        This is the method that will be run at each X `sleep` seconds. Since
-        this is an abstract method, it should be overriden by its children.
+        This is the method that will be run at each X ``sleep`` seconds.
+
+        Since this is an abstract method, it should be overriden before usage.
         """
         pass
 
@@ -338,39 +399,44 @@ class PollingBlock(Block):
 
 
 class ExecutorBlock(Block):
-    """Executor Block
+    """Executor Block.
 
     This is a special Block implementation to be used when it is not possible
     to implement functionality using asyncio, for example, when a external
     library uses its own event loop.
 
-    What this block does is to call `run()` method inside a [executor][1],
+    What this block does is to call ``run()`` method inside an `executor`_,
     that is run in a separate thread or process depending of the selected
     executor. Since it is running in a separate thread/process, it does not
     interfere with the main asyncio loop.
 
     You must not instantiate this class directly, instead you should
-    subclass it and implement `run()` method first.
+    subclass it and implement ``run()`` method first.
 
-      - *executor*: an optional [`Executor`][2] instance. If not passed it
-    will use the default one
+    Args:
+      executor: an optional `Executor instance`_. If not passed it
+    will use the default one.
 
-    **See also:** `Block()` parameters.
+    See also:
+      ``Block()`` arguments.
 
-    [1]: https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor
-    [2]: https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor
+    .. _executor:
+      https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor
+    .. _Executor instance:
+      https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor
     """
 
     def __init__(self, executor: Optional[Executor] = None, **kwargs) -> None:
-        super().__init__(**kwargs)
         self.executor = executor
+        super().__init__(**kwargs)
 
     @abc.abstractmethod
     def run(self) -> None:
-        """Main loop in PollingBlock
+        """Main loop in PollingBlock.
 
-        This is the method that will be run inside a executor. Since this
-        is an abstract method, it should be overriden by its children.
+        This is the method that will be run inside an executor.
+
+        Since this is an abstract method, it should be overriden before usage.
         """
         pass
 
