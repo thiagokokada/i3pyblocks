@@ -1,3 +1,16 @@
+"""Blocks based on `asyncio.subprocess`_
+
+This is a collection of Blocks based on ``asyncio.subprocess``, allowing you
+to run an external program, parse its output and show it in i3pyblocks.
+
+All Blocks in this module are based on ``PollingBlock``, since it is more
+difficult to have proper event based updates when coordinating subprocess.
+There is some alternatives that to try in the future, for example using inotify
+or dbus based approaches.
+
+.. _asyncio.subprocess:
+  https://docs.python.org/3/library/asyncio-subprocess.html
+"""
 from asyncio import subprocess
 
 from i3pyblocks import blocks, types
@@ -5,6 +18,24 @@ from i3pyblocks._internal import utils
 
 
 class ShellBlock(blocks.PollingBlock):
+    """Block that shows the result of a command running in shell.
+
+    Args:
+      command:
+        Command to be run. This will be parsed by shell, so it can also be
+        multiple arbitrary commands separated by newlines, or multiple
+        commands connected by pipes.
+      format:
+        Format string to shown. Supports both ``{output}`` (stdout) and
+        ``{output_err}`` (stderr) placeholders.
+      command_on_click:
+        Dictable with commands to be called when the user interacts with mouse
+        inside this block. After running this Block will be updated. Can be
+        useful to change the keyboard layout for example.
+      **kwargs:
+        Extra arguments to be passed to ``PollingBlock`` class.
+    """
+
     def __init__(
         self,
         command: str,
@@ -17,10 +48,12 @@ class ShellBlock(blocks.PollingBlock):
             (types.MouseButton.SCROLL_DOWN, None),
         ),
         color_by_returncode: types.Dictable = (),
+        sleep: int = 1,
+        *,
         _utils=utils,
         **kwargs
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.command = command
         self.command_on_click = dict(command_on_click)
@@ -52,6 +85,33 @@ class ShellBlock(blocks.PollingBlock):
 
 
 class ToggleBlock(blocks.PollingBlock):
+    """Block that shows a toggle on or off accordingly to command's output.
+
+    This block output is determined by ``command_state``. When the command
+    outputs something in stdout, this is interpreted as ON, while when the
+    command outputs nothing in stdout, this is interpreted as OFF.
+
+    Args:
+      command_state:
+        Command to be run to determine state. This will be parsed by shell,
+        so it can also be multiple arbitrary commands separated by newlines,
+        or multiple commands connected by pipes.
+      command_on:
+        Command to be called when the current state is OFF, so it can be
+        turned to ON.
+      command_off:
+        Command to be called when the current state is ON, so it can be
+        turned to OFF.
+      format_on:
+        Format string to be shown when state is ON.
+      format_off:
+        Format string to be shown when state is OFF.
+      sleep:
+        Sleep in seconds between each call to ``run()``.
+      **kwargs:
+        Extra arguments to be passed to ``PollingBlock`` class.
+    """
+
     def __init__(
         self,
         command_state: str,
@@ -59,11 +119,12 @@ class ToggleBlock(blocks.PollingBlock):
         command_off: str,
         format_on: str = "ON",
         format_off: str = "OFF",
+        sleep: int = 1,
         *,
         _utils=utils,
         **kwargs
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(sleep=sleep, **kwargs)
         self.command_state = command_state
         self.command_on = command_on
         self.command_off = command_off

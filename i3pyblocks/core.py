@@ -1,3 +1,14 @@
+"""i3pyblocks core.
+
+This module contains the essence of i3pyblocks. Most of its functionality is
+implemented in Runner class, a class that manages Blocks and also handles
+outputing the result, handling i3bar events and handling Unix signals.
+
+Attributes:
+  logger: Logger instance used by i3pyblocks.
+"""
+
+
 import asyncio
 import json
 import logging
@@ -13,11 +24,14 @@ logger.addHandler(logging.NullHandler())
 
 
 class Runner:
-    """Manages and runs Blocks
+    """Main class of i3pyblocks, managing and running Blocks.
 
     This is the class in i3pyblocks responsible to managing Blocks and
     running them, printing its results to stdout and also reading stdin for
-    possible click events comming from i3bar.
+    possible click events comming from `i3bar`_.
+
+    .. _i3bar:
+      https://i3wm.org/docs/i3bar-protocol.html
     """
 
     def __init__(self) -> None:
@@ -28,22 +42,30 @@ class Runner:
         self.queue: asyncio.Queue = asyncio.Queue()
 
     def register_signal(
-        self, block: blocks.Block, signums: Iterable[Union[int, signal.Signals]]
+        self,
+        block: blocks.Block,
+        signums: Iterable[Union[int, signal.Signals]],
     ) -> None:
-        """Registers a list of Unix signals for a Block
+        """Registers a list of Unix signals for a Block.
 
-        This will register a Block's `signal_handler()` method as a callback
+        This will register a Block's signal_handler() method as a callback
         for when signums[] is called. Note that since signals are associated
         with the main thread of i3pyblocks, each signal can only be assigned
-        to an specific Block.
+        to a specific Block.
 
-        The received signal will be passed to `Block.signal_handler()` as a
+        The received signal will be passed to Block.signal_handler() as a
         parameter, so when receiving multiple signals it is possible to
         identify each of them separately.
 
-          - *block*: Block's instance that will receive the signal
-          - *signums*: any iterable containing signal numbers, can be either
-        an int or a signal.Signals' enum
+        This method capture the errors inside Block.signal_handler(), but
+        it also logs it so you can inspect the issue later on.
+
+        Args:
+          block:
+            ``i3pyblocks.blocks.Block`` instance that will receive the signal.
+          signmums:
+            Any iterable containing signal numbers. Each signal can be an
+            int or a signal.Signals' enum.
         """
 
         async def signal_handler(sig: signal.Signals):
@@ -67,25 +89,38 @@ class Runner:
             logger.debug(f"Registered signal {sig.name} for {block.block_name}")
 
     def register_task(self, awaitable: Awaitable) -> None:
-        """Register a task that will be run in Runner's loop."""
+        """Register a task that will be run in Runner's loop.
+
+        Args:
+          awaitable:
+            Either a coroutine, task or future that will be added to the task list
+            to be schedule inside main loop in i3pyblocks.
+        """
         task = asyncio.create_task(awaitable)
         self.tasks.append(task)
         logger.debug(f"Registered async task {awaitable} in {self}")
 
     def register_block(
-        self, block: blocks.Block, signals: Iterable[Union[int, signal.Signals]] = ()
+        self,
+        block: blocks.Block,
+        signals: Iterable[Union[int, signal.Signals]] = (),
     ) -> None:
-        """Registers a Block that will be run and managed by Runner
+        """Registers a Block that will be run and managed by Runner.
 
         This will register a new Block in Runner and also make sure that
-        everything is ready to run the Block correctly. Optionally it will
-        also register any Unix signals that the Block wants to wait for
-        events (see `Runner.register_signal()` method).
+        everything is ready to run the Block correctly.
 
-          - *block*: i3pyblocks.blocks.Block's instance that will be
-        registered
-          - *signums*: any iterable containing signal numbers, can be either
-        an int or a signal.Signals' enum
+        Optionally it will also register any Unix signals that the Block
+        wants to wait for events (see ``Runner.register_signal()`` method).
+
+        Args:
+          block:
+            ``i3pyblocks.blocks.Block`` instance that will be registered
+            inside Runner's main loop.
+          signums:
+            Any iterable containing signal numbers, can be either an int or
+            a signal.Signals' enum. See ``Runner.register_signal()`` method
+            for more information.
         """
         # Setup the block before starting it
         block.setup(self.queue)
@@ -99,7 +134,7 @@ class Runner:
             self.register_signal(block, signals)
 
     async def update_results(self) -> None:
-        """Get updated results from registed Blocks"""
+        """Get updated results from registed Blocks."""
         id_, result = await self.queue.get()
         self.results[id_] = result
         self.queue.task_done()
@@ -111,11 +146,11 @@ class Runner:
             self.results[id_] = result
 
     async def write_results(self) -> None:
-        """Writes results to stdout
+        """Writes results to stdout.
 
         This is a endless loop that will wait for an update in any Block,
         get this update and print all Blocks results using the format
-        described in <https://i3wm.org/docs/i3bar-protocol.html#_the_protocol>.
+        described in https://i3wm.org/docs/i3bar-protocol.html#_the_protocol.
         """
         while True:
             await self.update_results()
@@ -123,13 +158,16 @@ class Runner:
             print(json.dumps(output), end=",\n", flush=True)
 
     async def click_event(self, raw: AnyStr) -> None:
-        """Parses a click event, passing it to a Block's `click_handler()`
+        """Parses a click event, passing it to a Block's ``click_handler()``.
 
-        Receives a click event from stdin in JSON format, parsing it, finding
-        the correspondent Block and calling its `click_handler()` method.
+        Receives a click event from stdin in JSON format, parses it, finds
+        the correspondent ``i3pyblocks.blocks.Block`` and calls its
+        ``click_handler()`` method.
 
-          - *raw*: a JSON formatted string with the click event, as described
-        in <https://i3wm.org/docs/i3bar-protocol.html#_click_events>
+        Args:
+          raw:
+            A JSON formatted string with the click event, as described in
+            https://i3wm.org/docs/i3bar-protocol.html#_click_events.
         """
         try:
             click_event = json.loads(raw)
@@ -160,7 +198,7 @@ class Runner:
 
     # Based on: https://git.io/fjbHx
     async def click_events(self) -> None:
-        """Reads stdin for new click events"""
+        """Reads stdin for new click events."""
         reader = await utils.get_aio_reader(self.loop)
         await reader.readline()
 
@@ -170,22 +208,25 @@ class Runner:
             await reader.readuntil(b",")
 
     def stop(self) -> None:
-        """Stops the Runner"""
+        """Stops the Runner."""
         for task in self.tasks:
             task.cancel()
 
     async def start(self, timeout: Optional[int] = None) -> None:
-        """Starts the Runner
+        """Starts the Runner.
 
         This will first print the header as specified in
-        <https://i3wm.org/docs/i3bar-protocol.html#_the_protocol>, declaring
+        https://i3wm.org/docs/i3bar-protocol.html#_the_protocol, declaring
         the capabilities of i3pyblocks to i3bar.
 
         Afterwards it will run forever printing to stdout the updates from
         the registered Blocks in the format expected by i3bar, and will also
         reads stdin for any click events coming from i3bar.
 
-          - *timeout*: time in seconds to stop the Runner
+        Args:
+          timeout:
+            Time in seconds to stop the Runner. This is mostly used by tests
+            or debug purposes.
         """
         self.register_task(self.click_events())
         self.register_task(self.write_results())

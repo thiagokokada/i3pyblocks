@@ -52,14 +52,13 @@ async def main():
     )
 
     # For each partition found, add it to the Runner
-    # Using `short_label=True` shows only the first letter of the path
+    # Using `{{short_path}}` shows only the first letter of the path
     # i.e.: /mnt/backup -> /m/b
     for partition in partitions():
         runner.register_block(
             psutil.DiskUsageBlock(
-                format=" {label}: {free:.1f}GiB",
+                format=" {short_path}: {free:.1f}GiB",
                 path=partition.mountpoint,
-                short_label=True,
             )
         )
 
@@ -156,7 +155,7 @@ async def main():
     # `response_callback`, that receives the response of the HTTP request and
     # you can manipulate it the way you want
     runner.register_block(
-        aiohttp.RequestBlock(
+        aiohttp.PollingRequestBlock(
             "https://wttr.in/?format=%c+%t",
             format_error="",
             sleep=60 * 60,

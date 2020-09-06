@@ -14,12 +14,12 @@ async def test_cpu_percent_block():
     mock_psutil = Mock(psutil)
     mock_psutil.cpu_percent.return_value = 75.5
 
-    instance = m_psutil.CpuPercentBlock(format="{percent}", _psutil=mock_psutil)
+    instance = m_psutil.CpuPercentBlock(format="{icon} {percent}", _psutil=mock_psutil)
     await instance.run()
 
     result = instance.result()
 
-    assert result["full_text"] == "75.5"
+    assert result["full_text"] == "▇ 75.5"
     assert result["color"] == types.Color.WARN
 
 
@@ -31,7 +31,7 @@ async def test_disk_usage_block():
     )
 
     instance = m_psutil.DiskUsageBlock(
-        format="{icon} {label} {total:.1f} {used:.1f} {free:.1f} {percent}",
+        format="{icon} {path} {total:.1f} {used:.1f} {free:.1f} {percent}",
         _psutil=mock_psutil,
     )
     await instance.run()
@@ -43,7 +43,7 @@ async def test_disk_usage_block():
 
 
 @pytest.mark.asyncio
-async def test_disk_usage_block_with_short_label():
+async def test_disk_usage_block_with_short_path():
     mock_psutil = Mock(psutil)
     mock_psutil.disk_usage.return_value = misc.AttributeDict(
         total=226227036160, used=49354395648, free=165309575168, percent=91.3
@@ -52,8 +52,7 @@ async def test_disk_usage_block_with_short_label():
 
     instance = m_psutil.DiskUsageBlock(
         path=Path(path_str),
-        format="{label}",
-        short_label=True,
+        format="{short_path}",
         _psutil=mock_psutil,
     )
     await instance.run()
@@ -179,7 +178,7 @@ async def test_sensors_battery_block_without_battery():
 
     result = instance.result()
 
-    assert result["full_text"] == ""
+    assert result["full_text"] == "No battery"
 
 
 @pytest.mark.asyncio
