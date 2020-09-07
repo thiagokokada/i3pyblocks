@@ -86,6 +86,27 @@ bar {
 }
 ```
 
+For NixOS users, this repository is also an overlay. You can add it to your
+`/etc/nixos/configuration.nix` as:
+
+
+```nix
+{
+  # ...
+  nixpkgs.overlays = [
+    (import (builtins.fetchTarball {
+      url = https://github.com/thiagokokada/i3pyblocks/master/archive.tar.gz;
+    }))
+  ];
+  environment.systemPackages = with pkgs; [
+    i3pyblocks
+  ];
+  # ...
+}
+
+```
+
+
 ## Development
 
 To setup a development environment, create a new [venv][3] first and run:
@@ -108,7 +129,7 @@ get a working environment variable is using the `shell.nix` file included in
 this repo:
 
 ```shell
-nix-shell shell.nix
+nix-shell shell-dev.nix
 ```
 
 ## Contributing
