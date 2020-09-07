@@ -82,7 +82,7 @@ file:
 ```
 bar {
     position top
-    status_command /path/to/venv/python /path/to/your/my_i3pyblocks_config.py
+    status_command /path/to/venv/i3pyblocks -c /path/to/your/my_i3pyblocks_config.py
 }
 ```
 
