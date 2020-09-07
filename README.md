@@ -86,8 +86,8 @@ bar {
 }
 ```
 
-For NixOS users, this repository is also an overlay. You can add it to your
-`/etc/nixos/configuration.nix` as:
+For NixOS users, this repository have a separate branch `nix-overlay` that acts
+as an overlay. You can add it to your `/etc/nixos/configuration.nix` as:
 
 
 ```nix
@@ -95,7 +95,7 @@ For NixOS users, this repository is also an overlay. You can add it to your
   # ...
   nixpkgs.overlays = [
     (import (builtins.fetchTarball {
-      url = https://github.com/thiagokokada/i3pyblocks/master/archive.tar.gz;
+      url = https://github.com/thiagokokada/i3pyblocks/archive/nix-overlay.tar.gz;
     }))
   ];
   environment.systemPackages = with pkgs; [
