@@ -25,7 +25,7 @@ let
 in
 mach-nix.buildPythonApplication rec {
   pname = "i3pyblocks";
-  version = "master-tarball";
+  version = "master";
 
   src = "https://github.com/thiagokokada/i3pyblocks/tarball/master";
   requirements = extraLibs;
