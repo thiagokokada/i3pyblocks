@@ -14,13 +14,14 @@ m_aionotify = pytest.importorskip("i3pyblocks.blocks.aionotify")
 @pytest.mark.asyncio
 async def test_file_watcher_block(tmpdir):
     tmpfile = tmpdir / "tmpfile.txt"
-    with open(tmpfile, "w"):
-        pass
 
-    async def update_file():
-        await asyncio.sleep(0.1)
+    def update_file(text):
         with open(tmpfile, "w") as f:
-            f.write("Hello World!")
+            f.write(text)
+
+    async def update_file_async(text):
+        await asyncio.sleep(0.1)
+        update_file(text)
 
     class ValidFileWatcherBlock(m_aionotify.FileWatcherBlock):
         def __init__(self):
@@ -33,10 +34,27 @@ async def test_file_watcher_block(tmpdir):
 
     block = ValidFileWatcherBlock()
 
-    await task.runner([block.start(), update_file()], timeout=0.2)
+    update_file("Run!")
+    await block.run()
+    assert block.result()["full_text"] == "Run!"
 
-    result = block.result()
-    assert result["full_text"] == "Hello World!"
+    update_file("Click!")
+    await block.click_handler()
+    assert block.result()["full_text"] == "Click!"
+
+    update_file("Signal!")
+    await block.signal_handler()
+    assert block.result()["full_text"] == "Signal!"
+
+    await task.runner(
+        [
+            block.start(),
+            update_file_async("Async!"),
+        ],
+        timeout=0.2,
+    )
+
+    assert block.result()["full_text"] == "Async!"
 
 
 @pytest.mark.asyncio

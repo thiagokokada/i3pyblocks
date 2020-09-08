@@ -350,6 +350,9 @@ class PollingBlock(Block):
     a loop where it executes ``run()`` method and sleeps for ``sleep`` seconds,
     afterwards running ``run()`` again, keeping this cycle forever.
 
+    By default, a click or a signal event will refresh the contents of this
+    Block.
+
     You must not instantiate this class directly, instead you should
     subclass it and implement ``run()`` method first.
 
@@ -375,21 +378,10 @@ class PollingBlock(Block):
         """
         pass
 
-    async def click_handler(
-        self,
-        *,
-        x: int,
-        y: int,
-        button: int,
-        relative_x: int,
-        relative_y: int,
-        width: int,
-        height: int,
-        modifiers: List[Optional[str]],
-    ) -> None:
+    async def click_handler(self, **_kwargs) -> None:
         await self.run()
 
-    async def signal_handler(self, *, sig: signal.Signals) -> None:
+    async def signal_handler(self, **_kwargs) -> None:
         await self.run()
 
     async def start(self) -> None:
