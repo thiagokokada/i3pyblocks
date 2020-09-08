@@ -18,8 +18,9 @@ changed, this Block is updated.
 
 import abc
 import asyncio
+import signal
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import aionotify
 
@@ -31,6 +32,9 @@ class FileWatcherBlock(blocks.Block):
     """File watcher Block.
 
     A highly efficient Block to watch for events that happen in a file.
+
+    By default, a click or a signal event will refresh the contents of this
+    Block.
 
     You must not instantiate this class directly, instead you should
     subclass it and implement ``run()`` method first.
@@ -75,6 +79,12 @@ class FileWatcherBlock(blocks.Block):
         self.path = Path(path) if path else None
         self.format_file_not_found = format_file_not_found
         self.aionotify = _aionotify
+
+    async def click_handler(self, **_kwargs) -> None:
+        await self.run()
+
+    async def signal_handler(self, **_kwargs) -> None:
+        await self.run()
 
     @abc.abstractmethod
     async def run(self) -> None:
