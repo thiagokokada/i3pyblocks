@@ -24,7 +24,7 @@ setuptools.setup(
     entry_points={"console_scripts": ["i3pyblocks = i3pyblocks.cli:main"]},
     extras_require={
         "aiohttp": ["aiohttp>=3.4.0"],
-        "aionotify": ["aionotify>=0.1.0"],
+        "aionotify": ["aionotify>=0.2.0"],
         "i3ipc": ["i3ipc>=2.0.1"],
         "psutil": ["psutil>=5.4.8"],
         "pulsectl": ["pulsectl>=18.10.5"],
