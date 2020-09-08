@@ -34,7 +34,7 @@ example if you want to use `i3pyblocks.blocks.aionotify` you would need to
 install `aionotify` first:
 
 ```shell
-# This will install all dependencies necessary to make aionotify block work
+# This will install the dependencies for `i3pyblocks.blocks.aiohttp`
 pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[aiohttp]'
 # You can also pass multiple dependencies separated by comma
 pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[i3ipc,psutil]'
