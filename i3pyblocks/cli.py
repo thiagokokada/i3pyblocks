@@ -30,7 +30,9 @@ def main(args: Optional[List[str]] = None) -> None:
         required=False,
     )
     parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {__version__}",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     parsed_args = parser.parse_args(args=args)
 

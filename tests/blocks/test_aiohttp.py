@@ -1,7 +1,8 @@
-import aiohttp
-from aiohttp import web
+import pytest
 
-from i3pyblocks.blocks import aiohttp as m_aiohttp
+aiohttp = pytest.importorskip("aiohttp")
+web = pytest.importorskip("aiohttp.web")
+m_aiohttp = pytest.importorskip("i3pyblocks.blocks.aiohttp")
 
 
 async def test_polling_request_block(aiohttp_server):
