@@ -1,12 +1,13 @@
 from pathlib import Path
 from unittest.mock import Mock
 
-import psutil
 import pytest
 from helpers import misc
 
 from i3pyblocks import types
-from i3pyblocks.blocks import psutil as m_psutil
+
+psutil = pytest.importorskip("psutil")
+m_psutil = pytest.importorskip("i3pyblocks.blocks.psutil")
 
 
 @pytest.mark.asyncio

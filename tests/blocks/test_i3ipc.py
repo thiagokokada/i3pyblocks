@@ -1,16 +1,16 @@
-import i3ipc
-import i3ipc.aio
 import pytest
 from asynctest import CoroutineMock, Mock
 from helpers import misc, task
 
-from i3pyblocks.blocks import i3ipc as m_i3ipc
+i3ipc = pytest.importorskip("i3ipc")
+i3ipc_aio = pytest.importorskip("i3ipc.aio")
+m_i3ipc = pytest.importorskip("i3pyblocks.blocks.i3ipc")
 
 
 @pytest.mark.asyncio
 async def test_window_title_block():
     mock_i3ipc = Mock(i3ipc)
-    mock_i3ipc_aio = Mock(i3ipc.aio)
+    mock_i3ipc_aio = Mock(i3ipc_aio)
 
     mock_connection = mock_i3ipc_aio.Connection.return_value
     # For some reason asynctest.Mock didn't work here
