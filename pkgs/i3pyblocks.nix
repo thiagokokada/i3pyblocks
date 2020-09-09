@@ -3,29 +3,11 @@
 , pkgs
 , stdenv
 , makeWrapper
-  # Use Python from system so we ensure that we are using the same glibc
-, pythonPkg ? pkgs.python38
-, extraLibs ? ''
-    aiohttp
-    aionotify
-    i3ipc
-    psutil
-    pulsectl
-  ''
+, python3Packages
+, extraLibs ? []
 }:
 
-let
-  libs = with pkgs; [
-    libpulseaudio
-  ];
-  mach-nix = import (
-    builtins.fetchGit {
-      url = "https://github.com/DavHau/mach-nix/";
-      ref = "refs/tags/2.3.0";
-    }
-  );
-in
-mach-nix.buildPythonApplication rec {
+python3Packages.buildPythonApplication rec {
   pname = "i3pyblocks";
   version = "master";
 
@@ -34,16 +16,18 @@ mach-nix.buildPythonApplication rec {
     ref = "master";
   };
 
-  requirements = extraLibs;
+  propagatedBuildInputs = extraLibs;
 
-  buildInputs = libs ++ [ makeWrapper ];
-
-  makeWrapperArgs = [
-    "--suffix"
-    "LD_LIBRARY_PATH"
-    ":"
-    "${stdenv.lib.makeLibraryPath libs}"
+  checkInputs = with pkgs.python3Packages; [
+    asynctest
+    pytest
+    pytest-aiohttp
+    pytest-asyncio
   ];
+
+  checkPhase = ''
+    pytest -c /dev/null
+  '';
 
   meta = with stdenv.lib; {
     homepage = "https://github.com/thiagokokada/i3pyblocks";
@@ -52,6 +36,4 @@ mach-nix.buildPythonApplication rec {
     platforms = platforms.linux;
     maintainers = [ maintainers.thiagokokada ];
   };
-
-  python = pythonPkg;
 }
