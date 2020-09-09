@@ -3,6 +3,8 @@
 , pkgs
 , stdenv
 , makeWrapper
+  # Use Python from system so we ensure that we are using the same glibc
+, pythonPkg ? pkgs.python38
 , extraLibs ? ''
     aiohttp
     aionotify
@@ -27,7 +29,11 @@ mach-nix.buildPythonApplication rec {
   pname = "i3pyblocks";
   version = "master";
 
-  src = "https://github.com/thiagokokada/i3pyblocks/tarball/master";
+  src = builtins.fetchGit {
+    url = "https://github.com/thiagokokada/i3pyblocks";
+    ref = "master";
+  };
+
   requirements = extraLibs;
 
   buildInputs = libs ++ [ makeWrapper ];
@@ -47,6 +53,5 @@ mach-nix.buildPythonApplication rec {
     maintainers = [ maintainers.thiagokokada ];
   };
 
-  # Use Python from system so we can link with system libraries
-  python = pkgs.python38;
+  python = pythonPkg;
 }
