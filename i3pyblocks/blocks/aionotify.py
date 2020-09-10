@@ -18,8 +18,9 @@ changed, this Block is updated.
 
 import abc
 import asyncio
+import signal
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import aionotify
 
@@ -79,10 +80,21 @@ class FileWatcherBlock(blocks.Block):
         self.format_file_not_found = format_file_not_found
         self.aionotify = _aionotify
 
-    async def click_handler(self, **_kwargs) -> None:
+    async def click_handler(
+        self,
+        *,
+        x: int,
+        y: int,
+        button: int,
+        relative_x: int,
+        relative_y: int,
+        width: int,
+        height: int,
+        modifiers: List[Optional[str]],
+    ) -> None:
         await self.run()
 
-    async def signal_handler(self, **_kwargs) -> None:
+    async def signal_handler(self, *, sig: signal.Signals) -> None:
         await self.run()
 
     @abc.abstractmethod

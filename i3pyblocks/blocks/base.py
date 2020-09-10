@@ -379,10 +379,21 @@ class PollingBlock(Block):
         """
         pass
 
-    async def click_handler(self, **_kwargs) -> None:
+    async def click_handler(
+        self,
+        *,
+        x: int,
+        y: int,
+        button: int,
+        relative_x: int,
+        relative_y: int,
+        width: int,
+        height: int,
+        modifiers: List[Optional[str]],
+    ) -> None:
         await self.run()
 
-    async def signal_handler(self, **_kwargs) -> None:
+    async def signal_handler(self, *, sig: signal.Signals) -> None:
         await self.run()
 
     async def start(self) -> None:
