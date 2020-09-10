@@ -1,4 +1,4 @@
-name: Test
+name: Lint
 
 on:
   push:
@@ -9,16 +9,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.8
 
     - name: Cache pip
       uses: actions/cache@v2
@@ -38,9 +35,6 @@ jobs:
         python3 -m venv venv
         make dev-install
 
-    - name: Test with pytest
+    - name: Run linters
       run: |
-        make test-coverage
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+        make lint
