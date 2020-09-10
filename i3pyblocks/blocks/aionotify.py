@@ -18,9 +18,8 @@ changed, this Block is updated.
 
 import abc
 import asyncio
-import signal
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import aionotify
 

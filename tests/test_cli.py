@@ -38,8 +38,8 @@ def test_config(capfd, tmpdir):
             async def main():
                 runner = Runner()
 
-                runner.register_block(basic.TextBlock("Hello World!"))
-                runner.register_block(datetime.DateTimeBlock())
+                await runner.register_block(basic.TextBlock("Hello World!"))
+                await runner.register_block(datetime.DateTimeBlock())
 
                 await runner.start()
 

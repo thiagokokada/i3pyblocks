@@ -12,7 +12,7 @@ async def clock_example():
     from i3pyblocks.blocks import datetime
 
     runner = core.Runner()
-    runner.register_block(datetime.DateTimeBlock())
+    await runner.register_block(datetime.DateTimeBlock())
 
     await runner.start()
 

@@ -100,7 +100,7 @@ class Runner:
         self.tasks.append(task)
         logger.debug(f"Registered async task {awaitable} in {self}")
 
-    def register_block(
+    async def register_block(
         self,
         block: blocks.Block,
         signals: Iterable[Union[int, signal.Signals]] = (),
@@ -123,7 +123,7 @@ class Runner:
             for more information.
         """
         # Setup the block before starting it
-        block.setup(self.queue)
+        await block.setup(self.queue)
 
         self.blocks[block.id] = block
         # This only works correctly because from Python 3.7+ dict is ordered

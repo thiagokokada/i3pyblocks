@@ -38,9 +38,9 @@ async def test_runner(capsys, mock_stdin):
     instance_2 = ValidPollingBlock(block_name="instance_2")
     instance_3 = ValidPollingBlock(block_name="instance_3")
 
-    runner.register_block(instance_1)
-    runner.register_block(instance_2)
-    runner.register_block(instance_3)
+    await runner.register_block(instance_1)
+    await runner.register_block(instance_2)
+    await runner.register_block(instance_3)
 
     await runner.start(timeout=0.5)
 
@@ -78,7 +78,7 @@ async def test_runner_with_fault_block(capsys, mock_stdin):
 
     runner = core.Runner()
     instance = FaultPollingBlock()
-    runner.register_block(instance)
+    await runner.register_block(instance)
 
     await runner.start(timeout=0.5)
 
@@ -135,7 +135,7 @@ async def test_runner_with_signal_handler(capsys, mock_stdin):
 
     runner = core.Runner()
     instance = ValidPollingBlockWithSignalHandler()
-    runner.register_block(instance, signals=[signal.SIGUSR1, signal.SIGUSR2])
+    await runner.register_block(instance, signals=[signal.SIGUSR1, signal.SIGUSR2])
 
     runner.register_task(send_signal())
     runner.register_task(send_another_signal())
@@ -184,7 +184,7 @@ async def test_runner_with_signal_handler_exception(capsys, mock_stdin):
 
     runner = core.Runner()
     instance = InvalidPollingBlockWithSignalHandler()
-    runner.register_block(instance, signals=[signal.SIGUSR1])
+    await runner.register_block(instance, signals=[signal.SIGUSR1])
 
     runner.register_task(send_signal())
 
@@ -218,7 +218,7 @@ async def test_runner_with_click_event():
 
     runner = core.Runner()
     instance = ValidPollingBlockWithClickHandler()
-    runner.register_block(instance)
+    await runner.register_block(instance)
 
     click_event = json.dumps(
         {
@@ -262,7 +262,7 @@ async def test_runner_with_click_event_exception():
 
     runner = core.Runner()
     instance = InvalidPollingBlockWithClickHandler()
-    runner.register_block(instance)
+    await runner.register_block(instance)
 
     click_event = json.dumps(
         {"name": "InvalidPollingBlockWithClickHandler", "instance": str(instance.id)}
@@ -298,7 +298,7 @@ async def test_runner_with_click_events(capsys):
 
     runner = core.Runner()
     instance = ValidPollingBlockWithClickHandler()
-    runner.register_block(instance)
+    await runner.register_block(instance)
 
     click_event = json.dumps(
         {
