@@ -258,8 +258,8 @@ class Block(metaclass=abc.ABCMeta):
 
         If you want to do some kinda of asynchronous initialization, override
         this function and put your code here. However, do not forget to call
-        ``super().setup(queue=queue)`` after your code to prepare your Block
-        for updates.
+        ``await super().setup(queue=queue)`` after your code to prepare your
+        Block for updates.
 
         Args:
           queue:
