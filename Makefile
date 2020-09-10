@@ -8,6 +8,7 @@ PYTHON := venv/bin/python
 all: lint test-coverage
 deps: deps-compile deps-sync
 lint: black isort flake8 mypy
+lint-fix: black-fix isort-fix
 
 black:
 	$(PYTHON) -m black --check $(SRC_PATHS)

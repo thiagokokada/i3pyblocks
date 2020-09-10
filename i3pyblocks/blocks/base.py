@@ -27,19 +27,18 @@ class Block(metaclass=abc.ABCMeta):
     It should not be used directly, instead it should be derivated and its
     abstract methods should be implemented.
 
-    Keyword Args:
-      block_name:
-        Allows you to set a custom internal representation for the class.
-        This should only be useful if you need to differentiate between
-        multiple instances of the same module in a consistent way (i.e.:
-        you can't rely on something random like the `Module.id`).
-        If not passed this will use by default the string representation
-        of the class name.
-      default_state:
-        Defines the default state of the Block, that is, the value that will
-        be shown unless the state is updated by Block's `update_state()` method.
-        For example, let's say you want a block that has a permanent green
-        background (unless overriden), so you can do something like::
+    :param block_name: Allows you to set a custom internal representation for
+        the class. This should only be useful if you need to differentiate
+        between multiple instances of the same module in a consistent way
+        (i.e.: you can't rely on something random like the ``Module.id``).
+        If not passed this will use by default the string representation of
+        the class name.
+
+    :param default_state: Defines the default state of the Block, that is, the
+        value that will be shown unless the state is updated by Block's
+        ``update_state()`` method. For example, let's say you want a block that
+        has a permanent green background (unless overriden), so you can do
+        something like::
 
             block_instance = Block(
                 default_state={
@@ -50,9 +49,10 @@ class Block(metaclass=abc.ABCMeta):
         And all calls to `result()` will have ``background == "#008000"``,
         unless overriden by ``update_status()`` with a different value.
 
-    See Also:
-      For details about each of the keys available in ``default_state``, see
-      ``update_state()`` documentation.
+    .. seealso::
+
+        For details about each of the keys available in ``default_state``, see
+        ``update_state()`` documentation.
     """
 
     def __init__(
@@ -115,59 +115,59 @@ class Block(metaclass=abc.ABCMeta):
         since they're mapped directly from it (so a ``full_text="foo"`` results
         in a ``{"full_text": "foo"}`` in the Block's output).
 
-        Args:
-          full_text:
-            The full_text will be displayed by i3bar on the status line. This
-            is the only required parameter. If full_text is an empty string, the
-            block will be skipped.
-          short_text:
-            It will be used in case the status line needs to be shortened because
-            it uses more space than your screen provides.
-          color:
-            To make the current state of the information easy to spot, colors can
-            be used. Colors are specified in hex (like in HTML), starting with a
-            leading hash sign. For example, #ff0000 means red.
-          background:
-            Overrides the background color for this particular block.
-          border:
-            Overrides the border color for this particular block.
-          border_top:
-            Defines the width (in pixels) of the top border of this block.
-            Defaults to 1.
-          border_right:
-            Defines the width (in pixels) of the right border of this block.
-            Defaults to 1.
-          border_bottom:
-            Defines the width (in pixels) of the bottom border of this block.
-            Defaults to 1.
-          border_left:
-            Defines the width (in pixels) of the left border of this block.
-            Defaults to 1.
-          min_width:
-            The minimum width (in pixels) of the block. If the content of the
-            full_text key take less space than the specified min_width, the
-            block will be padded to the left and/or the right side, according
-            to the align key.
-          align:
-            Align text on the center, right or left (default) of the block,
-            when the minimum width of the latter, specified by the min_width
-            key, is not reached.
-          urgent:
-            A boolean which specifies whether the current value is urgent.
-          separator:
-            A boolean which specifies whether a separator line should be
-            drawn after this block. The default is true, meaning the separator
-            line will be drawn.
-          separator_block_width:
-            The amount of pixels to leave blank after the block. In the middle
-            of this gap, a separator line will be drawn unless separator is
-            disabled.
-          markup:
-            A string that indicates how the text of the block should be parsed.
-            Pango markup only works if you use a pango font.
+        :param full_text: The full_text will be displayed by i3bar on the status
+            line. This is the only required parameter. If full_text is an empty
+            string, the block will be skipped.
+
+        :param short_text: It will be used in case the status line needs to be
+            shortened because it uses more space than your screen provides.
+
+        :param color: To make the current state of the information easy to spot,
+            colors can be used. Colors are specified in hex (like in HTML),
+            starting with a leading hash sign. For example, #ff0000 means red.
+
+        :param background: Overrides the background color for this particular
+            block.
+
+        :param border: Overrides the border color for this particular block.
+
+        :param border_top: Defines the width (in pixels) of the top border of
+            this block. Defaults to 1.
+
+        :param border_right: Defines the width (in pixels) of the right border
+            of this block. Defaults to 1.
+
+        :param border_bottom: Defines the width (in pixels) of the bottom border
+            of this block. Defaults to 1.
+
+        :param border_left: Defines the width (in pixels) of the left border of
+            this block. Defaults to 1.
+
+        :param min_width: The minimum width (in pixels) of the block. If the
+            content of the full_text key take less space than the specified
+            min_width, the block will be padded to the left and/or the right
+            side, according to the align key.
+
+        :param align: Align text on the center, right or left (default) of the
+            block, when the minimum width of the latter, specified by the
+            min_width key, is not reached.
+
+        :param urgent: A boolean which specifies whether the current value is
+            urgent.
+
+        :param separator: A boolean which specifies whether a separator line
+            should be drawn after this block. The default is true, meaning the
+            separator line will be drawn.
+
+        :param separator_block_width: The amount of pixels to leave blank after
+            the block. In the middle of this gap, a separator line will be
+            drawn unless separator is disabled.
+
+        :param markup: A string that indicates how the text of the block should
+            be parsed. Pango markup only works if you use a pango font.
 
         .. _i3bar's protocol specification:
-          https://i3wm.org/docs/i3bar-protocol.html#_blocks_in_detail
+            https://i3wm.org/docs/i3bar-protocol.html#_blocks_in_detail
         """
         self._state = utils.non_nullable_dict(
             full_text=full_text,
@@ -193,14 +193,13 @@ class Block(metaclass=abc.ABCMeta):
         This will combine both the default state and the current state to
         generate the current state of the Block.
 
-        Returns:
-          A ``i3pyblocks.types.Result`` map, ready to be converted to JSON.
-          For example::
+        :returns: A ``i3pyblocks.types.Result`` map, ready to be converted to
+            JSON. For example::
 
-            {
-               "full_text": "Some funny text",
-               "background": "#FF0000",
-            }
+                {
+                    "full_text": "Some funny text",
+                    "background": "#FF0000",
+                }
         """
         return {**self._default_state, **self._state}
 
@@ -225,8 +224,9 @@ class Block(metaclass=abc.ABCMeta):
         The parameters of this method is passed as-is to Block's
         ``update_state()``.
 
-        See Also:
-          ``Block.update_state()`` arguments.
+        .. seealso::
+
+            ``Block.update_state()`` arguments.
         """
         self.update_state(*args, **kwargs)
         self.push_update()
@@ -244,8 +244,9 @@ class Block(metaclass=abc.ABCMeta):
         The parameters of this method is passed as-is to Block's
         ``update_state()``.
 
-        See Also:
-          ``Block.update_state()`` arguments.
+        .. seealso:
+
+            ``Block.update_state()`` arguments.
         """
         self.update(*args, **kwargs)
         self.frozen = True
@@ -261,10 +262,8 @@ class Block(metaclass=abc.ABCMeta):
         ``await super().setup(queue=queue)`` after your code to prepare your
         Block for updates.
 
-        Args:
-          queue:
-            ``asyncio.Queue`` instance that will be used to notify updates
-            from this Block.
+        :param queue: ``asyncio.Queue`` instance that will be used to notify
+            updates from this Block.
         """
         self.update_queue = queue
         self.frozen = False
@@ -286,33 +285,32 @@ class Block(metaclass=abc.ABCMeta):
         Each of this method arguments is from `i3bar's protocol specification`_,
         since they're mapped directly (so a ``{"x": 1}`` results in a ``x=1``).
 
-        Keyword Args:
-          x:
-            X11 root window coordinates where the click occurred.
-          y:
-            X11 root window coordinates where the click occurred.
-          button:
-            X11 button ID (for example 1 to 3 for left/middle/right mouse
-            button).
-          relative_x:
-            Coordinates where the click occurred, with respect to the top left
-            corner of the block.
-          relative_y:
-            Coordinates where the click occurred, with respect to the top left
-            corner of the block.
-          width:
-            Width (in px) of the block.
-          height:
-            Height (in px) of the block.
-          modifier:
-            A list of the modifiers active when the click occurred. The
-            order in which modifiers are listed is not guaranteed.
+        :param x: X11 root window coordinates where the click occurred.
 
-        See Also:
-          ``i3pyblocks.types.MouseButton`` has the mapping of the available
-          mouse button IDs.
-          ``i3pyblocks.types.KeyModifier`` has the mapping of the available
-          modifiers.
+        :param y: X11 root window coordinates where the click occurred.
+
+        :param button: X11 button ID (for example 1 to 3 for left/middle/right
+            mouse button).
+
+        :param relative_x: Coordinates where the click occurred, with respect
+            to the top left corner of the block.
+
+        :param relative_y: Coordinates where the click occurred, with respect
+            to the top left corner of the block.
+
+        :param width: Width (in px) of the block.
+
+        :param height: Height (in px) of the block.
+
+        :param modifier: A list of the modifiers active when the click occurred.
+            The order in which modifiers are listed is not guaranteed.
+
+        .. seealso::
+
+            ``i3pyblocks.types.MouseButton`` has the mapping of the available
+            mouse button IDs.
+            ``i3pyblocks.types.KeyModifier`` has the mapping of the available
+            modifiers.
 
         .. i3bar's protocol specification:
           https://i3wm.org/docs/i3bar-protocol.html#_click_events
@@ -322,10 +320,8 @@ class Block(metaclass=abc.ABCMeta):
     async def signal_handler(self, *, sig: signal.Signals) -> None:
         """Callback called when a signal event happens to this Block.
 
-        Keyword Args:
-          sig:
-            Signals enum with the signal that originated this event. This can
-            be used to differentiate between different signals.
+        :param sig: Signals enum with the signal that originated this event.
+            This can be used to differentiate between different signals.
         """
         pass
 
@@ -357,12 +353,11 @@ class PollingBlock(Block):
     You must not instantiate this class directly, instead you should
     subclass it and implement ``run()`` method first.
 
-    Args:
-      sleep:
-        Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to ``run()``.
 
-    See Also:
-      ``Block()`` arguments.
+    .. seealso::
+
+        ``Block()`` arguments.
     """
 
     def __init__(self, sleep: int = 1, **kwargs) -> None:
@@ -422,18 +417,17 @@ class ExecutorBlock(Block):
     You must not instantiate this class directly, instead you should
     subclass it and implement ``run()`` method first.
 
-    Args:
-      executor:
-        An optional `Executor instance`_. If not passed it will use the
-        default one.
+    :param executor: An optional `Executor instance`_. If not passed it will
+        use the default one.
 
-    See also:
-      ``Block()`` arguments.
+    .. seealso::
+
+        ``Block()`` arguments.
 
     .. _executor:
-      https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor
+        https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor
     .. _Executor instance:
-      https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor
+        https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor
     """
 
     def __init__(self, executor: Optional[Executor] = None, **kwargs) -> None:

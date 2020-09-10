@@ -4,13 +4,13 @@ from i3pyblocks import blocks
 
 
 class TextBlock(blocks.Block):
-    """Block that shows arbitrary text in i3pyblocks.
+    r"""Block that shows arbitrary text in i3pyblocks.
 
-    Args:
-      full_text:
+    :param full_text:
         Text to be shown.
-      **kwargs:
-        Arguments to be passed to ``i3pyblocks.Block.update_state()`` method.
+
+    :param \*\*kwargs: Arguments to be passed to
+        ``i3pyblocks.Block.update_state()`` method.
     """
 
     def __init__(self, full_text: str, **kwargs) -> None:
