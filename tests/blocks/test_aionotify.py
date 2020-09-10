@@ -1,4 +1,5 @@
 import asyncio
+import signal
 
 import pytest
 from asynctest import Mock
@@ -39,11 +40,20 @@ async def test_file_watcher_block(tmpdir):
     assert block.result()["full_text"] == "Run!"
 
     update_file("Click!")
-    await block.click_handler()
+    await block.click_handler(
+        x=1,
+        y=1,
+        button=types.MouseButton.LEFT_BUTTON,
+        relative_x=1,
+        relative_y=1,
+        width=1,
+        height=1,
+        modifiers=[],
+    )
     assert block.result()["full_text"] == "Click!"
 
     update_file("Signal!")
-    await block.signal_handler()
+    await block.signal_handler(sig=signal.SIGHUP)
     assert block.result()["full_text"] == "Signal!"
 
     await task.runner(
