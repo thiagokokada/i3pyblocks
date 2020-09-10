@@ -53,7 +53,7 @@ async def test_valid_block():
         ),
     )
 
-    block.setup(asyncio.Queue())
+    await block.setup(asyncio.Queue())
 
     assert block.result() == {
         "align": "center",

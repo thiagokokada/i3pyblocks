@@ -250,15 +250,16 @@ class Block(metaclass=abc.ABCMeta):
         self.update(*args, **kwargs)
         self.frozen = True
 
-    def setup(self, queue: asyncio.Queue) -> None:
+    async def setup(self, queue: asyncio.Queue) -> None:
         """Setup a Block.
 
         This method is called just before ``start()`` to setup some things
         necessary to make the Block work.
 
-        While you may put your own initialization code here, don't forget
-        to call ``super().setup(queue=queue)`` after overriding this method,
-        so everything works correctly.
+        If you want to do some kinda of asynchronous initialization, override
+        this function and put your code here. However, do not forget to call
+        ``super().setup(queue=queue)`` after your code to prepare your Block
+        for updates.
 
         Args:
           queue:

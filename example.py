@@ -38,12 +38,12 @@ async def main():
     # Show the current i3 focused window title
     # Using `.format()` (https://pyformat.info/) to limit the number of
     # characters to 41
-    runner.register_block(i3ipc.WindowTitleBlock(format=" {window_title:.41s}"))
+    await runner.register_block(i3ipc.WindowTitleBlock(format=" {window_title:.41s}"))
 
     # Show the current network speed for either en* (ethernet) or wl* devices
     # Limiting the interface name to only 2 characters since it can get quite
     # verbose
-    runner.register_block(
+    await runner.register_block(
         psutil.NetworkSpeedBlock(
             format_up=" {interface:.2s}:  {upload}  {download}",
             format_down="",
@@ -55,33 +55,35 @@ async def main():
     # Using `{{short_path}}` shows only the first letter of the path
     # i.e.: /mnt/backup -> /m/b
     for partition in partitions():
-        runner.register_block(
+        await runner.register_block(
             psutil.DiskUsageBlock(
                 format=" {short_path}: {free:.1f}GiB",
                 path=partition.mountpoint,
             )
         )
 
-    runner.register_block(psutil.VirtualMemoryBlock(format=" {available:.1f}GiB"))
+    await runner.register_block(
+        psutil.VirtualMemoryBlock(format=" {available:.1f}GiB")
+    )
 
     # Using custom icons to show the temperature visually
     # So when the temperature is above 75,  is shown, when it is above 50,
     #  is shown, etc.
     # Needs Font Awesome 5 installed
-    runner.register_block(
+    await runner.register_block(
         psutil.SensorsTemperaturesBlock(
             format="{icon} {current:.0f}°C",
             icons=((0, ""), (25, ""), (50, ""), (75, "")),
         )
     )
 
-    runner.register_block(
+    await runner.register_block(
         psutil.CpuPercentBlock(format=" {percent}%"),
     )
 
-    runner.register_block(psutil.LoadAvgBlock(format=" {load1}"))
+    await runner.register_block(psutil.LoadAvgBlock(format=" {load1}"))
 
-    runner.register_block(
+    await runner.register_block(
         psutil.SensorsBatteryBlock(
             format_plugged=" {percent:.0f}%",
             format_unplugged="{icon} {percent:.0f}% {remaining_time}",
@@ -95,7 +97,7 @@ async def main():
     # is shown
     # When `format_on` is being shown, clicking on it runs `command_off`,
     # while when `format_off` is being shown, clicking on it runs `command_on`
-    runner.register_block(
+    await runner.register_block(
         subprocess.ToggleBlock(
             command_state="xset q | grep -Fo 'DPMS is Enabled'",
             command_on="xset s on +dpms",
@@ -109,7 +111,7 @@ async def main():
     # is hidden)
     # `command_on_click` runs some command when the mouse click is captured,
     # in this case when the user scrolls up or down
-    runner.register_block(
+    await runner.register_block(
         subprocess.ShellBlock(
             command="xkblayout-state print %s",
             format=" {output}",
@@ -124,7 +126,7 @@ async def main():
     # there is no backlight
     # We set to empty instead, so when no backlight is available (i.e.
     # desktop), we hide this block
-    runner.register_block(
+    await runner.register_block(
         aionotify.BacklightBlock(
             format=" {percent:.0f}%",
             format_no_backlight="",
@@ -140,7 +142,7 @@ async def main():
     # In this case, we can force update the module when the volume changes,
     # for example, by running:
     # $ pactl set-sink-volume @DEFAULT_SINK@ +5% && pkill -SIGUSR1 example.py
-    runner.register_block(
+    await runner.register_block(
         pulsectl.PulseAudioBlock(
             format=" {volume:.0f}%",
             format_mute=" mute",
@@ -154,7 +156,7 @@ async def main():
     # For more complex requests, we can also pass a custom async function
     # `response_callback`, that receives the response of the HTTP request and
     # you can manipulate it the way you want
-    runner.register_block(
+    await runner.register_block(
         aiohttp.PollingRequestBlock(
             "https://wttr.in/?format=%c+%t",
             format_error="",
@@ -166,7 +168,7 @@ async def main():
     # example below shows
     # For a description of how you can customize, look:
     # https://developer.gnome.org/pango/stable/pango-Markup.html
-    runner.register_block(
+    await runner.register_block(
         datetime.DateTimeBlock(
             format_time=utils.pango_markup(" %T", font_weight="bold"),
             format_date=utils.pango_markup(" %a, %d/%m", font_weight="light"),
