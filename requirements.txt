@@ -11,22 +11,21 @@ appdirs==1.4.4            # via black
 async-timeout==3.0.1      # via aiohttp
 asynctest==0.13.0         # via -r requirements/dev.in
 attrs==20.2.0             # via aiohttp, flake8-bugbear, pytest
-black==20.8b1             # via -r requirements/dev.in, pytest-black
+black==20.8b1             # via -r requirements/dev.in
 chardet==3.0.4            # via aiohttp
 click==7.1.2              # via black, pip-tools
 coverage==5.2.1           # via pytest-cov
-filelock==3.0.12          # via pytest-mypy
 flake8-bugbear==20.1.4    # via -r requirements/dev.in
-flake8==3.8.3             # via -r requirements/dev.in, flake8-bugbear, pytest-flake8
+flake8==3.8.3             # via -r requirements/dev.in, flake8-bugbear
 i3ipc==2.2.1              # via i3pyblocks
 idna==2.10                # via yarl
 iniconfig==1.0.1          # via pytest
-isort==5.5.1              # via -r requirements/dev.in, pytest-isort
+isort==5.5.1              # via -r requirements/dev.in
 mccabe==0.6.1             # via flake8
 more-itertools==8.5.0     # via pytest
 multidict==4.7.6          # via aiohttp, yarl
 mypy-extensions==0.4.3    # via black, mypy
-mypy==0.782               # via -r requirements/dev.in, pytest-mypy
+mypy==0.782               # via -r requirements/dev.in
 packaging==20.4           # via pytest
 pathspec==0.8.0           # via black
 pip-tools==5.3.1          # via -r requirements/dev.in
@@ -39,16 +38,12 @@ pyflakes==2.2.0           # via flake8
 pyparsing==2.4.7          # via packaging
 pytest-aiohttp==0.3.0     # via -r requirements/dev.in
 pytest-asyncio==0.14.0    # via -r requirements/dev.in
-pytest-black==0.3.11      # via -r requirements/dev.in
 pytest-cov==2.10.1        # via -r requirements/dev.in
-pytest-flake8==1.0.6      # via -r requirements/dev.in
-pytest-isort==1.2.0       # via -r requirements/dev.in
-pytest-mypy==0.7.0        # via -r requirements/dev.in
-pytest==6.0.1             # via -r requirements/dev.in, pytest-aiohttp, pytest-asyncio, pytest-black, pytest-cov, pytest-flake8, pytest-mypy
+pytest==6.0.1             # via -r requirements/dev.in, pytest-aiohttp, pytest-asyncio, pytest-cov
 python-xlib==0.27         # via i3ipc
 regex==2020.7.14          # via black
 six==1.15.0               # via packaging, pip-tools, python-xlib
-toml==0.10.1              # via black, pytest, pytest-black
+toml==0.10.1              # via black, pytest
 typed-ast==1.4.1          # via black, mypy
 typing-extensions==3.7.4.3  # via black, mypy
 yarl==1.5.1               # via aiohttp

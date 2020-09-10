@@ -1,38 +1,22 @@
-SRC_PATHS := i3pyblocks tests *.py
 TEST_PATHS := tests
+SRC_PATHS := *.py i3pyblocks $(TEST_PATHS)
 PYTHON := venv/bin/python
-.PHONY: clean dev-install format format-check lint mypy tests tests-with-coverage
+.PHONY: all deps lint \
+	black black-fix clean deps-compile deps-upgrade deps-sync dev-install \
+	isort isort-fix flake8 mypy test test-coverage
 
-all: tests
+all: lint test-coverage
+deps: deps-compile deps-sync
+lint: black isort flake8 mypy
 
-clean:
-	git clean -fxd
-
-tests:
-	$(PYTHON) -m pytest $(TEST_PATHS)
-
-tests-with-coverage:
-	$(PYTHON) -m pytest --cov=i3pyblocks --cov-report=term --cov-report=xml $(TEST_PATHS)
-
-format:
-	$(PYTHON) -m black $(SRC_PATHS)
-
-format-check:
+black:
 	$(PYTHON) -m black --check $(SRC_PATHS)
 
-isort:
-	$(PYTHON) -m isort $(SRC_PATHS)
+black-fix:
+	$(PYTHON) -m black $(SRC_PATHS)
 
-lint:
-	$(PYTHON) -m flake8 $(SRC_PATHS)
-
-mypy:
-	$(PYTHON) -m mypy $(SRC_PATHS)
-
-dev-install:
-	$(PYTHON) -m pip install -r requirements.txt
-
-deps: deps-compile deps-sync
+clean:
+	rm -rf *.egg-info .{mypy,pytest}_cache __pycache__
 
 deps-compile:
 	CUSTOM_COMPILE_COMMAND="make deps-compile"\
@@ -48,3 +32,24 @@ deps-upgrade:
 
 deps-sync:
 	$(PYTHON) -m piptools sync requirements.txt
+
+dev-install:
+	$(PYTHON) -m pip install -r requirements.txt
+
+isort:
+	$(PYTHON) -m isort --check $(SRC_PATHS)
+
+isort-fix:
+	$(PYTHON) -m isort $(SRC_PATHS)
+
+flake8:
+	$(PYTHON) -m flake8 $(SRC_PATHS)
+
+mypy:
+	$(PYTHON) -m mypy $(SRC_PATHS)
+
+test:
+	$(PYTHON) -m pytest $(TEST_PATHS)
+
+test-coverage:
+	$(PYTHON) -m pytest --cov=i3pyblocks --cov-report=term --cov-report=xml $(TEST_PATHS)

@@ -38,9 +38,13 @@ jobs:
         python3 -m venv venv
         make dev-install
 
+    - name: Run linters
+      run: |
+        make lint
+
     - name: Test with pytest
       run: |
-        make tests-with-coverage
+        make test-coverage
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
