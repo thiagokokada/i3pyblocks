@@ -28,6 +28,8 @@ setuptools.setup(
         "i3ipc": ["i3ipc>=2.0.1"],
         "psutil": ["psutil>=5.4.8"],
         "pulsectl": ["pulsectl>=18.10.5"],
+        # Future version not released yet
+        "xlib": ["python-xlib>0.2.7"],
         "dev": requirements_from_pip("requirements/dev.in"),
     },
     classifiers=[
