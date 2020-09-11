@@ -16,6 +16,7 @@ from i3pyblocks.blocks import (
     psutil,
     pulsectl,
     subprocess,
+    xlib,
 )
 
 # Configure logging, so we can have debug information available in
@@ -102,6 +103,14 @@ async def main():
             command_state="xset q | grep -Fo 'DPMS is Enabled'",
             command_on="xset s on +dpms",
             command_off="xset s off -dpms",
+            format_on="  ",
+            format_off="  ",
+        )
+    )
+
+    # This is equivalent to the example above, but using pure Python
+    await runner.register_block(
+        xlib.DPMSBlock(
             format_on="  ",
             format_off="  ",
         )

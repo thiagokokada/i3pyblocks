@@ -20,7 +20,7 @@ flake8==3.8.3             # via -r requirements/dev.in, flake8-bugbear
 i3ipc==2.2.1              # via i3pyblocks
 idna==2.10                # via yarl
 iniconfig==1.0.1          # via pytest
-isort==5.5.1              # via -r requirements/dev.in
+isort==5.5.2              # via -r requirements/dev.in
 mccabe==0.6.1             # via flake8
 more-itertools==8.5.0     # via pytest
 multidict==4.7.6          # via aiohttp, yarl
@@ -40,7 +40,7 @@ pytest-aiohttp==0.3.0     # via -r requirements/dev.in
 pytest-asyncio==0.14.0    # via -r requirements/dev.in
 pytest-cov==2.10.1        # via -r requirements/dev.in
 pytest==6.0.1             # via -r requirements/dev.in, pytest-aiohttp, pytest-asyncio, pytest-cov
-python-xlib==0.27         # via i3ipc
+git+https://github.com/thiagokokada/python-xlib@152a2510d6710ce1fa4b4c341750ee1c6d449987#python-xlib  # via -r requirements/meta.in, i3ipc
 regex==2020.7.14          # via black
 six==1.15.0               # via packaging, pip-tools, python-xlib
 toml==0.10.1              # via black, pytest
