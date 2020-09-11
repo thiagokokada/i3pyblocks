@@ -405,6 +405,7 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         includes ``{icon}`` placeholder.
 
     :param sleep: Sleep in seconds between each call to ``run()``.
+
     :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
     """
 

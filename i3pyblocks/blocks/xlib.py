@@ -26,6 +26,14 @@ class DPMSBlock(blocks.PollingBlock):
     basically enabling or disabling "screen saver". This is very similar to
     `Caffeine`_ extension in Gnome, or `Amphetamine`_ on macOS.
 
+    :param format_on: format string to shown when DPMS is on.
+
+    :param format_off: format string to shown when DPMS is off.
+
+    :param sleep: Sleep in seconds between each call to ``run()``.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+
     .. _DPMS:
         https://en.wikipedia.org/wiki/VESA_Display_Power_Management_Signaling
     .. _Caffeine:
