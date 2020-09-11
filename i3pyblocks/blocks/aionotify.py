@@ -10,9 +10,9 @@ For an example implementation, take BacklightBlock. It watches for changes in
 changed, this Block is updated.
 
 .. _aionotify:
-  https://github.com/rbarrois/aionotify
+    https://github.com/rbarrois/aionotify
 .. _inotify:
-  https://en.wikipedia.org/wiki/Inotify
+    https://en.wikipedia.org/wiki/Inotify
 """
 
 
@@ -29,7 +29,7 @@ from i3pyblocks._internal import utils
 
 
 class FileWatcherBlock(blocks.Block):
-    """File watcher Block.
+    r"""File watcher Block.
 
     A highly efficient Block to watch for events that happen in a file.
 
@@ -39,12 +39,11 @@ class FileWatcherBlock(blocks.Block):
     You must not instantiate this class directly, instead you should
     subclass it and implement ``run()`` method first.
 
-    Args:
-      path:
-        The file path to watch for events.
-      flags:
-        The modification flags to be watched. A list of flags can be found
-        `in aionotify repo`_. Multiple flags can be passed to, for example::
+    :param path: The file path to watch for events.
+
+    :param flags: The modification flags to be watched. A list of flags can be
+        found `in aionotify repo`_. Multiple flags can be passed to, for
+        example::
 
             from aionotify import Flags
 
@@ -52,17 +51,18 @@ class FileWatcherBlock(blocks.Block):
                 path="/some/path",
                 flags=Flags.MODIFY | Flags.CREATE,
             )
-      format_file_not_found:
-        Format string to shown when the file in passed in ``path`` is not
-        found.
-      **kwargs:
-        Extra arguments to be passed to ``Block`` class.
 
-    See Also:
-      ``Block()`` arguments.
+    :param format_file_not_found: Format string to shown when the file in passed
+        in ``path`` is not found.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``Block`` class.
+
+    .. seealso::
+
+        ``Block()`` arguments.
 
     .. _in aionotify repo:
-      https://github.com/rbarrois/aionotify/blob/master/aionotify/enums.py
+        https://github.com/rbarrois/aionotify/blob/master/aionotify/enums.py
     """
 
     def __init__(
@@ -122,36 +122,35 @@ class FileWatcherBlock(blocks.Block):
 
 
 class BacklightBlock(FileWatcherBlock):
-    """Backlight Block.
+    r"""Backlight Block.
 
     Based on `sysfs backlight interface`_.
 
-    Args:
-      format:
-        Format string to shown. Supports the following placeholders:
+    :param format: Format string to shown. Supports the following placeholders:
 
           - ``{brightness}``: Current brightness of display
           - ``{max_brightness}``: Max brightness supported by display
           - ``{percent}``: Percentage between current and max display
             brightness
-      base_path:
-        The path where available backlights will be searched.
-      device_glob:
-        `File glob`_ that will be used to search the device inside the
-        ``base_path``. By default it tries to find anything, but if for
-        some reason you want a specific device you can just use
+
+    :param base_path: The path where available backlights will be searched.
+
+    :param device_glob: `File glob`_ that will be used to search the device
+        inside the ``base_path``. By default it tries to find anything, but if
+        for some reason you want a specific device you can just use
         ``device_name`` here instead.
-      command_on_click:
-        Dictable with commands to be called when the user interacts with mouse
-        inside this block. Can be useful to adjust the backlight using scroll,
-        for example.
-      **kwargs:
-        Extra arguments to be passed to ``FileWatcherBlock`` class.
+
+    :param command_on_click: Dictable with commands to be called when the user
+        interacts with mouse inside this block. Can be useful to adjust the
+        backlight using scroll, for example.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``FileWatcherBlock``
+        class.
 
     .. _sysfs backlight interface:
-      https://www.kernel.org/doc/Documentation/ABI/stable/sysfs-class-backlight
+        https://www.kernel.org/doc/Documentation/ABI/stable/sysfs-class-backlight
     .. _File glob:
-      https://docs.python.org/3/library/glob.html
+        https://docs.python.org/3/library/glob.html
     """
 
     def __init__(

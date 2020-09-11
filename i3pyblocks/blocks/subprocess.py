@@ -9,7 +9,7 @@ There is some alternatives that to try in the future, for example using inotify
 or dbus based approaches.
 
 .. _asyncio.subprocess:
-  https://docs.python.org/3/library/asyncio-subprocess.html
+    https://docs.python.org/3/library/asyncio-subprocess.html
 """
 from asyncio import subprocess
 
@@ -18,21 +18,20 @@ from i3pyblocks._internal import utils
 
 
 class ShellBlock(blocks.PollingBlock):
-    """Block that shows the result of a command running in shell.
+    r"""Block that shows the result of a command running in shell.
 
-    Args:
-      command:
-        Command to be run. This will be parsed by shell, so it can also be
-        multiple arbitrary commands separated by newlines, or multiple
+    :param command: Command to be run. This will be parsed by shell, so it can
+        also be multiple arbitrary commands separated by newlines, or multiple
         commands connected by pipes.
-      format:
-        Format string to shown. Supports both ``{output}`` (stdout) and
-        ``{output_err}`` (stderr) placeholders.
-      command_on_click:
-        Dictable with commands to be called when the user interacts with mouse
-        inside this block. After running this Block will be updated. Can be
-        useful to change the keyboard layout for example.
-      **kwargs:
+
+    :param format: Format string to shown. Supports both ``{output}`` (stdout)
+        and ``{output_err}`` (stderr) placeholders.
+
+    :param command_on_click: Dictable with commands to be called when the user
+        interacts with mouse inside this block. After running this Block will
+        be updated. Can be useful to change the keyboard layout for example.
+
+    :param \*\*kwargs:
         Extra arguments to be passed to ``PollingBlock`` class.
     """
 
@@ -85,31 +84,29 @@ class ShellBlock(blocks.PollingBlock):
 
 
 class ToggleBlock(blocks.PollingBlock):
-    """Block that shows a toggle on or off accordingly to command's output.
+    r"""Block that shows a toggle on or off accordingly to command's output.
 
     This block output is determined by ``command_state``. When the command
     outputs something in stdout, this is interpreted as ON, while when the
     command outputs nothing in stdout, this is interpreted as OFF.
 
-    Args:
-      command_state:
-        Command to be run to determine state. This will be parsed by shell,
-        so it can also be multiple arbitrary commands separated by newlines,
-        or multiple commands connected by pipes.
-      command_on:
-        Command to be called when the current state is OFF, so it can be
-        turned to ON.
-      command_off:
-        Command to be called when the current state is ON, so it can be
-        turned to OFF.
-      format_on:
-        Format string to be shown when state is ON.
-      format_off:
-        Format string to be shown when state is OFF.
-      sleep:
-        Sleep in seconds between each call to ``run()``.
-      **kwargs:
-        Extra arguments to be passed to ``PollingBlock`` class.
+    :param command_state: Command to be run to determine state. This will be
+        parsed by shell, so it can also be multiple arbitrary commands
+        separated by newlines, or multiple commands connected by pipes.
+
+    :param command_on: Command to be called when the current state is OFF, so
+        it can be turned to ON.
+
+    :param command_off: Command to be called when the current state is ON, so
+        it can be turned to OFF.
+
+    :param format_on: Format string to be shown when state is ON.
+
+    :param format_off: Format string to be shown when state is OFF.
+
+    :param sleep: Sleep in seconds between each call to ``run()``.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
     """
 
     def __init__(

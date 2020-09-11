@@ -15,7 +15,7 @@ can't just update when memory usage increase/decrease or we would use too much
 resources for it).
 
 .. _psutil:
-  https://github.com/giampaolo/psutil
+    https://github.com/giampaolo/psutil
 """
 
 import datetime
@@ -34,32 +34,30 @@ _CPU_COUNT = psutil.cpu_count()
 
 
 class CpuPercentBlock(blocks.PollingBlock):
-    """Block that shows the current CPU percentage.
+    r"""Block that shows the current CPU percentage.
 
-    Args:
-      format:
-        Format string to shown. Supports both ``{percent}`` and ``{icon}``
-        placeholders.
-      colors:
-        A Dictable that represents the color that will be shown in each CPU
-        interval. For example::
+    :param format: Format string to shown. Supports both ``{percent}`` and
+        ``{icon}`` placeholders.
 
-          {
-             0: "000000",
-             10: "#FF0000",
-             50: "#FFFFFF",
-          }
+    :param colors: A Dictable that represents the color that will be shown in
+        each CPU interval. For example::
+
+            {
+                0: "000000",
+                10: "#FF0000",
+                50: "#FFFFFF",
+            }
 
         When the CPU % is between [0, 10) the color is set to "000000", from
         [10, 50) is set to "FF0000" and from 50 and beyond it is "#FFFFFF".
-      icons:
-        Similar to ``colors``, but for icons. Can be used to create a graphic
-        representation of the CPU %. Only displayed when ``format`` includes
-        ``{icon}`` placeholder.
-      sleep:
-        Sleep in seconds between each call to ``run()``.
-      **kwargs:
-        Extra arguments to be passed to ``PollingBlock`` class.
+
+    :param icons: Similar to ``colors``, but for icons. Can be used to create a
+        graphic representation of the CPU %. Only displayed when ``format``
+        includes ``{icon}`` placeholder.
+
+    :param sleep: Sleep in seconds between each call to ``run()``.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
     """
 
     def __init__(
@@ -107,13 +105,11 @@ class CpuPercentBlock(blocks.PollingBlock):
 
 
 class DiskUsageBlock(blocks.PollingBlock):
-    """Block that shows the current disk usage for path.
+    r"""Block that shows the current disk usage for path.
 
-    Args:
-      path:
-        Path to the disk to shown.
-      format:
-        Format string to shown. Supports the following placeholders:
+    :param path: Path to the disk to shown.
+
+    :param format: Format string to shown. Supports the following placeholders:
 
         - ``{path}``: Disk path, for example: ``/mnt/backup``
         - ``{short_path}``: Disk path, but only show the first letter of each
@@ -123,29 +119,29 @@ class DiskUsageBlock(blocks.PollingBlock):
         - ``{free}``: Disk free size
         - ``{percent}``: Disk usage in percentage
         - ``{icon}``: Show disk usage percentage in icon representation
-      colors:
-        A Dictable that represents the color that will be shown in each disk
-        usage in percentage interval. For example::
 
-          {
-             0: "000000",
-             10: "#FF0000",
-             50: "#FFFFFF",
-          }
+    :param colors: A Dictable that represents the color that will be shown in
+        each disk usage in percentage interval. For example::
+
+            {
+                0: "000000",
+                10: "#FF0000",
+                50: "#FFFFFF",
+            }
 
         When the disk % is between [0, 10) the color is set to "000000", from
         [10, 50) is set to "FF0000" and from 50 and beyond it is "#FFFFFF".
-      icons:
-        Similar to ``colors``, but for icons. Can be used to create a graphic
-        representation of the disk %. Only displayed when ``format`` includes
-        ``{icon}`` placeholder.
-      divisor:
-        Divisor used for all size reportings for this Block. For example, using
-        ``1024 ** 1024`` here makes all sizes return in MiB.
-      sleep:
-        Sleep in seconds between each call to ``run()``.
-      **kwargs:
-        Extra arguments to be passed to ``PollingBlock`` class.
+
+    :param icons: Similar to ``colors``, but for icons. Can be used to create a
+        graphic representation of the disk %. Only displayed when ``format``
+        includes ``{icon}`` placeholder.
+
+    :param divisor: Divisor used for all size reportings for this Block. For
+        example, using ``1024 ** 1024`` here makes all sizes return in MiB.
+
+    :param sleep: Sleep in seconds between each call to ``run()``.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
     """
 
     def __init__(
@@ -209,21 +205,19 @@ class DiskUsageBlock(blocks.PollingBlock):
 
 
 class LoadAvgBlock(blocks.PollingBlock):
-    """Block that shows the current load average, in the last 1, 5 or 15 minutes.
+    r"""Block that shows the current load average, in the last 1, 5 or 15 minutes.
 
-    Args:
-      format:
-        Format string to shown. Supports the ``{load1}``, ``{load5}`` and
-        ``{load15}`` placeholders.
-      colors:
-        A Dictable that represents the color that will be shown in each load1
-        interval. For example::
+    :param format: Format string to shown. Supports the ``{load1}``, ``{load5}``
+        and ``{load15}`` placeholders.
 
-          {
-             0: "000000",
-             2: "#FF0000",
-             4: "#FFFFFF",
-          }
+    :param colors: A Dictable that represents the color that will be shown in
+        each load1 interval. For example::
+
+            {
+                0: "000000",
+                2: "#FF0000",
+                4: "#FFFFFF",
+            }
 
         When the load1 is between [0, 2) the color is set to "000000", from
         [2, 4) is set to "FF0000" and from 4 and beyond it is "#FFFFFF".
@@ -232,10 +226,10 @@ class LoadAvgBlock(blocks.PollingBlock):
         logical CPUs in the system, by default this block returns
         ``types.Color.WARN`` for ``load1 == <cpu count> / 2`` and
         ``types.Color.URGENT`` for ``load1 == <cpu count>``.
-      sleep:
-        Sleep in seconds between each call to ``run()``.
-      **kwargs:
-        Extra arguments to be passed to ``PollingBlock`` class.
+
+    :param sleep: Sleep in seconds between each call to ``run()``.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
     """
 
     def __init__(
@@ -267,12 +261,10 @@ class LoadAvgBlock(blocks.PollingBlock):
 
 
 class NetworkSpeedBlock(blocks.PollingBlock):
-    """Block that shows the current network speed for the connect interface.
+    r"""Block that shows the current network speed for the connect interface.
 
-    Args:
-      format_up:
-        Format string to shown when there is at least one connected interface.
-        Supports the following placeholders:
+    :param format_up: Format string to shown when there is at least one
+        connected interface. Supports the following placeholders:
 
         - ``{interface}``: Interface name, for example: ``eno1``
         - ``{upload}``: Upload speed
@@ -281,26 +273,30 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         Since upload/download speeds varies greatly during usage, this module
         automatically finds the most compact speed representation. So instead
         of showing ``1500K`` it will show ``1.5M``, for example.
-      colors:
-        A Dictable that represents the color that will be shown in each load1
-        interval. For example::
 
-          {
-             0: "000000",
-             2 * types.IECUnit.MIB: "#FF0000",
-             4 * types.IECUnit.MIB: "#FFFFFF",
-          }
+    :param format_down: Format string to shown when there is no connected
+        interface.
+
+    :param colors: A Dictable that represents the color that will be shown in
+        each load1 interval. For example::
+
+            {
+                0: "000000",
+                2 * types.IECUnit.MIB: "#FF0000",
+                4 * types.IECUnit.MIB: "#FFFFFF",
+            }
 
         When the network speed is between [0, 2) MiB the color is set to
         "000000", from [2, 4) is set to "FF0000" and from 4 and beyond it is
         "#FFFFFF".
-      interface_regex:
-        Regex for which interfaces to use. By default it already includes the
-        most common ones and excludes things like ``lo`` (loopback interface).
-      sleep:
-        Sleep in seconds between each call to ``run()``.
-      **kwargs:
-        Extra arguments to be passed to ``PollingBlock`` class.
+
+    :param interface_regex: Regex for which interfaces to use. By default it
+         already includes the most common ones and excludes things like ``lo``
+         (loopback interface).
+
+    :param sleep: Sleep in seconds between each call to ``run()``.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
     """
 
     def __init__(
@@ -374,45 +370,42 @@ class NetworkSpeedBlock(blocks.PollingBlock):
 
 
 class SensorsBatteryBlock(blocks.PollingBlock):
-    """Block that shows battery information.
+    r"""Block that shows battery information.
 
-    Args:
-      format_plugged:
-        Format string to shown when the battery is plugged (charging).
-        Support the following placeholders:
+    :param format_plugged: format string to shown when the battery is plugged
+        (charging). support the following placeholders:
 
-        - ``{percent}``: Battery capacity in percentage
-        - ``{remaining_time}``: Battery remaining time
-        - ``{icon}``: Show battery capacity percentage in icon representation
-      format_unplugged:
-        Format string to shown when the battery is unplugged (discharging).
-        Supports the same placeholders as ``format_unplugged``.
-      format_unknown:
-        Format string to shown when the battery is an unknown state.
-        Supports the same placeholders as ``format_unplugged``.
-      format_no_battery:
-        Format string to shown when no battery is detected.
-      colors:
-        A Dictable that represents the color that will be shown in each battery
-        percentage interval. For example::
+        - ``{percent}``: battery capacity in percentage
+        - ``{remaining_time}``: battery remaining time
+        - ``{icon}``: show battery capacity percentage in icon representation
 
-          {
-             0: "000000",
-             10: "#FF0000",
-             25: "#FFFFFF",
-          }
+    :param format_unplugged: Format string to shown when the battery is unplugged
+        (discharging). Supports the same placeholders as ``format_unplugged``.
+
+    :param format_unknown: Format string to shown when the battery is an unknown
+        state. Supports the same placeholders as ``format_unplugged``.
+
+    :param format_no_battery: Format string to shown when no battery is detected.
+
+    :param colors: A Dictable that represents the color that will be shown in
+        each battery percentage interval. For example::
+
+            {
+                0: "000000",
+                10: "#FF0000",
+                25: "#FFFFFF",
+            }
 
         When the battery percentage is between [0, 10) % the color is set to
         "000000", from [10, 25) is set to "FF0000" and from 25 and beyond it is
         "#FFFFFF".
-      icons:
-        Similar to ``colors``, but for icons. Can be used to create a graphic
-        representation of the battery %. Only displayed when ``format`` includes
-        ``{icon}`` placeholder.
-      sleep:
-        Sleep in seconds between each call to ``run()``.
-      **kwargs:
-        Extra arguments to be passed to ``PollingBlock`` class.
+
+    :param icons: Similar to ``colors``, but for icons. Can be used to create a
+        graphic representation of the battery %. Only displayed when ``format``
+        includes ``{icon}`` placeholder.
+
+    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
     """
 
     def __init__(
@@ -482,40 +475,38 @@ class SensorsBatteryBlock(blocks.PollingBlock):
 
 
 class SensorsTemperaturesBlock(blocks.PollingBlock):
-    """Block that shows sensor temperature information.
+    r"""Block that shows sensor temperature information.
 
-    Args:
-      format:
-        Format string to shown. Support the following placeholders:
+    :param format: Format string to shown. Support the following placeholders:
 
         - ``{label}``: Label of the sensor. Architecture specific
         - ``{current}``: Current temperature reported by sensor
         - ``{high}``: Highest temperature reported by sensor
         - ``{critical}``: Critical temperature reported by sensor
         - ``{icon}``: Show sensor temperature in icon representation
-      colors:
-        A Dictable that represents the color that will be shown in each temperature
-        interval. For example::
 
-          {
-             0: "000000",
-             50: "#FF0000",
-             80: "#FFFFFF",
-          }
+    :param colors: A Dictable that represents the color that will be shown in each
+        temperature interval. For example::
+
+            {
+                0: "000000",
+                50: "#FF0000",
+                80: "#FFFFFF",
+            }
 
         When the sensor temperature is between [0, 50) % the color is set to
         "000000", from [50, 80) is set to "FF0000" and from 80 and beyond it is
         "#FFFFFF".
-      icons:
-        Similar to ``colors``, but for icons. Can be used to create a graphic
-        representation of the temperature. Only displayed when ``format``
+
+    :param icons: Similar to ``colors``, but for icons. Can be used to create a
+        graphic representation of the temperature. Only displayed when ``format``
         includes ``{icon}`` placeholder.
-      fahrenheit:
-        Show temperature in in Fahrenheit instead of Celsius.
-      sleep:
-        Sleep in seconds between each call to ``run()``.
-      **kwargs:
-        Extra arguments to be passed to ``PollingBlock`` class.
+
+    :param fahrenheit: Show temperature in in Fahrenheit instead of Celsius.
+
+    :param sleep: Sleep in seconds between each call to ``run()``.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
     """
 
     def __init__(
@@ -574,11 +565,9 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
 
 
 class VirtualMemoryBlock(blocks.PollingBlock):
-    """Block that shows virtual memory information.
+    r"""Block that shows virtual memory information.
 
-    Args:
-      format:
-        Format string to shown. Support the following placeholders:
+    :param format: Format string to shown. Support the following placeholders:
 
         - ``{total}``: Total installed memory
         - ``{available}``: Available memory
@@ -586,30 +575,30 @@ class VirtualMemoryBlock(blocks.PollingBlock):
         - ``{free}``: Free memory
         - ``{percent}``: Percent used memory
         - ``{icon}``: Show memory percent in icon representation
-      colors:
-        A Dictable that represents the color that will be shown in each used
-        memory percentage. For example::
 
-          {
-             0: "000000",
-             50: "#FF0000",
-             80: "#FFFFFF",
-          }
+    :param colors: A Dictable that represents the color that will be shown in
+        each used memory percentage. For example::
+
+            {
+                0: "000000",
+                50: "#FF0000",
+                80: "#FFFFFF",
+            }
 
         When the used memory % is between [0, 50) % the color is set to
         "000000", from [50, 80) is set to "FF0000" and from 80 and beyond it is
         "#FFFFFF".
-      divisor:
-        Divisor used for all size reportings for this Block. For example, using
-        ``1024 ** 1024`` here makes all sizes return in MiB.
-      icons:
-        Similar to ``colors``, but for icons. Can be used to create a graphic
-        representation of the used memory. Only displayed when ``format``
+
+    :param divisor: Divisor used for all size reportings for this Block. For
+        example, using ``1024 ** 1024`` here makes all sizes return in MiB.
+
+    :param icons: Similar to ``colors``, but for icons. Can be used to create a
+        graphic representation of the used memory. Only displayed when ``format``
         includes ``{icon}`` placeholder.
-      sleep:
-        Sleep in seconds between each call to ``run()``.
-      **kwargs:
-        Extra arguments to be passed to ``PollingBlock`` class.
+
+    :param sleep: Sleep in seconds between each call to ``run()``.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
     """
 
     def __init__(

@@ -31,7 +31,7 @@ class Runner:
     possible click events comming from `i3bar`_.
 
     .. _i3bar:
-      https://i3wm.org/docs/i3bar-protocol.html
+        https://i3wm.org/docs/i3bar-protocol.html
     """
 
     def __init__(self) -> None:
@@ -48,36 +48,37 @@ class Runner:
     ) -> None:
         """Registers a list of Unix signals for a Block.
 
-        This will register a Block's signal_handler() method as a callback
+        This will register a Block's ``signal_handler()`` method as a callback
         for when signums[] is called. Note that since signals are associated
         with the main thread of i3pyblocks, each signal can only be assigned
         to a specific Block.
 
-        The received signal will be passed to Block.signal_handler() as a
+        The received signal will be passed to ``Block.signal_handler()`` as a
         parameter, so when receiving multiple signals it is possible to
         identify each of them separately.
 
-        This method capture the errors inside Block.signal_handler(), but
+        This method capture the errors inside ``Block.signal_handler()``, but
         it also logs it so you can inspect the issue later on.
 
-        Args:
-          block:
-            ``i3pyblocks.blocks.Block`` instance that will receive the signal.
-          signmums:
-            Any iterable containing signal numbers. Each signal can be an
-            int or a signal.Signals' enum.
+        :param block: ``i3pyblocks.blocks.Block`` instance that will receive
+            the signal.
+
+        :param signmums: Any iterable containing signal numbers. Each signal
+            can be an int or a signal.Signals' enum.
         """
 
         async def signal_handler(sig: signal.Signals):
             try:
                 logger.debug(
-                    f"Block {block.block_name} with id {block.id} received a signal {sig.name}"
+                    f"Block {block.block_name} with id {block.id} received "
+                    f"a signal {sig.name}"
                 )
                 await block.signal_handler(sig=sig)
             except Exception as e:
                 logger.exception(f"Exception in {block.block_name} signal handler")
                 block.abort(
-                    f"Exception in {block.block_name} signal handler: {e}", urgent=True
+                    f"Exception in {block.block_name} signal handler: {e}",
+                    urgent=True,
                 )
 
         def callback_fn(sig: signal.Signals):
@@ -91,10 +92,8 @@ class Runner:
     def register_task(self, awaitable: Awaitable) -> None:
         """Register a task that will be run in Runner's loop.
 
-        Args:
-          awaitable:
-            Either a coroutine, task or future that will be added to the task list
-            to be schedule inside main loop in i3pyblocks.
+        :param awaitable: Either a coroutine, task or future that will be added
+            to the task list to be schedule inside main loop in i3pyblocks.
         """
         task = asyncio.create_task(awaitable)
         self.tasks.append(task)
@@ -110,17 +109,15 @@ class Runner:
         This will register a new Block in Runner and also make sure that
         everything is ready to run the Block correctly.
 
-        Optionally it will also register any Unix signals that the Block
-        wants to wait for events (see ``Runner.register_signal()`` method).
+        Optionally it will also register any Unix signals that the Block wants
+        to wait for events (see ``Runner.register_signal()`` method).
 
-        Args:
-          block:
-            ``i3pyblocks.blocks.Block`` instance that will be registered
-            inside Runner's main loop.
-          signums:
-            Any iterable containing signal numbers, can be either an int or
-            a signal.Signals' enum. See ``Runner.register_signal()`` method
-            for more information.
+        :param block: ``i3pyblocks.blocks.Block`` instance that will be
+            registered inside Runner's main loop.
+
+        :param signums: Any iterable containing signal numbers, can be either
+            an int or a signal.Signals' enum. See ``Runner.register_signal()``
+            method for more information.
         """
         # Setup the block before starting it
         await block.setup(self.queue)
@@ -164,10 +161,8 @@ class Runner:
         the correspondent ``i3pyblocks.blocks.Block`` and calls its
         ``click_handler()`` method.
 
-        Args:
-          raw:
-            A JSON formatted string with the click event, as described in
-            https://i3wm.org/docs/i3bar-protocol.html#_click_events.
+        :param raw: A JSON formatted string with the click event, as described
+            in https://i3wm.org/docs/i3bar-protocol.html#_click_events.
         """
         try:
             click_event = json.loads(raw)
@@ -223,10 +218,8 @@ class Runner:
         the registered Blocks in the format expected by i3bar, and will also
         reads stdin for any click events coming from i3bar.
 
-        Args:
-          timeout:
-            Time in seconds to stop the Runner. This is mostly used by tests
-            or debug purposes.
+        :param timeout: Time in seconds to stop the Runner. This is mostly used
+            by tests or debug purposes.
         """
         self.register_task(self.click_events())
         self.register_task(self.write_results())

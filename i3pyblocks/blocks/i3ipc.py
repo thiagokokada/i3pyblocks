@@ -7,7 +7,7 @@ Since it uses a publish/subscribe mechanism, it should be highly efficient,
 only updating when it is actually needed.
 
 .. _i3ipc:
-  https://github.com/altdesktop/i3ipc-python
+    https://github.com/altdesktop/i3ipc-python
 """
 
 import i3ipc
@@ -17,13 +17,12 @@ from i3pyblocks import blocks, core
 
 
 class WindowTitleBlock(blocks.Block):
-    """Block that shows the current window title.
+    r"""Block that shows the current window title.
 
-    Args:
-      format:
-        Format string to shown. Supports ``{window_title}`` placeholder.
-      **kwargs:
-        Extra arguments to be passed to ``Block`` class.
+    :param format: Format string to shown. Supports ``{window_title}``
+        placeholder.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``Block`` class.
     """
 
     def __init__(

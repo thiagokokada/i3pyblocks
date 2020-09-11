@@ -10,12 +10,12 @@ pretty efficient since it react to events from PulseAudio itself.
 Needs PulseAudio installed in your computer, or you will receive the following
 error when trying to run this module::
 
-  OSError: libpulse.so.0: cannot open shared object file: No such file or directory
+    OSError: libpulse.so.0: cannot open shared object file: No such file or directory
 
 .. _pulsectl:
-  https://github.com/mk-fg/python-pulse-control
+    https://github.com/mk-fg/python-pulse-control
 .. _PulseAudio:
-  https://www.freedesktop.org/wiki/Software/PulseAudio/
+    https://www.freedesktop.org/wiki/Software/PulseAudio/
 """
 
 import subprocess
@@ -31,7 +31,7 @@ from i3pyblocks._internal import utils
 
 # Based on: https://git.io/fjbHp
 class PulseAudioBlock(blocks.ExecutorBlock):
-    """Block that shows volume and other info from default PulseAudio sink.
+    r"""Block that shows volume and other info from default PulseAudio sink.
 
     This Block shows the volume of the current default PulseAudio sink, and
     also includes a ``click_handler()`` allowing you to mute the default sink
@@ -39,35 +39,33 @@ class PulseAudioBlock(blocks.ExecutorBlock):
     It will also open a program on the left click, by default it calls the
     `pavucontrol`_ but this is configurable.
 
-    Args:
-      format:
-        Format string showed when the audio sink is not mute. Supports both
-        ``{volume}`` and ``{icon}`` placeholders.
-      format_mute:
-        Format string showing when the audio sink is mute. It will be shown
-        with ``color_mute`` set.
-      colors:
-        A Dictable that represents the color that will be shown in each volume
-        interval. For example::
+    :param format: Format string showed when the audio sink is not mute. Supports
+        both ``{volume}`` and ``{icon}`` placeholders.
 
-          {
-             0: "000000",
-             10: "#FF0000",
-             50: "#FFFFFF",
-          }
+    :param format_mute: Format string showing when the audio sink is mute. It
+        will be shown with ``color_mute`` set.
+
+    :param colors: A Dictable that represents the color that will be shown in
+        each volume interval. For example::
+
+            {
+                0: "000000",
+                10: "#FF0000",
+                50: "#FFFFFF",
+            }
 
         When the volume is between [0, 10) the color is set to "000000", from
         [10, 50) is set to "FF0000" and from 50 and beyond it is "#FFFFFF".
-      color_mute:
-        Color used when the sound is mute.
-      icons:
-        Similar to ``colors``, but for icons. Can be used to create a graphic
-        representation of the volume. Only displayed when ``format`` includes
-        ``{icon}`` placeholder.
-      command:
-        Program to run when this block is right clicked.
-      **kwargs:
-        Extra arguments to be passed to ``BlockExecutor`` class.
+
+    :param color_mute: Color used when the sound is mute.
+
+    :param icons: Similar to ``colors``, but for icons. Can be used to create a
+        graphic representation of the volume. Only displayed when ``format``
+        includes ``{icon}`` placeholder.
+
+    :param command: Program to run when this block is right clicked.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``BlockExecutor`` class.
 
     .. _pavucontrol:
       https://freedesktop.org/software/pulseaudio/pavucontrol/
@@ -181,10 +179,8 @@ class PulseAudioBlock(blocks.ExecutorBlock):
     def change_volume(self, volume: float):
         """Change volume of the current PulseAudio sink.
 
-        Args:
-          volume:
-            Float to be increased/decreased relative to the current volume.
-            To decrease the volume use a negative value.
+        :param volume: Float to be increased/decreased relative to the current
+            volume. To decrease the volume use a negative value.
         """
         # TODO: Use self.pulse instead of our own Pulse instance here
         # Using self.pulse.volume_change_all_chans() may cause a deadlock

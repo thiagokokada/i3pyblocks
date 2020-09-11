@@ -1,7 +1,7 @@
 """Blocks based on `datetime`_.
 
 .. _datetime:
-  https://docs.python.org/3/library/datetime.html
+    https://docs.python.org/3/library/datetime.html
 """
 
 from datetime import datetime
@@ -10,25 +10,25 @@ from i3pyblocks import blocks
 
 
 class DateTimeBlock(blocks.PollingBlock):
-    """Block that shows date and time for current location.
+    r"""Block that shows date and time for current location.
 
     This blocks alternates between Time and Date display by clicks in the
     Block. Keep in mind that ``format_date`` and ``format_time`` names are
     arbitrary and both formats have capacity to display both date and time.
 
-    Args:
-      format_date:
-        Format string when showing date. Uses `strftime`_ placeholders.
-      format_time:
-        Format string when showing time. Uses `strftime`_ placeholders.
-      sleep:
-        Sleep in seconds between each call to ``run()``. If you're not showing
-        seconds in this block it makes sense to increase this value.
-      **kwargs:
-        Extra arguments to be passed to ``PollingBlock`` class.
+    :param format_date: Format string when showing date. Uses `strftime`_
+        placeholders.
+
+    :param format_time: Format string when showing time. Uses `strftime`_
+        placeholders.
+
+    :param sleep: Sleep in seconds between each call to ``run()``. If you're
+        not showing seconds in this block it makes sense to increase this value.
+
+    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
 
     .. _strftime:
-      https://strftime.org/
+        https://strftime.org/
     """
 
     def __init__(
