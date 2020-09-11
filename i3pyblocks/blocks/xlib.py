@@ -20,7 +20,7 @@ from i3pyblocks import blocks
 
 
 class DPMSBlock(blocks.PollingBlock):
-    """Block that controls of X11 Display Power Management Signaling (DPMS).
+    r"""Block that controls of X11 Display Power Management Signaling (DPMS).
 
     It shows the state of `DPMS`_ and also allow toggling it ON and OFF,
     basically enabling or disabling "screen saver". This is very similar to
