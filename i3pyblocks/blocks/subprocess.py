@@ -48,8 +48,6 @@ class ShellBlock(blocks.PollingBlock):
         ),
         color_by_returncode: types.Dictable = (),
         sleep: int = 1,
-        *,
-        _utils=utils,
         **kwargs
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
@@ -57,7 +55,6 @@ class ShellBlock(blocks.PollingBlock):
         self.command = command
         self.command_on_click = dict(command_on_click)
         self.color_by_returncode = dict(color_by_returncode)
-        self.utils = _utils
 
     async def click_handler(self, button: int, **_kwargs) -> None:
         command = self.command_on_click.get(button)
@@ -65,7 +62,7 @@ class ShellBlock(blocks.PollingBlock):
         if not command:
             return
 
-        await self.utils.shell_run(command)
+        await utils.shell_run(command)
         await self.run()
 
     async def run(self) -> None:
@@ -117,8 +114,6 @@ class ToggleBlock(blocks.PollingBlock):
         format_on: str = "ON",
         format_off: str = "OFF",
         sleep: int = 1,
-        *,
-        _utils=utils,
         **kwargs
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
@@ -127,7 +122,6 @@ class ToggleBlock(blocks.PollingBlock):
         self.command_off = command_off
         self.format_on = format_on
         self.format_off = format_off
-        self.utils = _utils
 
     async def get_state(self) -> bool:
         stdout, _, _ = await utils.shell_run(self.command_state, stdout=subprocess.PIPE)
@@ -144,7 +138,7 @@ class ToggleBlock(blocks.PollingBlock):
         else:
             command = self.command_off
 
-        await self.utils.shell_run(command)
+        await utils.shell_run(command)
         await self.run()
 
     async def run(self) -> None:
