@@ -12,9 +12,10 @@ or dbus based approaches.
     https://docs.python.org/3/library/asyncio-subprocess.html
 """
 from asyncio import subprocess
+from typing import Mapping, Optional
 
 from i3pyblocks import blocks, types
-from i3pyblocks._internal import utils
+from i3pyblocks._internal import models, utils
 
 
 class ShellBlock(blocks.PollingBlock):
@@ -27,7 +28,7 @@ class ShellBlock(blocks.PollingBlock):
     :param format: Format string to shown. Supports both ``{output}`` (stdout)
         and ``{output_err}`` (stderr) placeholders.
 
-    :param command_on_click: Dictable with commands to be called when the user
+    :param command_on_click: Mapping with commands to be called when the user
         interacts with mouse inside this block. After running this Block will
         be updated. Can be useful to change the keyboard layout for example.
 
@@ -39,22 +40,22 @@ class ShellBlock(blocks.PollingBlock):
         self,
         command: str,
         format: str = "{output}",
-        command_on_click: types.Dictable = (
-            (types.MouseButton.LEFT_BUTTON, None),
-            (types.MouseButton.MIDDLE_BUTTON, None),
-            (types.MouseButton.RIGHT_BUTTON, None),
-            (types.MouseButton.SCROLL_UP, None),
-            (types.MouseButton.SCROLL_DOWN, None),
-        ),
-        color_by_returncode: types.Dictable = (),
+        command_on_click: models.CommandToClick = {
+            types.MouseButton.LEFT_BUTTON: None,
+            types.MouseButton.MIDDLE_BUTTON: None,
+            types.MouseButton.RIGHT_BUTTON: None,
+            types.MouseButton.SCROLL_UP: None,
+            types.MouseButton.SCROLL_DOWN: None,
+        },
+        color_by_returncode: Mapping[int, Optional[str]] = {},
         sleep: int = 1,
         **kwargs
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.command = command
-        self.command_on_click = dict(command_on_click)
-        self.color_by_returncode = dict(color_by_returncode)
+        self.command_on_click = command_on_click
+        self.color_by_returncode = color_by_returncode
 
     async def click_handler(self, button: int, **_kwargs) -> None:
         command = self.command_on_click.get(button)
@@ -70,7 +71,7 @@ class ShellBlock(blocks.PollingBlock):
             self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
 
-        color = self.color_by_returncode.get(process.returncode)
+        color = self.color_by_returncode.get(process.returncode or 0)
 
         output = stdout.decode().strip()
         output_err = stderr.decode().strip()

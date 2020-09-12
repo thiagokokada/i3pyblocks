@@ -1,18 +1,16 @@
 import asyncio
 import sys
 from asyncio import subprocess
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple
 
-from i3pyblocks import types
+from i3pyblocks._internal import models
 
 
-def calculate_threshold(
-    items: types.Dictable, value: Union[int, float]
-) -> Optional[str]:
+def calculate_threshold(items: models.Threshold, value: float) -> Optional[str]:
     selected_item = None
 
     for threshold, item in dict(items).items():
-        if value >= threshold:  # type: ignore
+        if value >= threshold:
             selected_item = item
         else:
             break

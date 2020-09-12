@@ -27,7 +27,7 @@ import psutil
 from psutil._common import bytes2human
 
 from i3pyblocks import blocks, types
-from i3pyblocks._internal import utils
+from i3pyblocks._internal import models, utils
 
 # Default CPU count to be used in LoadAvgBlock
 _CPU_COUNT = psutil.cpu_count()
@@ -39,7 +39,7 @@ class CpuPercentBlock(blocks.PollingBlock):
     :param format: Format string to shown. Supports both ``{percent}`` and
         ``{icon}`` placeholders.
 
-    :param colors: A Dictable that represents the color that will be shown in
+    :param colors: A mapping that represents the color that will be shown in
         each CPU interval. For example::
 
             {
@@ -63,28 +63,28 @@ class CpuPercentBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "C: {percent}%",
-        colors: types.Dictable[int, Optional[str]] = (
-            (0, types.Color.NEUTRAL),
-            (75, types.Color.WARN),
-            (90, types.Color.URGENT),
-        ),
-        icons: types.Dictable[float, str] = (
-            (0.0, "▁"),
-            (12.5, "▂"),
-            (25.0, "▃"),
-            (37.5, "▄"),
-            (50.0, "▅"),
-            (62.5, "▆"),
-            (75.0, "▇"),
-            (87.5, "█"),
-        ),
+        colors: models.Threshold = {
+            0: types.Color.NEUTRAL,
+            75: types.Color.WARN,
+            90: types.Color.URGENT,
+        },
+        icons: models.Threshold = {
+            0.0: "▁",
+            12.5: "▂",
+            25.0: "▃",
+            37.5: "▄",
+            50.0: "▅",
+            62.5: "▆",
+            75.0: "▇",
+            87.5: "█",
+        },
         sleep: int = 5,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
-        self.colors = dict(colors)
-        self.icons = dict(icons)
+        self.colors = colors
+        self.icons = icons
 
     async def run(self) -> None:
         percent = psutil.cpu_percent(interval=None)
@@ -117,7 +117,7 @@ class DiskUsageBlock(blocks.PollingBlock):
         - ``{percent}``: Disk usage in percentage
         - ``{icon}``: Show disk usage percentage in icon representation
 
-    :param colors: A Dictable that represents the color that will be shown in
+    :param colors: A mapping that represents the color that will be shown in
         each disk usage in percentage interval. For example::
 
             {
@@ -145,29 +145,29 @@ class DiskUsageBlock(blocks.PollingBlock):
         self,
         path: Union[Path, str] = "/",
         format: str = "{path}: {free:.1f}GiB",
-        colors: types.Dictable[int, Optional[str]] = (
-            (0, types.Color.NEUTRAL),
-            (75, types.Color.WARN),
-            (90, types.Color.URGENT),
-        ),
-        icons: types.Dictable[float, str] = (
-            (0.0, "▁"),
-            (12.5, "▂"),
-            (25.0, "▃"),
-            (37.5, "▄"),
-            (50.0, "▅"),
-            (62.5, "▆"),
-            (75.0, "▇"),
-            (87.5, "█"),
-        ),
+        colors: models.Threshold = {
+            0: types.Color.NEUTRAL,
+            75: types.Color.WARN,
+            90: types.Color.URGENT,
+        },
+        icons: models.Threshold = {
+            0.0: "▁",
+            12.5: "▂",
+            25.0: "▃",
+            37.5: "▄",
+            50.0: "▅",
+            62.5: "▆",
+            75.0: "▇",
+            87.5: "█",
+        },
         divisor: int = types.IECUnit.GiB,
         sleep: int = 5,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
-        self.colors = dict(colors)
-        self.icons = dict(icons)
+        self.colors = colors
+        self.icons = icons
         self.divisor = divisor
         self.path = Path(path)
         self.short_path = self._get_short_path()
@@ -204,8 +204,8 @@ class LoadAvgBlock(blocks.PollingBlock):
     :param format: Format string to shown. Supports the ``{load1}``, ``{load5}``
         and ``{load15}`` placeholders.
 
-    :param colors: A Dictable that represents the color that will be shown in
-        each load1 interval. For example::
+    :param colors: A mapping that represents the color that will be shown in each
+        load1 interval. For example::
 
             {
                 0: "000000",
@@ -229,17 +229,17 @@ class LoadAvgBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "L: {load1}",
-        colors: types.Dictable[int, Optional[str]] = (
-            (0, types.Color.NEUTRAL),
-            (_CPU_COUNT // 2, types.Color.WARN),
-            (_CPU_COUNT, types.Color.URGENT),
-        ),
+        colors: models.Threshold = {
+            0: types.Color.NEUTRAL,
+            _CPU_COUNT // 2: types.Color.WARN,
+            _CPU_COUNT: types.Color.URGENT,
+        },
         sleep: int = 5,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
-        self.colors = dict(colors)
+        self.colors = colors
 
     async def run(self) -> None:
         load1, load5, load15 = psutil.getloadavg()
@@ -268,7 +268,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
     :param format_down: Format string to shown when there is no connected
         interface.
 
-    :param colors: A Dictable that represents the color that will be shown in
+    :param colors: A mapping that represents the color that will be shown in
         each load1 interval. For example::
 
             {
@@ -294,11 +294,11 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         self,
         format_up: str = "{interface}:  U {upload} D {download}",
         format_down: str = "NO NETWORK",
-        colors: types.Dictable[int, Optional[str]] = (
-            (0, types.Color.NEUTRAL),
-            (2 * types.IECUnit.MiB, types.Color.WARN),
-            (5 * types.IECUnit.MiB, types.Color.URGENT),
-        ),
+        colors: models.Threshold = {
+            0: types.Color.NEUTRAL,
+            2 * types.IECUnit.MiB: types.Color.WARN,
+            5 * types.IECUnit.MiB: types.Color.URGENT,
+        },
         interface_regex: str = "en*|eth*|ppp*|sl*|wl*|ww*",
         sleep: int = 3,
         **kwargs,
@@ -306,7 +306,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         super().__init__(sleep=sleep, **kwargs)
         self.format_up = format_up
         self.format_down = format_down
-        self.colors = dict(colors)
+        self.colors = colors
         self.interface_regex = re.compile(interface_regex)
         self.previous = psutil.net_io_counters(pernic=True)
 
@@ -375,8 +375,8 @@ class SensorsBatteryBlock(blocks.PollingBlock):
 
     :param format_no_battery: Format string to shown when no battery is detected.
 
-    :param colors: A Dictable that represents the color that will be shown in
-        each battery percentage interval. For example::
+    :param colors: A mapping that represents the color that will be shown in each
+        battery percentage interval. For example::
 
             {
                 0: "000000",
@@ -403,21 +403,21 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         format_unplugged: str = "B: {icon} {percent:.0f}% {remaining_time}",
         format_unknown: str = "B: {icon} {percent:.0f}%",
         format_no_battery: str = "No battery",
-        colors: types.Dictable[int, Optional[str]] = (
-            (0, types.Color.URGENT),
-            (10, types.Color.WARN),
-            (25, types.Color.NEUTRAL),
-        ),
-        icons: types.Dictable[float, str] = (
-            (0.0, "▁"),
-            (12.5, "▂"),
-            (25.0, "▃"),
-            (37.5, "▄"),
-            (50.0, "▅"),
-            (62.5, "▆"),
-            (75.0, "▇"),
-            (87.5, "█"),
-        ),
+        colors: models.Threshold = {
+            0: types.Color.URGENT,
+            10: types.Color.WARN,
+            25: types.Color.NEUTRAL,
+        },
+        icons: models.Threshold = {
+            0.0: "▁",
+            12.5: "▂",
+            25.0: "▃",
+            37.5: "▄",
+            50.0: "▅",
+            62.5: "▆",
+            75.0: "▇",
+            87.5: "█",
+        },
         sleep: int = 5,
         **kwargs,
     ):
@@ -426,8 +426,8 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         self.format_unplugged = format_unplugged
         self.format_unknown = format_unknown
         self.format_no_battery = format_no_battery
-        self.colors = dict(colors)
-        self.icons = dict(icons)
+        self.colors = colors
+        self.icons = icons
 
     async def run(self):
         battery = psutil.sensors_battery()
@@ -468,7 +468,7 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
         - ``{critical}``: Critical temperature reported by sensor
         - ``{icon}``: Show sensor temperature in icon representation
 
-    :param colors: A Dictable that represents the color that will be shown in each
+    :param colors: A mapping that represents the color that will be shown in each
         temperature interval. For example::
 
             {
@@ -495,21 +495,21 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "T: {current:.0f}°C",
-        colors: types.Dictable[int, Optional[str]] = (
-            (0, types.Color.NEUTRAL),
-            (60, types.Color.WARN),
-            (85, types.Color.URGENT),
-        ),
-        icons: types.Dictable[float, str] = (
-            (0.0, "▁"),
-            (12.5, "▂"),
-            (25.0, "▃"),
-            (37.5, "▄"),
-            (50.0, "▅"),
-            (62.5, "▆"),
-            (75.0, "▇"),
-            (87.5, "█"),
-        ),
+        colors: models.Threshold = {
+            0: types.Color.NEUTRAL,
+            60: types.Color.WARN,
+            85: types.Color.URGENT,
+        },
+        icons: models.Threshold = {
+            0.0: "▁",
+            12.5: "▂",
+            25.0: "▃",
+            37.5: "▄",
+            50.0: "▅",
+            62.5: "▆",
+            75.0: "▇",
+            87.5: "█",
+        },
         fahrenheit: bool = False,
         sensor: str = None,
         sleep: int = 5,
@@ -517,8 +517,8 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
-        self.colors = dict(colors)
-        self.icons = dict(icons)
+        self.colors = colors
+        self.icons = icons
         self.fahrenheit = fahrenheit
         if sensor:
             self.sensor = sensor
@@ -556,8 +556,8 @@ class VirtualMemoryBlock(blocks.PollingBlock):
         - ``{percent}``: Percent used memory
         - ``{icon}``: Show memory percent in icon representation
 
-    :param colors: A Dictable that represents the color that will be shown in
-        each used memory percentage. For example::
+    :param colors: A mapping that represents the color that will be shown in each
+        used memory percentage. For example::
 
             {
                 0: "000000",
@@ -584,29 +584,29 @@ class VirtualMemoryBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "M: {available:.1f}GiB",
-        colors: types.Dictable[int, Optional[str]] = (
-            (0, types.Color.NEUTRAL),
-            (75, types.Color.WARN),
-            (90, types.Color.URGENT),
-        ),
-        icons: types.Dictable[float, str] = (
-            (0.0, "▁"),
-            (12.5, "▂"),
-            (25.0, "▃"),
-            (37.5, "▄"),
-            (50.0, "▅"),
-            (62.5, "▆"),
-            (75.0, "▇"),
-            (87.5, "█"),
-        ),
+        colors: models.Threshold = {
+            0: types.Color.NEUTRAL,
+            75: types.Color.WARN,
+            90: types.Color.URGENT,
+        },
+        icons: models.Threshold = {
+            0.0: "▁",
+            12.5: "▂",
+            25.0: "▃",
+            37.5: "▄",
+            50.0: "▅",
+            62.5: "▆",
+            75.0: "▇",
+            87.5: "█",
+        },
         divisor: int = types.IECUnit.GiB,
         sleep: int = 3,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
-        self.colors = dict(colors)
-        self.icons = dict(icons)
+        self.colors = colors
+        self.icons = icons
         self.divisor = divisor
 
     def _convert(self, dividend: float) -> float:

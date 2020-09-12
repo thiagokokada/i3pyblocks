@@ -12,8 +12,8 @@ import uuid
 from concurrent.futures import Executor
 from typing import List, Optional
 
-from i3pyblocks import core, types
-from i3pyblocks._internal import utils
+from i3pyblocks import core
+from i3pyblocks._internal import models, utils
 
 
 class Block(metaclass=abc.ABCMeta):
@@ -59,21 +59,7 @@ class Block(metaclass=abc.ABCMeta):
         self,
         *,
         block_name: Optional[str] = None,
-        default_state: types.Dictable[str, Optional[types.Value]] = (
-            ("color", None),
-            ("background", None),
-            ("border", None),
-            ("border_top", None),
-            ("border_right", None),
-            ("border_bottom", None),
-            ("border_left", None),
-            ("min_width", None),
-            ("align", types.AlignText.LEFT),
-            ("urgent", False),
-            ("separator", True),
-            ("separator_block_width", None),
-            ("markup", types.MarkupText.NONE),
-        ),
+        default_state: models.State = {},
     ) -> None:
         self.id = uuid.uuid4()
         self.block_name = block_name or self.__class__.__name__
@@ -82,7 +68,7 @@ class Block(metaclass=abc.ABCMeta):
 
         # Those are default values for properties if they are not overriden
         self._default_state = utils.non_nullable_dict(
-            name=self.block_name, instance=str(self.id), **dict(default_state)
+            name=self.block_name, instance=str(self.id), **default_state
         )
 
         self.update_state()
@@ -187,21 +173,20 @@ class Block(metaclass=abc.ABCMeta):
             markup=markup,
         )
 
-    def result(self) -> types.Result:
-        """Returns the current state of Block as a Result map.
+    def result(self) -> models.State:
+        """Returns the current state of Block as a dict.
 
         This will combine both the default state and the current state to
         generate the current state of the Block.
 
-        :returns: A ``i3pyblocks.types.Result`` map, ready to be converted to
-            JSON. For example::
+        :returns: A State dict, ready to be converted to JSON. For example::
 
                 {
                     "full_text": "Some funny text",
                     "background": "#FF0000",
                 }
         """
-        return {**self._default_state, **self._state}
+        return {**self._default_state, **self._state}  # type: ignore
 
     def push_update(self) -> None:
         """Push result to queue, so it can be retrieved by Runner."""

@@ -74,7 +74,12 @@ async def main():
     await runner.register_block(
         psutil.SensorsTemperaturesBlock(
             format="{icon} {current:.0f}°C",
-            icons=((0, ""), (25, ""), (50, ""), (75, "")),
+            icons={
+                0: "",
+                25: "",
+                50: "",
+                75: "",
+            },
         )
     )
 
@@ -89,7 +94,13 @@ async def main():
             format_plugged=" {percent:.0f}%",
             format_unplugged="{icon} {percent:.0f}% {remaining_time}",
             format_unknown="{icon} {percent:.0f}%",
-            icons=((0, ""), (10, ""), (25, ""), (50, ""), (75, "")),
+            icons={
+                0: "",
+                10: "",
+                25: "",
+                50: "",
+                75: "",
+            },
         )
     )
 
@@ -124,10 +135,10 @@ async def main():
         subprocess.ShellBlock(
             command="xkblayout-state print %s",
             format=" {output}",
-            command_on_click=(
-                (types.MouseButton.SCROLL_UP, "xkblayout-state set +1"),
-                (types.MouseButton.SCROLL_DOWN, "xkblayout-state set -1"),
-            ),
+            command_on_click={
+                types.MouseButton.SCROLL_UP: "xkblayout-state set +1",
+                types.MouseButton.SCROLL_DOWN: "xkblayout-state set -1",
+            },
         )
     )
 
@@ -139,10 +150,10 @@ async def main():
         aionotify.BacklightBlock(
             format=" {percent:.0f}%",
             format_no_backlight="",
-            command_on_click=(
-                (types.MouseButton.SCROLL_UP, "light -A 5%"),
-                (types.MouseButton.SCROLL_DOWN, "light -U 5"),
-            ),
+            command_on_click={
+                types.MouseButton.SCROLL_UP: "light -A 5%",
+                types.MouseButton.SCROLL_DOWN: "light -U 5",
+            },
         )
     )
 

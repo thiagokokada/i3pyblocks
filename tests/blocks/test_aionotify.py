@@ -168,13 +168,13 @@ async def test_backlight_block_click_handler(tmpdir):
     with patch("i3pyblocks.blocks.aionotify.utils", **mock_config) as mock_utils:
         instance = m_aionotify.BacklightBlock(
             base_path=tmpdir,
-            command_on_click=(
-                (types.MouseButton.LEFT_BUTTON, "LEFT_BUTTON"),
-                (types.MouseButton.MIDDLE_BUTTON, "MIDDLE_BUTTON"),
-                (types.MouseButton.RIGHT_BUTTON, "RIGHT_BUTTON"),
-                (types.MouseButton.SCROLL_UP, "SCROLL_UP"),
-                (types.MouseButton.SCROLL_DOWN, "SCROLL_DOWN"),
-            ),
+            command_on_click={
+                types.MouseButton.LEFT_BUTTON: "LEFT_BUTTON",
+                types.MouseButton.MIDDLE_BUTTON: "MIDDLE_BUTTON",
+                types.MouseButton.RIGHT_BUTTON: "RIGHT_BUTTON",
+                types.MouseButton.SCROLL_UP: "SCROLL_UP",
+                types.MouseButton.SCROLL_DOWN: "SCROLL_DOWN",
+            },
         )
 
         for button in [

@@ -16,8 +16,8 @@ import signal
 import uuid
 from typing import AnyStr, Awaitable, Dict, Iterable, List, Optional, Union
 
-from i3pyblocks import blocks, types
-from i3pyblocks._internal import utils
+from i3pyblocks import blocks
+from i3pyblocks._internal import models, utils
 
 logger = logging.getLogger("i3pyblocks")
 logger.addHandler(logging.NullHandler())
@@ -37,7 +37,7 @@ class Runner:
     def __init__(self) -> None:
         self.loop = asyncio.get_event_loop()
         self.blocks: Dict[uuid.UUID, blocks.Block] = {}
-        self.results: Dict[uuid.UUID, Optional[types.Result]] = {}
+        self.results: Dict[uuid.UUID, Optional[models.State]] = {}
         self.tasks: List[asyncio.Future] = []
         self.queue: asyncio.Queue = asyncio.Queue()
 

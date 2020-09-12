@@ -22,6 +22,9 @@ setuptools.setup(
     url="https://github.com/thiagokokada/i3pyblocks",
     packages=setuptools.find_packages(),
     entry_points={"console_scripts": ["i3pyblocks = i3pyblocks.cli:main"]},
+    install_requires=[
+        "typing_extensions>=3.7.4; python_version < '3.8'",
+    ],
     extras_require={
         "aiohttp": ["aiohttp>=3.4.0"],
         "aionotify": ["aionotify>=0.2.0"],
