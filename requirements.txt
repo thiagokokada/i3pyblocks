@@ -15,6 +15,7 @@ black==20.8b1             # via -r requirements/dev.in
 chardet==3.0.4            # via aiohttp
 click==7.1.2              # via black, pip-tools
 coverage==5.2.1           # via pytest-cov
+dbus-next==0.1.4          # via i3pyblocks
 flake8-bugbear==20.1.4    # via -r requirements/dev.in
 flake8==3.8.3             # via -r requirements/dev.in, flake8-bugbear
 i3ipc==2.2.1              # via i3pyblocks

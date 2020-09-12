@@ -26,6 +26,7 @@ setuptools.setup(
         "typing_extensions>=3.7.4; python_version < '3.8'",
     ],
     extras_require={
+        "dbus": ["dbus-next>=0.1.1"],
         "http": ["aiohttp>=3.4.0"],
         "i3ipc": ["i3ipc>=2.0.1"],
         "inotify": ["aionotify>=0.2.0"],
