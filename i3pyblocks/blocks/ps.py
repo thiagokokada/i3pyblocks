@@ -93,7 +93,8 @@ class CpuPercentBlock(blocks.PollingBlock):
         icon = utils.calculate_threshold(self.icons, percent)
 
         self.update(
-            self.format.format(
+            self.ex_format(
+                self.format,
                 percent=percent,
                 icon=icon,
             ),
@@ -185,7 +186,8 @@ class DiskUsageBlock(blocks.PollingBlock):
         icon = utils.calculate_threshold(self.icons, disk.percent)
 
         self.update(
-            self.format.format(
+            self.ex_format(
+                self.format,
                 path=self.path,
                 short_path=self.short_path,
                 total=self._convert(disk.total),
@@ -247,7 +249,8 @@ class LoadAvgBlock(blocks.PollingBlock):
         color = utils.calculate_threshold(self.colors, load1)
 
         self.update(
-            self.format.format(load1=load1, load5=load5, load15=load15), color=color
+            self.ex_format(self.format, load1=load1, load5=load5, load15=load15),
+            color=color,
         )
 
 
@@ -346,7 +349,8 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         color = utils.calculate_threshold(self.colors, max(upload, download))
 
         self.update(
-            self.format_up.format(
+            self.ex_format(
+                self.format_up,
                 upload=bytes2human(upload),
                 download=bytes2human(download),
                 interface=interface,
@@ -448,7 +452,8 @@ class SensorsBatteryBlock(blocks.PollingBlock):
                 self.format = self.format_unplugged
 
         self.update(
-            self.format.format(
+            self.ex_format(
+                self.format,
                 percent=battery.percent,
                 remaining_time=(datetime.timedelta(seconds=battery.secsleft)),
                 icon=icon,
@@ -533,7 +538,8 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
         icon = utils.calculate_threshold(self.icons, temperature.current)
 
         self.update(
-            self.format.format(
+            self.ex_format(
+                self.format,
                 label=temperature.label,
                 current=temperature.current,
                 high=temperature.high,
@@ -619,7 +625,8 @@ class VirtualMemoryBlock(blocks.PollingBlock):
         icon = utils.calculate_threshold(self.icons, memory.percent)
 
         self.update(
-            self.format.format(
+            self.ex_format(
+                self.format,
                 total=self._convert(memory.total),
                 available=self._convert(memory.available),
                 used=self._convert(memory.used),

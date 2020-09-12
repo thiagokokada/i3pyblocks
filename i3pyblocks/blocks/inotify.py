@@ -214,7 +214,8 @@ class BacklightBlock(FileWatcherBlock):
         percent = (brightness / max_brightness) * 100
 
         self.update(
-            self.format.format(
+            self.ex_format(
+                self.format,
                 brightness=brightness,
                 max_brightness=max_brightness,
                 percent=percent,

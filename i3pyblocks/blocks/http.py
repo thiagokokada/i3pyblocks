@@ -111,7 +111,8 @@ class PollingRequestBlock(blocks.PollingBlock):
                     response = await self.response_callback(resp)
 
                     self.update(
-                        self.format.format(
+                        self.ex_format(
+                            self.format,
                             response=response,
                             status=resp.status,
                         )
