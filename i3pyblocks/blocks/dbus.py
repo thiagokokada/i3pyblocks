@@ -16,7 +16,7 @@ from typing import Optional
 from dbus_next import aio as dbus_aio
 from dbus_next import errors
 
-from i3pyblocks import blocks, core
+from i3pyblocks import blocks, core, types
 
 
 class KbddBlock(blocks.Block):
@@ -53,8 +53,17 @@ class KbddBlock(blocks.Block):
 
         self.update(self.format.format(full_layout=layout_name))
 
-    async def click_handler(self, **_kwargs) -> None:
-        await self.properties.call_next_layout()
+    async def click_handler(self, button: int, **_kwargs) -> None:
+        if (
+            button == types.MouseButton.LEFT_BUTTON
+            or button == types.MouseButton.SCROLL_UP
+        ):
+            await self.properties.call_next_layout()
+        elif (
+            button == types.MouseButton.RIGHT_BUTTON
+            or button == types.MouseButton.SCROLL_DOWN
+        ):
+            await self.properties.call_prev_layout()
         await self.update_layout()
 
     def update_callback(self, layout_name: str) -> None:

@@ -1,6 +1,7 @@
 import pytest
 from asynctest import CoroutineMock, patch
 
+from i3pyblocks import types
 from i3pyblocks.blocks import dbus
 
 
@@ -18,8 +19,6 @@ async def test_kbdd_block():
         mock_properties = instance.properties
 
         mock_properties.call_get_current_layout = CoroutineMock()
-        mock_properties.call_get_current_layout.return_value = 0
-
         mock_properties.call_get_layout_name = CoroutineMock()
         mock_properties.call_get_layout_name.return_value = (
             "English (US, intl., with dead keys)"
@@ -30,14 +29,17 @@ async def test_kbdd_block():
         assert instance.result()["full_text"] == "En"
 
         # Testing if click handler works
-        mock_properties.call_get_current_layout = CoroutineMock()
-        mock_properties.call_get_current_layout.return_value = 1
-
-        mock_properties.call_get_layout_name = CoroutineMock()
         mock_properties.call_get_layout_name.return_value = "Portuguese (Brazil)"
 
         mock_properties.call_next_layout = CoroutineMock()
-        await instance.click_handler()
+        await instance.click_handler(button=types.MouseButton.LEFT_BUTTON)
         mock_properties.call_next_layout.assert_called_once()
 
+        mock_properties.call_prev_layout = CoroutineMock()
+        await instance.click_handler(button=types.MouseButton.RIGHT_BUTTON)
+        mock_properties.call_prev_layout.assert_called_once()
+
         assert instance.result()["full_text"] == "Po"
+
+        instance.update_callback("Something")
+        assert instance.result()["full_text"] == "So"
