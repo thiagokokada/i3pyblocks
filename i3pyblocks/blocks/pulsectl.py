@@ -23,7 +23,6 @@ import time
 from typing import NoReturn, Optional
 
 import pulsectl
-from pulsectl import PulseError, PulseLoopStop
 
 from i3pyblocks import blocks, types
 from i3pyblocks._internal import utils
@@ -92,9 +91,6 @@ class PulseAudioBlock(blocks.ExecutorBlock):
             (87.5, "█"),
         ),
         command: str = "pavucontrol",
-        *,
-        _pulsectl=pulsectl,
-        _subprocess=subprocess,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -104,11 +100,9 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         self.color_mute = color_mute
         self.icons = dict(icons)
         self.command = command
-        self.pulsectl = _pulsectl
-        self.subprocess = _subprocess
 
         # https://pypi.org/project/pulsectl/#event-handling-code-threads
-        self.pulse = self.pulsectl.Pulse(__name__, connect=False)
+        self.pulse = pulsectl.Pulse(__name__, connect=False)
         self._initialize_pulse()
 
     def _initialize_pulse(self):
@@ -135,7 +129,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
     def _update_sink_info(self) -> None:
         try:
             self.sink = self.pulse.sink_info(self.sink_index)
-        except PulseError:
+        except pulsectl.PulseError:
             # Waiting a little before trying to connect again so we don't
             # burn CPU in a infinity loop
             time.sleep(0.5)
@@ -143,7 +137,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
 
     def _event_callback(self, event) -> NoReturn:
         self.event = event
-        raise PulseLoopStop()
+        raise pulsectl.PulseLoopStop()
 
     def _setup_event_callback(self) -> None:
         self.pulse.event_mask_set("sink", "server")
@@ -170,7 +164,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
 
     def toggle_mute(self):
         """Toggle mute on/off."""
-        with self.pulsectl.Pulse("toggle-mute") as pulse:
+        with pulsectl.Pulse("toggle-mute") as pulse:
             if self.sink.mute:
                 pulse.mute(self.sink, mute=False)
             else:
@@ -186,7 +180,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         # Using self.pulse.volume_change_all_chans() may cause a deadlock
         # when successive operations are done
         # We probably need have better control over loop in pulsectl
-        with self.pulsectl.Pulse("volume-changer") as pulse:
+        with pulsectl.Pulse("volume-changer") as pulse:
             pulse.volume_change_all_chans(self.sink, volume)
 
     async def click_handler(self, button: int, **_kwargs) -> None:
@@ -198,7 +192,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         On scroll down it decreases the volume.
         """
         if button == types.MouseButton.LEFT_BUTTON:
-            self.subprocess.Popen(self.command, shell=True)
+            subprocess.Popen(self.command, shell=True)
         elif button == types.MouseButton.RIGHT_BUTTON:
             self.toggle_mute()
         elif button == types.MouseButton.SCROLL_UP:

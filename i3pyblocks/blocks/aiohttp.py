@@ -90,8 +90,6 @@ class PollingRequestBlock(blocks.PollingBlock):
             [aiohttp.ClientResponse], Awaitable[str]
         ] = text_callback,
         sleep: int = 60,
-        *,
-        _aiohttp=aiohttp,
         **kwargs
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
@@ -101,11 +99,10 @@ class PollingRequestBlock(blocks.PollingBlock):
         self.method = method
         self.response_callback = response_callback
         self.request_opts = dict(request_opts)
-        self.aiohttp = _aiohttp
 
     async def run(self) -> None:
         try:
-            async with self.aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession() as session:
                 async with session.request(
                     method=self.method,
                     url=self.url,

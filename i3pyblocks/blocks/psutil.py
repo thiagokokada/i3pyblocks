@@ -79,18 +79,15 @@ class CpuPercentBlock(blocks.PollingBlock):
             (87.5, "█"),
         ),
         sleep: int = 5,
-        *,
-        _psutil=psutil,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = dict(colors)
         self.icons = dict(icons)
-        self.psutil = _psutil
 
     async def run(self) -> None:
-        percent = self.psutil.cpu_percent(interval=None)
+        percent = psutil.cpu_percent(interval=None)
 
         color = utils.calculate_threshold(self.colors, percent)
         icon = utils.calculate_threshold(self.icons, percent)
@@ -165,8 +162,6 @@ class DiskUsageBlock(blocks.PollingBlock):
         ),
         divisor: int = types.IECUnit.GiB,
         sleep: int = 5,
-        *,
-        _psutil=psutil,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
@@ -176,7 +171,6 @@ class DiskUsageBlock(blocks.PollingBlock):
         self.divisor = divisor
         self.path = Path(path)
         self.short_path = self._get_short_path()
-        self.psutil = _psutil
 
     def _convert(self, dividend: float) -> float:
         return dividend / self.divisor
@@ -185,7 +179,7 @@ class DiskUsageBlock(blocks.PollingBlock):
         return "/" + "/".join(x[0] for x in str(self.path).split("/") if x)
 
     async def run(self) -> None:
-        disk = self.psutil.disk_usage(str(self.path))
+        disk = psutil.disk_usage(str(self.path))
 
         color = utils.calculate_threshold(self.colors, disk.percent)
         icon = utils.calculate_threshold(self.icons, disk.percent)
@@ -241,17 +235,14 @@ class LoadAvgBlock(blocks.PollingBlock):
             (_CPU_COUNT, types.Color.URGENT),
         ),
         sleep: int = 5,
-        *,
-        _psutil=psutil,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = dict(colors)
-        self.psutil = _psutil
 
     async def run(self) -> None:
-        load1, load5, load15 = self.psutil.getloadavg()
+        load1, load5, load15 = psutil.getloadavg()
 
         color = utils.calculate_threshold(self.colors, load1)
 
@@ -310,8 +301,6 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         ),
         interface_regex: str = "en*|eth*|ppp*|sl*|wl*|ww*",
         sleep: int = 3,
-        *,
-        _psutil=psutil,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
@@ -319,11 +308,10 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         self.format_down = format_down
         self.colors = dict(colors)
         self.interface_regex = re.compile(interface_regex)
-        self.psutil = _psutil
-        self.previous = self.psutil.net_io_counters(pernic=True)
+        self.previous = psutil.net_io_counters(pernic=True)
 
     def _find_interface(self) -> Optional[str]:
-        interfaces = self.psutil.net_if_stats()
+        interfaces = psutil.net_if_stats()
 
         for interface, stats in interfaces.items():
             if stats.isup and self.interface_regex.match(interface):
@@ -344,7 +332,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
             self.abort(self.format_down, color=types.Color.URGENT)
             return
 
-        now = self.psutil.net_io_counters(pernic=True)
+        now = psutil.net_io_counters(pernic=True)
 
         try:
             upload, download = self._calculate_speed(
@@ -431,8 +419,6 @@ class SensorsBatteryBlock(blocks.PollingBlock):
             (87.5, "█"),
         ),
         sleep: int = 5,
-        *,
-        _psutil=psutil,
         **kwargs,
     ):
         super().__init__(sleep=sleep, **kwargs)
@@ -442,10 +428,9 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         self.format_no_battery = format_no_battery
         self.colors = dict(colors)
         self.icons = dict(icons)
-        self.psutil = _psutil
 
     async def run(self):
-        battery = self.psutil.sensors_battery()
+        battery = psutil.sensors_battery()
 
         if not battery:
             self.abort(self.format_no_battery)
@@ -454,10 +439,7 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         color = utils.calculate_threshold(self.colors, battery.percent)
         icon = utils.calculate_threshold(self.icons, battery.percent)
 
-        if (
-            battery.power_plugged
-            or battery.secsleft == self.psutil.POWER_TIME_UNLIMITED
-        ):
+        if battery.power_plugged or battery.secsleft == psutil.POWER_TIME_UNLIMITED:
             self.format = self.format_plugged
         else:
             if battery.secsleft == psutil.POWER_TIME_UNKNOWN:
@@ -531,8 +513,6 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
         fahrenheit: bool = False,
         sensor: str = None,
         sleep: int = 5,
-        *,
-        _psutil=psutil,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
@@ -540,14 +520,13 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
         self.colors = dict(colors)
         self.icons = dict(icons)
         self.fahrenheit = fahrenheit
-        self.psutil = _psutil
         if sensor:
             self.sensor = sensor
         else:
-            self.sensor = next(iter(self.psutil.sensors_temperatures()))
+            self.sensor = next(iter(psutil.sensors_temperatures()))
 
     async def run(self) -> None:
-        temperatures = self.psutil.sensors_temperatures(self.fahrenheit)[self.sensor]
+        temperatures = psutil.sensors_temperatures(self.fahrenheit)[self.sensor]
         temperature = temperatures[0]
 
         color = utils.calculate_threshold(self.colors, temperature.current)
@@ -622,8 +601,6 @@ class VirtualMemoryBlock(blocks.PollingBlock):
         ),
         divisor: int = types.IECUnit.GiB,
         sleep: int = 3,
-        *,
-        _psutil=psutil,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
@@ -631,13 +608,12 @@ class VirtualMemoryBlock(blocks.PollingBlock):
         self.colors = dict(colors)
         self.icons = dict(icons)
         self.divisor = divisor
-        self.psutil = _psutil
 
     def _convert(self, dividend: float) -> float:
         return dividend / self.divisor
 
     async def run(self) -> None:
-        memory = self.psutil.virtual_memory()
+        memory = psutil.virtual_memory()
 
         color = utils.calculate_threshold(self.colors, memory.percent)
         icon = utils.calculate_threshold(self.icons, memory.percent)

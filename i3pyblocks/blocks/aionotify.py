@@ -70,15 +70,12 @@ class FileWatcherBlock(blocks.Block):
         path: Union[Path, str, None],
         flags: Optional[aionotify.Flags] = None,
         format_file_not_found: str = "File not found {path}",
-        *,
-        _aionotify=aionotify,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.flags = flags
         self.path = Path(path) if path else None
         self.format_file_not_found = format_file_not_found
-        self.aionotify = _aionotify
 
     async def click_handler(
         self,
@@ -106,7 +103,7 @@ class FileWatcherBlock(blocks.Block):
             self.abort(full_text=self.format_file_not_found.format(path=self.path))
             return
 
-        watcher = self.aionotify.Watcher()
+        watcher = aionotify.Watcher()
         watcher.watch(str(self.path), flags=self.flags)
 
         try:
@@ -166,9 +163,6 @@ class BacklightBlock(FileWatcherBlock):
             (types.MouseButton.SCROLL_UP, None),
             (types.MouseButton.SCROLL_DOWN, None),
         ),
-        *,
-        _aionotify=aionotify,
-        _utils=utils,
         **kwargs,
     ) -> None:
         self.base_path = Path(base_path)
@@ -185,14 +179,11 @@ class BacklightBlock(FileWatcherBlock):
         if self.device_path:
             super().__init__(
                 path=self.device_path / "brightness",
-                flags=_aionotify.Flags.MODIFY,
-                _aionotify=_aionotify,
+                flags=aionotify.Flags.MODIFY,
                 **kwargs,
             )
         else:
             super().__init__(path=None, format_file_not_found=format_no_backlight)
-
-        self.utils = _utils
 
     async def click_handler(self, button: int, **_kwargs) -> None:
         command = self.command_on_click.get(button)
@@ -200,7 +191,7 @@ class BacklightBlock(FileWatcherBlock):
         if not command:
             return
 
-        await self.utils.shell_run(command)
+        await utils.shell_run(command)
 
     def _get_max_brightness(self) -> int:
         if self.device_path:

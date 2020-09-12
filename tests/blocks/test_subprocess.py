@@ -1,9 +1,10 @@
+from asyncio import subprocess
+
 import pytest
-from asynctest import Mock
+from asynctest import CoroutineMock, call, patch
 from helpers import misc
 
 from i3pyblocks import types
-from i3pyblocks._internal import utils
 from i3pyblocks.blocks import subprocess as m_sub
 
 
@@ -30,35 +31,42 @@ async def test_shell_block():
 
 @pytest.mark.asyncio
 async def test_shell_block_click_handler():
-    mock_utils = Mock(utils)
-
-    instance = m_sub.ShellBlock(
-        command="exit 0",
-        command_on_click=(
-            (types.MouseButton.LEFT_BUTTON, "LEFT_BUTTON"),
-            (types.MouseButton.MIDDLE_BUTTON, "MIDDLE_BUTTON"),
-            (types.MouseButton.RIGHT_BUTTON, "RIGHT_BUTTON"),
-            (types.MouseButton.SCROLL_UP, "SCROLL_UP"),
-            (types.MouseButton.SCROLL_DOWN, "SCROLL_DOWN"),
-        ),
-        _utils=mock_utils,
-    )
-
-    for button in [
-        "LEFT_BUTTON",
-        "RIGHT_BUTTON",
-        "MIDDLE_BUTTON",
-        "SCROLL_UP",
-        "SCROLL_DOWN",
-    ]:
-        mock_utils.shell_run.return_value = (
+    mock_config = {
+        "shell_run": CoroutineMock(),
+        "shell_run.return_value": (
             b"stdout\n",
             b"stderr\n",
             misc.AttributeDict(returncode=0),
+        ),
+    }
+
+    with patch("i3pyblocks.blocks.subprocess.utils", **mock_config) as mock_utils:
+        instance = m_sub.ShellBlock(
+            command="exit 0",
+            command_on_click=(
+                (types.MouseButton.LEFT_BUTTON, "LEFT_BUTTON"),
+                (types.MouseButton.MIDDLE_BUTTON, "MIDDLE_BUTTON"),
+                (types.MouseButton.RIGHT_BUTTON, "RIGHT_BUTTON"),
+                (types.MouseButton.SCROLL_UP, "SCROLL_UP"),
+                (types.MouseButton.SCROLL_DOWN, "SCROLL_DOWN"),
+            ),
         )
-        await instance.click_handler(getattr(types.MouseButton, button))
-        mock_utils.shell_run.assert_called_once_with(button)
-        mock_utils.shell_run.reset_mock()
+
+        for button in [
+            "LEFT_BUTTON",
+            "RIGHT_BUTTON",
+            "MIDDLE_BUTTON",
+            "SCROLL_UP",
+            "SCROLL_DOWN",
+        ]:
+            await instance.click_handler(getattr(types.MouseButton, button))
+            mock_utils.shell_run.assert_has_calls(
+                [
+                    call(button),
+                    call("exit 0", stdout=subprocess.PIPE, stderr=subprocess.PIPE),
+                ]
+            )
+            mock_utils.shell_run.reset_mock()
 
 
 @pytest.mark.asyncio

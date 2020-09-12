@@ -47,15 +47,12 @@ class DPMSBlock(blocks.PollingBlock):
         format_on: str = "DPMS ON",
         format_off: str = "DPMS OFF",
         sleep: int = 1,
-        *,
-        _Xdisplay=Xdisplay,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format_on = format_on
         self.format_off = format_off
-        self.Xdisplay = _Xdisplay
-        self.display = self.Xdisplay.Display()
+        self.display = Xdisplay.Display()
         self.loop = asyncio.get_running_loop()
         self.executor = ThreadPoolExecutor(max_workers=1)
 
