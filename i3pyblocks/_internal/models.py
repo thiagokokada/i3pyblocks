@@ -13,7 +13,7 @@ else:
             """TypedDict shim for Python <3.8."""
 
             def __init_subclass__(cls, **kwargs):
-                pass
+                super().__init_subclass__()
 
 
 class State(TypedDict, total=False):
@@ -35,4 +35,3 @@ class State(TypedDict, total=False):
 
 
 Threshold = Mapping[float, Optional[str]]
-CommandToClick = Mapping[int, Optional[str]]

@@ -15,7 +15,7 @@ from asyncio import subprocess
 from typing import Mapping, Optional
 
 from i3pyblocks import blocks, types
-from i3pyblocks._internal import models, utils
+from i3pyblocks._internal import utils
 
 
 class ShellBlock(blocks.PollingBlock):
@@ -40,7 +40,7 @@ class ShellBlock(blocks.PollingBlock):
         self,
         command: str,
         format: str = "{output}",
-        command_on_click: models.CommandToClick = {
+        command_on_click: Mapping[int, Optional[str]] = {
             types.MouseButton.LEFT_BUTTON: None,
             types.MouseButton.MIDDLE_BUTTON: None,
             types.MouseButton.RIGHT_BUTTON: None,
