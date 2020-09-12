@@ -6,7 +6,7 @@ from helpers import misc
 from i3pyblocks import types
 
 pulsectl = pytest.importorskip("pulsectl")
-m_pulsectl = pytest.importorskip("i3pyblocks.blocks.pulsectl")
+pulse = pytest.importorskip("i3pyblocks.blocks.pulse")
 
 # Stub some PulseAudio sinks
 SINK = misc.AttributeDict(description="description", index=1, name="sink", mute=0)
@@ -34,8 +34,8 @@ def mock_event(block_instance, facility):
 
 
 def test_pulse_audio_block():
-    with patch("i3pyblocks.blocks.pulsectl.pulsectl", **MOCK_CONFIG):
-        instance = m_pulsectl.PulseAudioBlock()
+    with patch("i3pyblocks.blocks.pulse.pulsectl", **MOCK_CONFIG):
+        instance = pulse.PulseAudioBlock()
 
         # If volume is 0%, returns Colors.URGENT
         instance.update_status()
@@ -67,8 +67,8 @@ def test_pulse_audio_block():
 
 
 def test_pulse_audio_block_exception():
-    with patch("i3pyblocks.blocks.pulsectl.pulsectl", **MOCK_CONFIG) as mock_pulsectl:
-        instance = m_pulsectl.PulseAudioBlock()
+    with patch("i3pyblocks.blocks.pulse.pulsectl", **MOCK_CONFIG) as mock_pulsectl:
+        instance = pulse.PulseAudioBlock()
 
         mock_pulse = mock_pulsectl.Pulse.return_value
 
@@ -88,11 +88,9 @@ def test_pulse_audio_block_exception():
 @pytest.mark.asyncio
 async def test_pulse_audio_block_click_handler():
     with patch(
-        "i3pyblocks.blocks.pulsectl.pulsectl", **MOCK_CONFIG
-    ) as mock_pulsectl, patch(
-        "i3pyblocks.blocks.pulsectl.subprocess"
-    ) as mock_subprocess:
-        instance = m_pulsectl.PulseAudioBlock(
+        "i3pyblocks.blocks.pulse.pulsectl", **MOCK_CONFIG
+    ) as mock_pulsectl, patch("i3pyblocks.blocks.pulse.subprocess") as mock_subprocess:
+        instance = pulse.PulseAudioBlock(
             command="command -c",
         )
 

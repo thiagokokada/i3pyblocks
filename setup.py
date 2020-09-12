@@ -26,13 +26,13 @@ setuptools.setup(
         "typing_extensions>=3.7.4; python_version < '3.8'",
     ],
     extras_require={
-        "aiohttp": ["aiohttp>=3.4.0"],
-        "aionotify": ["aionotify>=0.2.0"],
+        "http": ["aiohttp>=3.4.0"],
         "i3ipc": ["i3ipc>=2.0.1"],
-        "psutil": ["psutil>=5.4.8"],
-        "pulsectl": ["pulsectl>=18.10.5"],
+        "inotify": ["aionotify>=0.2.0"],
+        "ps": ["psutil>=5.4.8"],
+        "pulse": ["pulsectl>=18.10.5"],
         # Future version not released yet
-        "xlib": ["python-xlib>0.2.7"],
+        "x11": ["python-xlib>0.2.7"],
         "dev": requirements_from_pip("requirements/dev.in"),
     },
     classifiers=[

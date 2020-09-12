@@ -1,4 +1,4 @@
-"""Blocks based on `psutil`_.
+"""Blocks related to process and system information, based on `psutil`_.
 
 This is a collection of many Blocks based on ``psutil``, a cross-platform
 library for retrieving information on running processes and system utilization

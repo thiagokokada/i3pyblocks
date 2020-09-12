@@ -1,4 +1,4 @@
-"""Blocks based on `aiohttp`_.
+"""Blocks related to HTTP requests, based on `aiohttp`_.
 
 This module contains PollingRequestBlock, that uses ``aiohttp`` to request HTTP
 endpoints and shows the result in i3bar.

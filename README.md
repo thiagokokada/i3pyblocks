@@ -30,30 +30,16 @@ pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks'
 This will install a barebones version of `i3pyblocks`, but since the optional
 dependencies are not installed most blocks won't work.
 
-Each block is inside a namespace with the name of its main dependency, so for
-example if you want to use `i3pyblocks.blocks.aionotify` you would need to
-install `aionotify` first:
+Each block dependency is declared in `extra_requires` dictionary inside 
+`setup.py` file, so for example if you want to use `i3pyblocks.blocks.inotify`
+you have to install the extra dependencies declared in `inotify` feature:
 
 ```shell
-# This will install the dependencies for `i3pyblocks.blocks.aionotify`
-pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[aionotify]'
+# This will install the dependencies for `i3pyblocks.blocks.inotify`
+pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[inotify]'
 # You can also pass multiple dependencies separated by comma
-pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[i3ipc,psutil]'
+pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[i3ipc,ps]'
 ```
-
-Another option is to install each dependency manually:
-
-```shell
-# Not recommended since you need to track each dependency manually
-pip install aionotify
-```
-
-The current available block dependencies:
-- [aiohttp](https://github.com/aio-libs/aiohttp)
-- [aionotify](https://github.com/rbarrois/aionotify)
-- [i3ipc](https://github.com/altdesktop/i3ipc-python)
-- [psutil](https://github.com/giampaolo/psutil)
-- [pulsectl](https://github.com/mk-fg/python-pulse-control)
 
 ## Usage
 

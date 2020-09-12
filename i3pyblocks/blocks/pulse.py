@@ -1,4 +1,4 @@
-"""Blocks based on `pulsectl`_.
+"""Blocks related to PulseAudio, based on `pulsectl`_.
 
 This module contains PulseAudioBlock, that uses ``pulsectl`` to show/adjust
 volume in systems that runs `PulseAudio`_.
