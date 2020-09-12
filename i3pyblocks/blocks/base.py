@@ -13,7 +13,7 @@ from concurrent.futures import Executor
 from typing import List, Optional
 
 from i3pyblocks import core
-from i3pyblocks._internal import models, utils
+from i3pyblocks._internal import formatter, models, utils
 
 
 class Block(metaclass=abc.ABCMeta):
@@ -65,6 +65,7 @@ class Block(metaclass=abc.ABCMeta):
         self.block_name = block_name or self.__class__.__name__
         self.frozen = True
         self.update_queue: Optional[asyncio.Queue] = None
+        self.ex_format = formatter.ExtendedFormatter().format
 
         # Those are default values for properties if they are not overriden
         self._default_state = utils.non_nullable_dict(
