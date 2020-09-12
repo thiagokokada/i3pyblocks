@@ -21,11 +21,11 @@ IP).
 """
 
 import asyncio
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, Mapping
 
 import aiohttp
 
-from i3pyblocks import blocks, core, types
+from i3pyblocks import blocks, core
 
 DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=5)
 
@@ -55,8 +55,8 @@ class PollingRequestBlock(blocks.PollingBlock):
 
     :param format_error: Format string showed in case of an error in request.
 
-    :param request_opts: A Dictable of options passed directly to the
-        ``request()`` method in ``aiohttp``. The list of available parameters
+    :param request_opts: A mapping of options passed directly to the ``request()``
+        method in ``aiohttp``. The list of available parameters
         is `aiohttp docs`_.
 
     :param response_callback: A function that will be called after the response
@@ -85,7 +85,7 @@ class PollingRequestBlock(blocks.PollingBlock):
         method: str = "get",
         format: str = "{response}",
         format_error: str = "ERROR",
-        request_opts: types.Dictable[str, Any] = (("timeout", DEFAULT_TIMEOUT),),
+        request_opts: Mapping[str, Any] = {"timeout": DEFAULT_TIMEOUT},
         response_callback: Callable[
             [aiohttp.ClientResponse], Awaitable[str]
         ] = text_callback,
@@ -98,7 +98,7 @@ class PollingRequestBlock(blocks.PollingBlock):
         self.url = url
         self.method = method
         self.response_callback = response_callback
-        self.request_opts = dict(request_opts)
+        self.request_opts = request_opts
 
     async def run(self) -> None:
         try:

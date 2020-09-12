@@ -19,7 +19,7 @@ async def test_shell_block():
         exit 1
         """,
         format="{output} {output_err}",
-        color_by_returncode=((1, types.Color.URGENT),),
+        color_by_returncode={1: types.Color.URGENT},
     )
     await instance.run()
 
@@ -43,13 +43,13 @@ async def test_shell_block_click_handler():
     with patch("i3pyblocks.blocks.subprocess.utils", **mock_config) as mock_utils:
         instance = m_sub.ShellBlock(
             command="exit 0",
-            command_on_click=(
-                (types.MouseButton.LEFT_BUTTON, "LEFT_BUTTON"),
-                (types.MouseButton.MIDDLE_BUTTON, "MIDDLE_BUTTON"),
-                (types.MouseButton.RIGHT_BUTTON, "RIGHT_BUTTON"),
-                (types.MouseButton.SCROLL_UP, "SCROLL_UP"),
-                (types.MouseButton.SCROLL_DOWN, "SCROLL_DOWN"),
-            ),
+            command_on_click={
+                types.MouseButton.LEFT_BUTTON: "LEFT_BUTTON",
+                types.MouseButton.MIDDLE_BUTTON: "MIDDLE_BUTTON",
+                types.MouseButton.RIGHT_BUTTON: "RIGHT_BUTTON",
+                types.MouseButton.SCROLL_UP: "SCROLL_UP",
+                types.MouseButton.SCROLL_DOWN: "SCROLL_DOWN",
+            },
         )
 
         for button in [

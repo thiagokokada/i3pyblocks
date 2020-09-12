@@ -25,7 +25,7 @@ from typing import List, Optional, Union
 import aionotify
 
 from i3pyblocks import blocks, core, types
-from i3pyblocks._internal import utils
+from i3pyblocks._internal import models, utils
 
 
 class FileWatcherBlock(blocks.Block):
@@ -137,7 +137,7 @@ class BacklightBlock(FileWatcherBlock):
         for some reason you want a specific device you can just use
         ``device_name`` here instead.
 
-    :param command_on_click: Dictable with commands to be called when the user
+    :param command_on_click: Mapping with commands to be called when the user
         interacts with mouse inside this block. Can be useful to adjust the
         backlight using scroll, for example.
 
@@ -156,13 +156,13 @@ class BacklightBlock(FileWatcherBlock):
         format_no_backlight: str = "No backlight",
         base_path: Union[Path, str] = "/sys/class/backlight/",
         device_glob: Optional[str] = "*",
-        command_on_click: types.Dictable = (
-            (types.MouseButton.LEFT_BUTTON, None),
-            (types.MouseButton.MIDDLE_BUTTON, None),
-            (types.MouseButton.RIGHT_BUTTON, None),
-            (types.MouseButton.SCROLL_UP, None),
-            (types.MouseButton.SCROLL_DOWN, None),
-        ),
+        command_on_click: models.CommandToClick = {
+            types.MouseButton.LEFT_BUTTON: None,
+            types.MouseButton.MIDDLE_BUTTON: None,
+            types.MouseButton.RIGHT_BUTTON: None,
+            types.MouseButton.SCROLL_UP: None,
+            types.MouseButton.SCROLL_DOWN: None,
+        },
         **kwargs,
     ) -> None:
         self.base_path = Path(base_path)
@@ -174,7 +174,7 @@ class BacklightBlock(FileWatcherBlock):
 
         self.format = format
         self.format_no_backlight = format_no_backlight
-        self.command_on_click = dict(command_on_click)
+        self.command_on_click = command_on_click
 
         if self.device_path:
             super().__init__(

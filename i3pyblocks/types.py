@@ -1,13 +1,4 @@
-from typing import Dict, Iterable, Optional, Tuple, TypeVar, Union
-
-Value = Union[bool, int, str]
-Result = Dict[str, Value]
-
-KT = TypeVar("KT")
-VT = TypeVar("VT")
-
-# Dictable is either a Dict or something that can be converted to one
-Dictable = Union[Dict[KT, VT], Iterable[Tuple[KT, VT]]]
+from typing import Optional
 
 
 class AlignText:

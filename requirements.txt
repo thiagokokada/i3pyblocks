@@ -39,7 +39,7 @@ pyparsing==2.4.7          # via packaging
 pytest-aiohttp==0.3.0     # via -r requirements/dev.in
 pytest-asyncio==0.14.0    # via -r requirements/dev.in
 pytest-cov==2.10.1        # via -r requirements/dev.in
-pytest==6.0.1             # via -r requirements/dev.in, pytest-aiohttp, pytest-asyncio, pytest-cov
+pytest==6.0.2             # via -r requirements/dev.in, pytest-aiohttp, pytest-asyncio, pytest-cov
 git+https://github.com/thiagokokada/python-xlib@152a2510d6710ce1fa4b4c341750ee1c6d449987#python-xlib  # via -r requirements/meta.in, i3ipc
 regex==2020.7.14          # via black
 six==1.15.0               # via packaging, pip-tools, python-xlib

@@ -25,7 +25,7 @@ from typing import NoReturn, Optional
 import pulsectl
 
 from i3pyblocks import blocks, types
-from i3pyblocks._internal import utils
+from i3pyblocks._internal import models, utils
 
 
 # Based on: https://git.io/fjbHp
@@ -44,8 +44,8 @@ class PulseAudioBlock(blocks.ExecutorBlock):
     :param format_mute: Format string showing when the audio sink is mute. It
         will be shown with ``color_mute`` set.
 
-    :param colors: A Dictable that represents the color that will be shown in
-        each volume interval. For example::
+    :param colors: A mapping that represents the color that will be shown in each
+        volume interval. For example::
 
             {
                 0: "000000",
@@ -74,31 +74,31 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         self,
         format: str = "V: {volume:.0f}%",
         format_mute: str = "V: MUTE",
-        colors: types.Dictable[int, Optional[str]] = (
-            (0, types.Color.URGENT),
-            (10, types.Color.WARN),
-            (25, types.Color.NEUTRAL),
-        ),
+        colors: models.Threshold = {
+            0: types.Color.URGENT,
+            10: types.Color.WARN,
+            25: types.Color.NEUTRAL,
+        },
         color_mute: Optional[str] = types.Color.URGENT,
-        icons: types.Dictable[float, str] = (
-            (0.0, "▁"),
-            (12.5, "▂"),
-            (25.0, "▃"),
-            (37.5, "▄"),
-            (50.0, "▅"),
-            (62.5, "▆"),
-            (75.0, "▇"),
-            (87.5, "█"),
-        ),
+        icons: models.Threshold = {
+            0.0: "▁",
+            12.5: "▂",
+            25.0: "▃",
+            37.5: "▄",
+            50.0: "▅",
+            62.5: "▆",
+            75.0: "▇",
+            87.5: "█",
+        },
         command: str = "pavucontrol",
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.format = format
         self.format_mute = format_mute
-        self.colors = dict(colors)
+        self.colors = colors
         self.color_mute = color_mute
-        self.icons = dict(icons)
+        self.icons = icons
         self.command = command
 
         # https://pypi.org/project/pulsectl/#event-handling-code-threads
