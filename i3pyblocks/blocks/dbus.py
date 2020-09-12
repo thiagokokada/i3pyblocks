@@ -51,7 +51,7 @@ class KbddBlock(blocks.Block):
         current_layout: int = await self.properties.call_get_current_layout()
         layout_name: str = await self.properties.call_get_layout_name(current_layout)
 
-        self.update(self.format.format(full_layout=layout_name))
+        self.update(self.ex_format(self.format, full_layout=layout_name))
 
     async def click_handler(self, button: int, **_kwargs) -> None:
         if (
@@ -67,7 +67,7 @@ class KbddBlock(blocks.Block):
         await self.update_layout()
 
     def update_callback(self, layout_name: str) -> None:
-        self.update(self.format.format(full_layout=layout_name))
+        self.update(self.ex_format(self.format, full_layout=layout_name))
 
     async def setup(self, queue: Optional[asyncio.Queue] = None) -> None:
         try:

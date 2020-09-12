@@ -155,12 +155,15 @@ class PulseAudioBlock(blocks.ExecutorBlock):
     def update_status(self):
         """Update the PulseAudioBlock state."""
         if self.sink.mute:
-            self.update(self.format_mute.format(), color=self.color_mute)
+            self.update(self.format_mute, color=self.color_mute)
         else:
             volume = self.pulse.volume_get_all_chans(self.sink) * 100
             color = utils.calculate_threshold(self.colors, volume)
             icon = utils.calculate_threshold(self.icons, volume)
-            self.update(self.format.format(volume=volume, icon=icon), color=color)
+            self.update(
+                self.ex_format(self.format, volume=volume, icon=icon),
+                color=color,
+            )
 
     def toggle_mute(self):
         """Toggle mute on/off."""

@@ -28,7 +28,7 @@ async def test_valid_block():
         async def start(self):
             await super().start()
             self.update(
-                "Done!",
+                self.ex_format("{!u}", "Done!"),
                 color=None,
                 urgent=False,
                 markup=types.MarkupText.NONE,
@@ -85,7 +85,7 @@ async def test_valid_block():
         "border_right": 1,
         "border_top": 1,
         "color": "#000000",
-        "full_text": "Done!",
+        "full_text": "DONE!",
         "instance": str(block.id),
         "min_width": 10,
         "name": "Name",
@@ -107,7 +107,7 @@ async def test_valid_block():
         "border_right": 1,
         "border_top": 1,
         "color": "#000000",
-        "full_text": "Done!",
+        "full_text": "DONE!",
         "instance": str(block.id),
         "min_width": 10,
         "name": "Name",
