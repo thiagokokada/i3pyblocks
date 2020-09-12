@@ -360,7 +360,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
 class SensorsBatteryBlock(blocks.PollingBlock):
     r"""Block that shows battery information.
 
-    :param format_plugged: format string to shown when the battery is plugged
+    :param format_plugged: Format string to shown when the battery is plugged
         (charging). support the following placeholders:
 
         - ``{percent}``: battery capacity in percentage

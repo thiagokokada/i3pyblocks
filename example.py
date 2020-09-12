@@ -8,7 +8,15 @@ from pathlib import Path
 import psutil
 
 from i3pyblocks import Runner, types, utils
-from i3pyblocks.blocks import datetime, http, i3ipc, inotify, ps, pulse, subprocess, x11
+from i3pyblocks.blocks import (  # dbus,; x11,
+    datetime,
+    http,
+    i3ipc,
+    inotify,
+    ps,
+    pulse,
+    subprocess,
+)
 
 # Configure logging, so we can have debug information available in
 # ~/.i3pyblocks.log
@@ -109,12 +117,12 @@ async def main():
     )
 
     # This is equivalent to the example above, but using pure Python
-    await runner.register_block(
-        x11.DPMSBlock(
-            format_on="  ",
-            format_off="  ",
-        )
-    )
+    # await runner.register_block(
+    #     x11.DPMSBlock(
+    #         format_on="  ",
+    #         format_off="  ",
+    #     )
+    # )
 
     # ShellBlock just show the output of `command` (if it is empty this block
     # is hidden)
@@ -130,6 +138,15 @@ async def main():
             },
         )
     )
+
+    # This is the equivalent of the block above, but using D-Bus so it is more
+    # efficient (i.e.: there is no polling). But it needs Kbdd installed.
+    # https://github.com/qnikst/kbdd
+    # await runner.register_block(
+    #     dbus.KbddBlock(
+    #         format=" {full_layout:2s}",
+    #     )
+    # )
 
     # By default BacklightBlock showns a message "No backlight found" when
     # there is no backlight
