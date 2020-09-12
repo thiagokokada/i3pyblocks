@@ -59,7 +59,7 @@ class Block(metaclass=abc.ABCMeta):
         self,
         *,
         block_name: Optional[str] = None,
-        default_state: models.State = {},
+        default_state: Optional[models.State] = None,
     ) -> None:
         self.id = uuid.uuid4()
         self.block_name = block_name or self.__class__.__name__
@@ -68,7 +68,7 @@ class Block(metaclass=abc.ABCMeta):
 
         # Those are default values for properties if they are not overriden
         self._default_state = utils.non_nullable_dict(
-            name=self.block_name, instance=str(self.id), **default_state
+            name=self.block_name, instance=str(self.id), **(default_state or {})
         )
 
         self.update_state()
