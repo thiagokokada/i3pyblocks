@@ -2,7 +2,7 @@ import pytest
 from asynctest import patch
 from helpers import misc
 
-m_xlib = pytest.importorskip("i3pyblocks.blocks.xlib")
+x11 = pytest.importorskip("i3pyblocks.blocks.x11")
 
 
 @pytest.mark.asyncio
@@ -17,10 +17,10 @@ async def test_dpms_block():
             misc.AttributeDict(state=0),
         ]
     }
-    with patch("i3pyblocks.blocks.xlib.Xdisplay", **mock_config) as mock_Xdisplay:
+    with patch("i3pyblocks.blocks.x11.Xdisplay", **mock_config) as mock_Xdisplay:
         mock_Display = mock_Xdisplay.Display.return_value
 
-        instance = m_xlib.DPMSBlock()
+        instance = x11.DPMSBlock()
 
         await instance.run()
         assert instance.result()["full_text"] == "DPMS ON"

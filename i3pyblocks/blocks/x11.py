@@ -1,4 +1,4 @@
-"""Blocks based on `python-xlib`_.
+"""Blocks related to X11, based on `python-xlib`_.
 
 Blocks dedicated to control some X11 features. For example, ``DPMSBlock``
 shows the state of DPMS and allow you to toggle DPMS between ON and OFF.

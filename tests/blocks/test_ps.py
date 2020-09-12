@@ -7,14 +7,14 @@ from helpers import misc
 from i3pyblocks import types
 
 psutil = pytest.importorskip("psutil")
-m_psutil = pytest.importorskip("i3pyblocks.blocks.psutil")
+ps = pytest.importorskip("i3pyblocks.blocks.ps")
 
 
 @pytest.mark.asyncio
 async def test_cpu_percent_block():
     mock_config = {"cpu_percent.return_value": 75.5}
-    with patch("i3pyblocks.blocks.psutil.psutil", **mock_config):
-        instance = m_psutil.CpuPercentBlock(format="{icon} {percent}")
+    with patch("i3pyblocks.blocks.ps.psutil", **mock_config):
+        instance = ps.CpuPercentBlock(format="{icon} {percent}")
         await instance.run()
 
         result = instance.result()
@@ -30,8 +30,8 @@ async def test_disk_usage_block():
             total=226227036160, used=49354395648, free=165309575168, percent=91.3
         )
     }
-    with patch("i3pyblocks.blocks.psutil.psutil", **mock_config):
-        instance = m_psutil.DiskUsageBlock(
+    with patch("i3pyblocks.blocks.ps.psutil", **mock_config):
+        instance = ps.DiskUsageBlock(
             format="{icon} {path} {total:.1f} {used:.1f} {free:.1f} {percent}",
         )
         await instance.run()
@@ -51,8 +51,8 @@ async def test_disk_usage_block_with_short_path():
     }
     path_str = "/media/backup/Downloads"
 
-    with patch("i3pyblocks.blocks.psutil.psutil", **mock_config) as mock_psutil:
-        instance = m_psutil.DiskUsageBlock(path=Path(path_str), format="{short_path}")
+    with patch("i3pyblocks.blocks.ps.psutil", **mock_config) as mock_psutil:
+        instance = ps.DiskUsageBlock(path=Path(path_str), format="{short_path}")
         await instance.run()
 
         # Making sure that we call psutil.disk_usage with str instead of Path
@@ -66,8 +66,8 @@ async def test_disk_usage_block_with_short_path():
 @pytest.mark.asyncio
 async def test_load_avg_block():
     mock_config = {"getloadavg.return_value": (2.5, 5, 15)}
-    with patch("i3pyblocks.blocks.psutil.psutil", **mock_config):
-        instance = m_psutil.LoadAvgBlock(
+    with patch("i3pyblocks.blocks.ps.psutil", **mock_config):
+        instance = ps.LoadAvgBlock(
             format="{load1} {load5} {load15}",
             colors=(
                 (0, types.Color.NEUTRAL),
@@ -97,8 +97,8 @@ async def test_network_speed_block_down():
         }
     }
 
-    with patch("i3pyblocks.blocks.psutil.psutil", **mock_config):
-        instance = m_psutil.NetworkSpeedBlock(
+    with patch("i3pyblocks.blocks.ps.psutil", **mock_config):
+        instance = ps.NetworkSpeedBlock(
             format_up="{interface} {upload} {download}",
         )
 
@@ -153,10 +153,8 @@ async def test_network_speed_block_up():
         ],
     }
 
-    with patch("i3pyblocks.blocks.psutil.psutil", **mock_config):
-        instance = m_psutil.NetworkSpeedBlock(
-            format_up="{interface} {upload} {download}"
-        )
+    with patch("i3pyblocks.blocks.ps.psutil", **mock_config):
+        instance = ps.NetworkSpeedBlock(format_up="{interface} {upload} {download}")
 
         await instance.run()
 
@@ -169,8 +167,8 @@ async def test_network_speed_block_up():
 @pytest.mark.asyncio
 async def test_sensors_battery_block_without_battery():
     mock_config = {"sensors_battery.return_value": None}
-    with patch("i3pyblocks.blocks.psutil.psutil", **mock_config):
-        instance = m_psutil.SensorsBatteryBlock()
+    with patch("i3pyblocks.blocks.ps.psutil", **mock_config):
+        instance = ps.SensorsBatteryBlock()
 
         await instance.run()
 
@@ -196,8 +194,8 @@ async def test_sensors_battery_block_with_battery():
         "POWER_TIME_UNKNOWN": psutil.POWER_TIME_UNKNOWN,
     }
 
-    with patch("i3pyblocks.blocks.psutil.psutil", **mock_config):
-        instance = m_psutil.SensorsBatteryBlock()
+    with patch("i3pyblocks.blocks.ps.psutil", **mock_config):
+        instance = ps.SensorsBatteryBlock()
 
         await instance.run()
 
@@ -255,8 +253,8 @@ async def test_sensors_temperature_block():
         }
     }
 
-    with patch("i3pyblocks.blocks.psutil.psutil", **mock_config):
-        instance_default = m_psutil.SensorsTemperaturesBlock(
+    with patch("i3pyblocks.blocks.ps.psutil", **mock_config):
+        instance_default = ps.SensorsTemperaturesBlock(
             format="{icon} {label} {current} {high} {critical}"
         )
 
@@ -267,7 +265,7 @@ async def test_sensors_temperature_block():
         assert result["full_text"] == "▇ Package id 0 78.0 82.0 100.0"
         assert result["color"] == types.Color.WARN
 
-        instance_acpitz = m_psutil.SensorsTemperaturesBlock(sensor="acpitz")
+        instance_acpitz = ps.SensorsTemperaturesBlock(sensor="acpitz")
 
         await instance_acpitz.run()
 
@@ -288,8 +286,8 @@ async def test_virtual_memory_block():
         )
     }
 
-    with patch("i3pyblocks.blocks.psutil.psutil", **mock_config):
-        instance = m_psutil.VirtualMemoryBlock(
+    with patch("i3pyblocks.blocks.ps.psutil", **mock_config):
+        instance = ps.VirtualMemoryBlock(
             format="{icon} {total:.1f} {available:.1f} {used:.1f} {free:.1f} {percent}",
         )
 

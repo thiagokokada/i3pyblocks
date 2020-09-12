@@ -5,19 +5,10 @@ import logging
 import signal
 from pathlib import Path
 
-import psutil as ps
+import psutil
 
 from i3pyblocks import Runner, types, utils
-from i3pyblocks.blocks import (
-    aiohttp,
-    aionotify,
-    datetime,
-    i3ipc,
-    psutil,
-    pulsectl,
-    subprocess,
-    xlib,
-)
+from i3pyblocks.blocks import datetime, http, i3ipc, inotify, ps, pulse, subprocess, x11
 
 # Configure logging, so we can have debug information available in
 # ~/.i3pyblocks.log
@@ -28,7 +19,7 @@ logging.basicConfig(filename=Path.home() / ".i3pyblocks.log", level=logging.DEBU
 # Helper to find partitions, filtering some that we don't want to show
 # Will be used later on the DiskUsageBlock
 def partitions(excludes=("/boot", "/nix/store")):
-    partitions = ps.disk_partitions()
+    partitions = psutil.disk_partitions()
     return [p for p in partitions if p.mountpoint not in excludes]
 
 
@@ -45,7 +36,7 @@ async def main():
     # Limiting the interface name to only 2 characters since it can get quite
     # verbose
     await runner.register_block(
-        psutil.NetworkSpeedBlock(
+        ps.NetworkSpeedBlock(
             format_up=" {interface:.2s}:  {upload}  {download}",
             format_down="",
             interface_regex="en*|wl*",
@@ -57,22 +48,20 @@ async def main():
     # i.e.: /mnt/backup -> /m/b
     for partition in partitions():
         await runner.register_block(
-            psutil.DiskUsageBlock(
+            ps.DiskUsageBlock(
                 format=" {short_path}: {free:.1f}GiB",
                 path=partition.mountpoint,
             )
         )
 
-    await runner.register_block(
-        psutil.VirtualMemoryBlock(format=" {available:.1f}GiB")
-    )
+    await runner.register_block(ps.VirtualMemoryBlock(format=" {available:.1f}GiB"))
 
     # Using custom icons to show the temperature visually
     # So when the temperature is above 75,  is shown, when it is above 50,
     #  is shown, etc.
     # Needs Font Awesome 5 installed
     await runner.register_block(
-        psutil.SensorsTemperaturesBlock(
+        ps.SensorsTemperaturesBlock(
             format="{icon} {current:.0f}°C",
             icons={
                 0: "",
@@ -84,13 +73,13 @@ async def main():
     )
 
     await runner.register_block(
-        psutil.CpuPercentBlock(format=" {percent}%"),
+        ps.CpuPercentBlock(format=" {percent}%"),
     )
 
-    await runner.register_block(psutil.LoadAvgBlock(format=" {load1}"))
+    await runner.register_block(ps.LoadAvgBlock(format=" {load1}"))
 
     await runner.register_block(
-        psutil.SensorsBatteryBlock(
+        ps.SensorsBatteryBlock(
             format_plugged=" {percent:.0f}%",
             format_unplugged="{icon} {percent:.0f}% {remaining_time}",
             format_unknown="{icon} {percent:.0f}%",
@@ -121,7 +110,7 @@ async def main():
 
     # This is equivalent to the example above, but using pure Python
     await runner.register_block(
-        xlib.DPMSBlock(
+        x11.DPMSBlock(
             format_on="  ",
             format_off="  ",
         )
@@ -147,7 +136,7 @@ async def main():
     # We set to empty instead, so when no backlight is available (i.e.
     # desktop), we hide this block
     await runner.register_block(
-        aionotify.BacklightBlock(
+        inotify.BacklightBlock(
             format=" {percent:.0f}%",
             format_no_backlight="",
             command_on_click={
@@ -163,7 +152,7 @@ async def main():
     # for example, by running:
     # $ pactl set-sink-volume @DEFAULT_SINK@ +5% && pkill -SIGUSR1 example.py
     await runner.register_block(
-        pulsectl.PulseAudioBlock(
+        pulse.PulseAudioBlock(
             format=" {volume:.0f}%",
             format_mute=" mute",
         ),
@@ -177,7 +166,7 @@ async def main():
     # `response_callback`, that receives the response of the HTTP request and
     # you can manipulate it the way you want
     await runner.register_block(
-        aiohttp.PollingRequestBlock(
+        http.PollingRequestBlock(
             "https://wttr.in/?format=%c+%t",
             format_error="",
             sleep=60 * 60,

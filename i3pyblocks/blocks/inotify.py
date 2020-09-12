@@ -1,4 +1,4 @@
-"""Blocks based on `aionotify`_.
+"""Blocks related to monitoring file changes, based on `aionotify`_.
 
 This module contains FileWatcherBlock, an abstract, highly efficient Block to
 show the contents of an arbitrary file. It uses ``aionotify``, that itself is

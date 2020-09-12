@@ -8,7 +8,7 @@ from helpers import misc, task
 from i3pyblocks import types
 
 aionotify = pytest.importorskip("aionotify")
-m_aionotify = pytest.importorskip("i3pyblocks.blocks.aionotify")
+inotify = pytest.importorskip("i3pyblocks.blocks.inotify")
 
 
 @pytest.mark.asyncio
@@ -23,7 +23,7 @@ async def test_file_watcher_block(tmpdir):
         await asyncio.sleep(0.1)
         update_file(text)
 
-    class ValidFileWatcherBlock(m_aionotify.FileWatcherBlock):
+    class ValidFileWatcherBlock(inotify.FileWatcherBlock):
         def __init__(self):
             super().__init__(path=tmpfile, flags=aionotify.Flags.MODIFY)
 
@@ -68,7 +68,7 @@ async def test_file_watcher_block(tmpdir):
 
 @pytest.mark.asyncio
 async def test_file_watcher_block_with_non_existing_path():
-    class EmptyFileWatcherBlock(m_aionotify.FileWatcherBlock):
+    class EmptyFileWatcherBlock(inotify.FileWatcherBlock):
         def __init__(self):
             super().__init__(path="/non/existing/path")
 
@@ -99,7 +99,7 @@ async def test_backlight_block(tmpdir):
         with open(brightness_tmpfile, "w") as f:
             f.write("550")
 
-    block = m_aionotify.BacklightBlock(
+    block = inotify.BacklightBlock(
         format="{percent:.1f} {brightness} {max_brightness}",
         base_path=tmpdir,
         device_glob=None,
@@ -127,7 +127,7 @@ async def test_backlight_block_with_device_glob(tmpdir):
     with open(max_brightness_tmpfile, "w") as f:
         f.write("2500")
 
-    block = m_aionotify.BacklightBlock(
+    block = inotify.BacklightBlock(
         format="{percent:.1f} {brightness} {max_brightness}",
         base_path=str(tmpdir),
         device_glob="test_*",
@@ -142,7 +142,7 @@ async def test_backlight_block_with_device_glob(tmpdir):
 
 @pytest.mark.asyncio
 async def test_backlight_block_without_backlight(tmpdir):
-    block = m_aionotify.BacklightBlock(
+    block = inotify.BacklightBlock(
         format="{percent:.1f} {brightness} {max_brightness}",
         base_path=tmpdir,
         device_path="file_not_existing",
@@ -165,8 +165,8 @@ async def test_backlight_block_click_handler(tmpdir):
             misc.AttributeDict(returncode=0),
         ),
     }
-    with patch("i3pyblocks.blocks.aionotify.utils", **mock_config) as mock_utils:
-        instance = m_aionotify.BacklightBlock(
+    with patch("i3pyblocks.blocks.inotify.utils", **mock_config) as mock_utils:
+        instance = inotify.BacklightBlock(
             base_path=tmpdir,
             command_on_click={
                 types.MouseButton.LEFT_BUTTON: "LEFT_BUTTON",
