@@ -193,7 +193,7 @@ class Block(metaclass=abc.ABCMeta):
         if self.update_queue and not self.frozen:
             self.update_queue.put_nowait((self.id, self.result()))
         else:
-            core.logger.warning(
+            core.logger.debug(
                 f"Not pushing update since block {self.block_name} with "
                 f"id {self.id} is either not initialized or frozen"
             )
@@ -236,7 +236,7 @@ class Block(metaclass=abc.ABCMeta):
         self.update(*args, **kwargs)
         self.frozen = True
 
-    async def setup(self, queue: asyncio.Queue) -> None:
+    async def setup(self, queue: Optional[asyncio.Queue] = None) -> None:
         """Setup a Block.
 
         This method is called just before ``start()`` to setup some things
@@ -250,7 +250,10 @@ class Block(metaclass=abc.ABCMeta):
         :param queue: ``asyncio.Queue`` instance that will be used to notify
             updates from this Block.
         """
-        self.update_queue = queue
+        if queue:
+            self.update_queue = queue
+        else:
+            self.update_queue = asyncio.Queue()
         self.frozen = False
 
     async def click_handler(
@@ -378,7 +381,7 @@ class PollingBlock(Block):
 
     async def start(self) -> None:
         try:
-            while True:
+            while not self.frozen:
                 await self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:

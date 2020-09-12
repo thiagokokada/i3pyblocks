@@ -166,6 +166,7 @@ async def test_valid_polling_block():
             self.update(str(self.count))
 
     block = ValidPollingBlock()
+    await block.setup()
 
     await task.runner([block.start()], timeout=0.5)
 
@@ -212,6 +213,7 @@ async def test_polling_block_with_error():
             raise Exception("Boom!")
 
     block = PollingBlockWithError()
+    await block.setup()
 
     with pytest.raises(Exception):
         await block.start()
