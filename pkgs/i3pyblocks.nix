@@ -8,6 +8,7 @@
 , extraLibs ? ''
     aiohttp
     aionotify
+    dbus-next
     i3ipc
     psutil
     pulsectl
