@@ -19,7 +19,44 @@ from dbus_next import errors
 from i3pyblocks import blocks, core, types
 
 
-class KbddBlock(blocks.Block):
+class DbusBlock(blocks.Block):
+    """D-Bus Block.
+
+    This Block extends the ``i3pyblocks.blocks.Block`` by offering some helper
+    methods to work with D-Bus, alongside with a proper ``setup()`` method.
+
+    You must not instantiate this class directly, instead you should subclass
+    it and implement ``start()`` method first.
+    """
+
+    async def setup(self, queue: Optional[asyncio.Queue] = None) -> None:
+        try:
+            self.bus = await dbus_aio.MessageBus().connect()
+        except errors.DBusError:
+            core.logger.exception(
+                f"Cannot connect to D-Bus. Block {self.block_name} is disabled!"
+            )
+            return
+
+        await super().setup(queue)
+
+    async def get_object_via_introspection(
+        self, bus_name: str, object_path: str
+    ) -> dbus_aio.ProxyObject:
+        introspection = await self.bus.introspect(bus_name, object_path)
+        return self.bus.get_proxy_object(bus_name, object_path, introspection)
+
+    async def get_interface_via_introspection(
+        self,
+        bus_name: str,
+        object_path: str,
+        interface_name: str,
+    ) -> dbus_aio.ProxyInterface:
+        obj = await self.get_object_via_introspection(bus_name, object_path)
+        return obj.get_interface(interface_name)
+
+
+class KbddBlock(DbusBlock):
     """Block that shows X11 keyboard layout based on `kbdd`_ daemon.
 
     **Provisional block subject to changes/removal.**
@@ -41,59 +78,64 @@ class KbddBlock(blocks.Block):
 
     bus_name = "ru.gentoo.KbddService"
     object_path = "/ru/gentoo/KbddService"
-    interface = "ru.gentoo.kbdd"
+    interface_name = "ru.gentoo.kbdd"
 
-    def __init__(self, format: str = "{full_layout}", **kwargs) -> None:
+    def __init__(
+        self,
+        format: str = "{full_layout}",
+        sleep: int = 1,
+        **kwargs,
+    ) -> None:
         super().__init__(**kwargs)
         self.format = format
+        self.sleep = sleep
+        self.interface = None
+
+    def update_callback(self, layout_name: str) -> None:
+        self.update(self.ex_format(self.format, full_layout=layout_name))
 
     async def update_layout(self) -> None:
-        current_layout: int = await self.properties.call_get_current_layout()
-        layout_name: str = await self.properties.call_get_layout_name(current_layout)
+        if self.interface:
+            current_layout: int = await self.interface.call_get_current_layout()
+            layout_name: str = await self.interface.call_get_layout_name(current_layout)
 
-        self.update(self.ex_format(self.format, full_layout=layout_name))
+            self.update(self.ex_format(self.format, full_layout=layout_name))
 
     async def click_handler(self, button: int, **_kwargs) -> None:
         if (
             button == types.MouseButton.LEFT_BUTTON
             or button == types.MouseButton.SCROLL_UP
         ):
-            await self.properties.call_next_layout()
+            if self.interface:
+                await self.interface.call_next_layout()
         elif (
             button == types.MouseButton.RIGHT_BUTTON
             or button == types.MouseButton.SCROLL_DOWN
         ):
-            await self.properties.call_prev_layout()
+            if self.interface:
+                await self.interface.call_prev_layout()
         await self.update_layout()
 
-    def update_callback(self, layout_name: str) -> None:
-        self.update(self.ex_format(self.format, full_layout=layout_name))
-
-    async def setup(self, queue: Optional[asyncio.Queue] = None) -> None:
-        try:
-            self.bus = await dbus_aio.MessageBus().connect()
-            self.introspection = await self.bus.introspect(
-                self.bus_name,
-                self.object_path,
-            )
-            self.kbdd_object = self.bus.get_proxy_object(
-                self.bus_name,
-                self.object_path,
-                self.introspection,
-            )
-            self.properties = self.kbdd_object.get_interface(self.interface)
-        except errors.DBusError:
-            core.logger.exception(
-                f"Error during {self.block_name} setup. This block is disabled!"
-            )
+    async def start(self) -> None:
+        if self.frozen:
             return
 
-        await super().setup(queue)
+        while not self.interface:
+            try:
+                self.interface = await self.get_interface_via_introspection(
+                    self.bus_name,
+                    self.object_path,
+                    self.interface_name,
+                )
+            except errors.DBusError:
+                core.logger.debug(
+                    f"D-Bus {self.bus_name} service not found, retrying..."
+                )
+                await asyncio.sleep(self.sleep)
 
-    async def start(self) -> None:
         try:
             await self.update_layout()
-            self.properties.on_layout_name_changed(self.update_callback)
+            self.interface.on_layout_name_changed(self.update_callback)
         except Exception as e:
             core.logger.exception(f"Exception in {self.block_name}")
             self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
