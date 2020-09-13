@@ -1,5 +1,6 @@
 import asyncio
 import signal
+import time
 
 import pytest
 from helpers import task
@@ -200,6 +201,28 @@ async def test_valid_polling_block():
         "instance": str(block.id),
         "name": "ValidPollingBlock",
     }
+
+
+@pytest.mark.asyncio
+async def test_polling_block_abort():
+    class PollingBlockAbort(blocks.PollingBlock):
+        def __init__(self, sleep=0.1):
+            super().__init__(sleep=sleep)
+
+        def run(self):
+            pass
+
+    block = PollingBlockAbort()
+    await block.setup()
+    block.abort("Aborted")
+
+    start_time = time.time()
+    await task.runner([block.start()], timeout=10)
+    running_time = time.time() - start_time
+
+    assert block.result()["full_text"] == "Aborted"
+    # This test shouldn't take too long, or something is wrong
+    assert running_time < 0.1
 
 
 @pytest.mark.asyncio
