@@ -8,8 +8,9 @@ from pathlib import Path
 import psutil
 
 from i3pyblocks import Runner, types, utils
-from i3pyblocks.blocks import (  # dbus,; x11,
+from i3pyblocks.blocks import (  # x11,
     datetime,
+    dbus,
     http,
     i3ipc,
     inotify,
@@ -124,27 +125,33 @@ async def main():
     #     )
     # )
 
-    # ShellBlock just show the output of `command` (if it is empty this block
-    # is hidden)
-    # `command_on_click` runs some command when the mouse click is captured,
-    # in this case when the user scrolls up or down
+    # KbddBlock uses D-Bus to get the keyboard layout information updates, so
+    # it is very efficient (i.e.: there is no polling). But it needs `kbdd`
+    # installed and running: https://github.com/qnikst/kbdd
+    # Using mouse buttons or scroll here allows you to cycle between the layouts
+    # By default the resulting string is very big (i.e.: 'English (US, intl.)'),
+    # so we lowercase it using '!l' and truncate it to the first two letters
+    # using ':.2s', resulting in `en`
+    # You could also use '!u' to UPPERCASE it instead
     await runner.register_block(
-        subprocess.ShellBlock(
-            command="xkblayout-state print %s",
-            format=" {output}",
-            command_on_click={
-                types.MouseButton.SCROLL_UP: "xkblayout-state set +1",
-                types.MouseButton.SCROLL_DOWN: "xkblayout-state set -1",
-            },
+        dbus.KbddBlock(
+            format=" {full_layout!l:.2s}",
         )
     )
 
-    # This is the equivalent of the block above, but using D-Bus so it is more
-    # efficient (i.e.: there is no polling). But it needs Kbdd installed.
-    # https://github.com/qnikst/kbdd
+    # In case of `kbdd` isn't available for you, here is a alternative using
+    # ShellBlock and `xkblayout-state` program.  ShellBlock just show the output
+    # of `command` (if it is empty this block is hidden)
+    # `command_on_click` runs some command when the mouse click is captured,
+    # in this case when the user scrolls up or down
     # await runner.register_block(
-    #     dbus.KbddBlock(
-    #         format=" {full_layout:2s}",
+    #     subprocess.ShellBlock(
+    #         command="xkblayout-state print %s",
+    #         format=" {output}",
+    #         command_on_click={
+    #             types.MouseButton.SCROLL_UP: "xkblayout-state set +1",
+    #             types.MouseButton.SCROLL_DOWN: "xkblayout-state set -1",
+    #         },
     #     )
     # )
 

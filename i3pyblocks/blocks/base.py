@@ -10,7 +10,7 @@ import asyncio
 import signal
 import uuid
 from concurrent.futures import Executor
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from i3pyblocks import core
 from i3pyblocks._internal import formatter, models, utils
@@ -49,11 +49,22 @@ class Block(metaclass=abc.ABCMeta):
         And all calls to `result()` will have ``background == "#008000"``,
         unless overriden by ``update_status()`` with a different value.
 
+    :cvar ex_format: Extended format function accessible to all children. It
+        supports some additional funcionality compared to the default
+        ``str().format()`` method, for example::
+
+            s = "Hello!"
+            uppercase_s = self.ex_format("{string!u}", string=s)
+            lowercase_s = self.ex_format("{string!l}", string=s)
+            print(uppercase_s, lowercase_s)  # "HELLO! hello!"
+
     .. seealso::
 
         For details about each of the keys available in ``default_state``, see
         ``update_state()`` documentation.
     """
+
+    ex_format: Callable[..., str] = formatter.ExtendedFormatter().format
 
     def __init__(
         self,
@@ -65,7 +76,6 @@ class Block(metaclass=abc.ABCMeta):
         self.block_name = block_name or self.__class__.__name__
         self.frozen = True
         self.update_queue: Optional[asyncio.Queue] = None
-        self.ex_format = formatter.ExtendedFormatter().format
 
         # Those are default values for properties if they are not overriden
         self._default_state = utils.non_nullable_dict(
