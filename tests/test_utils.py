@@ -4,7 +4,8 @@ from i3pyblocks import utils
 
 
 def test_utils_docstrings():
-    failure_count, _ = doctest.testmod(utils)
+    failure_count, test_count = doctest.testmod(utils)
+    assert test_count == 3
     assert failure_count == 0
 
 

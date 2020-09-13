@@ -2,13 +2,14 @@ from string import Formatter
 
 
 class ExtendedFormatter(Formatter):
+    # Based on https://stackoverflow.com/a/46160537
     def convert_field(self, value, conversion):
-        """Extend conversion symbol. Based on https://stackoverflow.com/a/46160537
+        """Extended conversion symbols.
 
-        Following additional symbol has been added:
+        The following additional symbols have been added:
 
-            - l: convert to string and low case
-            - u: convert to string and up case
+            - l: convert to string and lower case
+            - u: convert to string and upper case
 
         Defaults are:
 
