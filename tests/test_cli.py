@@ -8,10 +8,20 @@ from i3pyblocks.__version__ import __version__
 
 
 def run_until_timeout(target, args, timeout=1):
+    # https://pytest-cov.readthedocs.io/en/v2.10.1_a/subprocess-support.html
+    try:
+        from pytest_cov.embed import cleanup_on_sigterm
+    except ImportError:
+        pass
+    else:
+        cleanup_on_sigterm()
+
     p = Process(target=target, args=args)
-    p.start()
-    p.join(timeout=timeout)
-    p.terminate()
+    try:
+        p.start()
+        p.join(timeout=timeout)
+    finally:
+        p.terminate()
 
 
 def test_example(capfd):

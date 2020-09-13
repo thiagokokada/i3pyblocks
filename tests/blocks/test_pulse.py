@@ -5,8 +5,13 @@ from helpers import misc
 
 from i3pyblocks import types
 
-pulsectl = pytest.importorskip("pulsectl")
-pulse = pytest.importorskip("i3pyblocks.blocks.pulse")
+try:
+    pulsectl = pytest.importorskip("pulsectl")
+    pulse = pytest.importorskip("i3pyblocks.blocks.pulse")
+except OSError:
+    from unittest import SkipTest
+
+    raise SkipTest("PulseAudio is not installed, skipping tests...")
 
 # Stub some PulseAudio sinks
 SINK = misc.AttributeDict(description="description", index=1, name="sink", mute=0)
