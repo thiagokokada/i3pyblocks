@@ -9,7 +9,9 @@ class ExtendedFormatter(Formatter):
         The following additional symbols have been added:
 
             - l: convert to string and lower case
-            - u: convert to string and upper case
+            - u: convert to string and UPPER CASE
+            - c: convert to string and Capitalize
+            - t: convert to string and Title-Ize
 
         Defaults are:
 
@@ -22,5 +24,9 @@ class ExtendedFormatter(Formatter):
             return str(value).upper()
         elif conversion == "l":
             return str(value).lower()
+        elif conversion == "c":
+            return str(value).capitalize()
+        elif conversion == "t":
+            return str(value).title()
 
         return super().convert_field(value, conversion)

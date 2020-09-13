@@ -14,6 +14,12 @@ def test_extended_formatter():
     assert ex_formatter.format("{string!u:.3s}", string=string) == "LOW"
     assert ex_formatter.format("{!u:.3s}", string) == "LOW"
 
+    string = "capitalize THIS"
+    assert ex_formatter.format("{string!c}", string=string) == "Capitalize this"
+
+    string = "some amazing title"
+    assert ex_formatter.format("{string!t}", string=string) == "Some Amazing Title"
+
     assert ex_formatter.format("{!u}", 0) == "0"
     assert ex_formatter.format("{!u}", object) == "<CLASS 'OBJECT'>"
     assert ex_formatter.format("{!u}", "Maße") == "MASSE"
