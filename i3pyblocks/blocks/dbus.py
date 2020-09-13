@@ -41,15 +41,15 @@ class KbddBlock(blocks.Block):
 
     bus_name = "ru.gentoo.KbddService"
     object_path = "/ru/gentoo/KbddService"
-    interface = "ru.gentoo.kbdd"
+    interface_name = "ru.gentoo.kbdd"
 
     def __init__(self, format: str = "{full_layout}", **kwargs) -> None:
         super().__init__(**kwargs)
         self.format = format
 
     async def update_layout(self) -> None:
-        current_layout: int = await self.properties.call_get_current_layout()
-        layout_name: str = await self.properties.call_get_layout_name(current_layout)
+        current_layout: int = await self.interface.call_get_current_layout()
+        layout_name: str = await self.interface.call_get_layout_name(current_layout)
 
         self.update(self.ex_format(self.format, full_layout=layout_name))
 
@@ -58,12 +58,12 @@ class KbddBlock(blocks.Block):
             button == types.MouseButton.LEFT_BUTTON
             or button == types.MouseButton.SCROLL_UP
         ):
-            await self.properties.call_next_layout()
+            await self.interface.call_next_layout()
         elif (
             button == types.MouseButton.RIGHT_BUTTON
             or button == types.MouseButton.SCROLL_DOWN
         ):
-            await self.properties.call_prev_layout()
+            await self.interface.call_prev_layout()
         await self.update_layout()
 
     def update_callback(self, layout_name: str) -> None:
@@ -81,7 +81,7 @@ class KbddBlock(blocks.Block):
                 self.object_path,
                 self.introspection,
             )
-            self.properties = self.kbdd_object.get_interface(self.interface)
+            self.interface = self.kbdd_object.get_interface(self.interface_name)
         except errors.DBusError:
             core.logger.exception(
                 f"Error during {self.block_name} setup. This block is disabled!"
@@ -93,7 +93,66 @@ class KbddBlock(blocks.Block):
     async def start(self) -> None:
         try:
             await self.update_layout()
-            self.properties.on_layout_name_changed(self.update_callback)
+            self.interface.on_layout_name_changed(self.update_callback)
+        except Exception as e:
+            core.logger.exception(f"Exception in {self.block_name}")
+            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
+            raise e
+
+
+class MediaPlayerBlock(blocks.Block):
+    bus_name = "org.mpris.MediaPlayer2.{player}"
+    object_path = "/org/mpris/MediaPlayer2"
+    interface_name = "org.freedesktop.DBus.Properties"
+
+    def __init__(
+        self,
+        player: str = "spotify",
+        format: str = "{artist} - {title}",
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.player = player
+        self.format = format
+
+    def update_callback(
+        self,
+        interface_name,
+        changed_properties,
+        invalidated_properties,
+    ):
+        metadata = changed_properties["Metadata"].value
+        self.update(
+            self.format.format(
+                artist=" ".join(metadata["xesam:artist"].value),
+                title=metadata["xesam:title"].value,
+            )
+        )
+
+    async def setup(self, queue: Optional[asyncio.Queue] = None) -> None:
+        try:
+            self.bus = await dbus_aio.MessageBus().connect()
+            self.introspection = await self.bus.introspect(
+                self.bus_name.format(player=self.player),
+                self.object_path,
+            )
+            self.mpris_object = self.bus.get_proxy_object(
+                self.bus_name.format(player=self.player),
+                self.object_path,
+                self.introspection,
+            )
+            self.interface = self.mpris_object.get_interface(self.interface_name)
+        except errors.DBusError:
+            core.logger.exception(
+                f"Error during {self.block_name} setup. This block is disabled!"
+            )
+            return
+
+        await super().setup(queue)
+
+    async def start(self):
+        try:
+            self.interface.on_properties_changed(self.update_callback)
         except Exception as e:
             core.logger.exception(f"Exception in {self.block_name}")
             self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
