@@ -1,4 +1,4 @@
-from i3pyblocks import formatter
+from i3pyblocks._internal import formatter
 
 
 def test_extended_formatter():

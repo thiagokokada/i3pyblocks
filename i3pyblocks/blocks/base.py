@@ -12,8 +12,8 @@ import uuid
 from concurrent.futures import Executor
 from typing import Callable, List, Optional
 
-from i3pyblocks import core, formatter
-from i3pyblocks._internal import models, utils
+from i3pyblocks import core
+from i3pyblocks._internal import formatter, models, utils
 
 
 class Block(metaclass=abc.ABCMeta):
@@ -53,13 +53,11 @@ class Block(metaclass=abc.ABCMeta):
         supports some additional funcionality compared to the default
         ``str().format()`` method, for example::
 
-            s = "Hello!"
-            uppercase_s = self.ex_format("{string!u}", string=s)
-            lowercase_s = self.ex_format("{string!l}", string=s)
-            print(uppercase_s, lowercase_s)  # "HELLO! hello!"
-
-        For more information about the available functionality, look at
-        ``i3pyblocks.formatter.ExtendedFormatter``.
+            s = "HellO WorlD!"
+            print(self.ex_format("{!u}", s))  # "HELLO WORLD!"
+            print(self.ex_format("{!l}", s))  # "hello world!"
+            print(self.ex_format("{!c}", s))  # "Hello world!"
+            print(self.ex_format("{!t}", s))  # "Hello World!"
 
     .. seealso::
 
