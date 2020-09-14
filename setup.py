@@ -2,12 +2,6 @@ import setuptools
 
 from i3pyblocks.__version__ import __version__
 
-
-def requirements_from_pip(filename):
-    with open(filename, "r") as pip:
-        return [dep.strip() for dep in pip if not dep.startswith("#") and dep.strip()]
-
-
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -34,7 +28,19 @@ setuptools.setup(
         "pulse": ["pulsectl>=18.10.5"],
         # Future version not released yet
         "x11": ["python-xlib>0.2.7"],
-        "dev": requirements_from_pip("requirements/dev.in"),
+        "dev": [
+            "asynctest",
+            "black",
+            "flake8",
+            "flake8-bugbear",
+            "isort",
+            "mypy",
+            "pip-tools",
+            "pytest",
+            "pytest-aiohttp",
+            "pytest-asyncio",
+            "pytest-cov",
+        ],
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
