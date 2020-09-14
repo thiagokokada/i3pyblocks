@@ -1,4 +1,4 @@
 # This is an workaround until this issue is fixed:
 # https://github.com/jazzband/pip-tools/issues/625
 -e .[dbus,http,inotify,i3ipc,ps,pulse]
-git+https://github.com/thiagokokada/python-xlib@152a2510d6710ce1fa4b4c341750ee1c6d449987#python-xlib
+git+https://github.com/python-xlib/python-xlib@128c60c681a40a843f2935efcc30d80614a065bf#python-xlib

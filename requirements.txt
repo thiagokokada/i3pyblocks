@@ -14,7 +14,7 @@ attrs==20.2.0             # via aiohttp, flake8-bugbear, pytest
 black==20.8b1             # via -r requirements/dev.in
 chardet==3.0.4            # via aiohttp
 click==7.1.2              # via black, pip-tools
-coverage==5.2.1           # via pytest-cov
+coverage==5.3             # via pytest-cov
 dbus-next==0.1.4          # via i3pyblocks
 flake8-bugbear==20.1.4    # via -r requirements/dev.in
 flake8==3.8.3             # via -r requirements/dev.in, flake8-bugbear
@@ -41,7 +41,7 @@ pytest-aiohttp==0.3.0     # via -r requirements/dev.in
 pytest-asyncio==0.14.0    # via -r requirements/dev.in
 pytest-cov==2.10.1        # via -r requirements/dev.in
 pytest==6.0.2             # via -r requirements/dev.in, pytest-aiohttp, pytest-asyncio, pytest-cov
-git+https://github.com/thiagokokada/python-xlib@152a2510d6710ce1fa4b4c341750ee1c6d449987#python-xlib  # via -r requirements/meta.in, i3ipc
+git+https://github.com/python-xlib/python-xlib@128c60c681a40a843f2935efcc30d80614a065bf#python-xlib  # via -r requirements/meta.in, i3ipc
 regex==2020.7.14          # via black
 six==1.15.0               # via packaging, pip-tools, python-xlib
 toml==0.10.1              # via black, pytest
