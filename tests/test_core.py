@@ -8,6 +8,7 @@ import pytest
 from asynctest import CoroutineMock
 
 from i3pyblocks import blocks, core, types
+from i3pyblocks.blocks import basic
 
 DEFAULT_STATE = dict(
     separator=None,
@@ -35,10 +36,12 @@ async def test_runner(capsys, mock_stdin):
     runner = core.Runner()
 
     instance_1 = ValidPollingBlock(block_name="instance_1")
-    instance_2 = ValidPollingBlock(block_name="instance_2")
+    instance_2 = basic.TextBlock("Hello!", block_name="instance_2")
+    instance_3 = basic.TextBlock("Another hello!", block_name="instance_3")
 
     await runner.register_block(instance_1)
     await runner.register_block(instance_2)
+    await runner.register_block(instance_3)
 
     await runner.start(timeout=0.5)
 
@@ -53,8 +56,21 @@ async def test_runner(capsys, mock_stdin):
 
     for i, result in enumerate(results[:5], start=1):
         assert result == [
-            {"name": "instance_1", "instance": str(instance_1.id), "full_text": str(i)},
-            {"name": "instance_2", "instance": str(instance_2.id), "full_text": str(i)},
+            {
+                "name": "instance_1",
+                "instance": str(instance_1.id),
+                "full_text": str(i),
+            },
+            {
+                "name": "instance_2",
+                "instance": str(instance_2.id),
+                "full_text": "Hello!",
+            },
+            {
+                "name": "instance_3",
+                "instance": str(instance_3.id),
+                "full_text": "Another hello!",
+            },
         ]
 
     assert results[5] is None
