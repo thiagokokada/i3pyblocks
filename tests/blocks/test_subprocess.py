@@ -32,15 +32,20 @@ async def test_shell_block():
 @pytest.mark.asyncio
 async def test_shell_block_click_handler():
     mock_config = {
-        "shell_run": CoroutineMock(),
-        "shell_run.return_value": (
-            b"stdout\n",
-            b"stderr\n",
-            misc.AttributeDict(returncode=0),
+        "aio_run": CoroutineMock(),
+        "aio_run.return_value": (
+            misc.AttributeDict(
+                stdout="stdout\n",
+                stderr="stderr\n",
+                returncode=0,
+            )
         ),
+        "PIPE": subprocess.PIPE,
     }
 
-    with patch("i3pyblocks.blocks.subprocess.utils", **mock_config) as mock_utils:
+    with patch(
+        "i3pyblocks.blocks.subprocess.subprocess", **mock_config
+    ) as mock_subprocess:
         instance = m_sub.ShellBlock(
             command="exit 0",
             command_on_click={
@@ -60,13 +65,18 @@ async def test_shell_block_click_handler():
             "SCROLL_DOWN",
         ]:
             await instance.click_handler(getattr(types.MouseButton, button))
-            mock_utils.shell_run.assert_has_calls(
+            mock_subprocess.aio_run.assert_has_calls(
                 [
                     call(button),
-                    call("exit 0", stdout=subprocess.PIPE, stderr=subprocess.PIPE),
+                    call(
+                        "exit 0",
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                    ),
                 ]
             )
-            mock_utils.shell_run.reset_mock()
+            mock_subprocess.aio_run.reset_mock()
 
 
 @pytest.mark.asyncio

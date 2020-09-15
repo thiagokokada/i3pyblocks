@@ -25,7 +25,7 @@ from typing import List, Mapping, Optional, Union
 import aionotify
 
 from i3pyblocks import blocks, core, types
-from i3pyblocks._internal import utils
+from i3pyblocks._internal import models, subprocess
 
 
 class FileWatcherBlock(blocks.Block):
@@ -156,7 +156,7 @@ class BacklightBlock(FileWatcherBlock):
         format_no_backlight: str = "No backlight",
         base_path: Union[Path, str] = "/sys/class/backlight/",
         device_glob: Optional[str] = "*",
-        command_on_click: Mapping[int, Optional[str]] = {
+        command_on_click: Mapping[int, Optional[models.CommandArgs]] = {
             types.MouseButton.LEFT_BUTTON: None,
             types.MouseButton.MIDDLE_BUTTON: None,
             types.MouseButton.RIGHT_BUTTON: None,
@@ -191,7 +191,7 @@ class BacklightBlock(FileWatcherBlock):
         if not command:
             return
 
-        await utils.shell_run(command)
+        await subprocess.aio_run(command)
 
     def _get_max_brightness(self) -> int:
         if self.device_path:

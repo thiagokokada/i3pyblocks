@@ -1,7 +1,6 @@
 import asyncio
 import sys
-from asyncio import subprocess
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 
 from i3pyblocks._internal import models
 
@@ -29,19 +28,3 @@ async def get_aio_reader(loop: asyncio.AbstractEventLoop) -> asyncio.StreamReade
     await loop.connect_read_pipe(lambda: protocol, sys.stdin)
 
     return reader
-
-
-async def shell_run(
-    command: str,
-    input: Optional[bytes] = None,
-    stdin: int = subprocess.DEVNULL,
-    stdout: int = subprocess.DEVNULL,
-    stderr: int = subprocess.DEVNULL,
-) -> Tuple[bytes, bytes, subprocess.Process]:
-    process = await asyncio.create_subprocess_shell(
-        command, stdin=stdin, stdout=stdout, stderr=stderr
-    )
-
-    stdout_data, stderr_data = await process.communicate(input=input)
-
-    return stdout_data, stderr_data, process
