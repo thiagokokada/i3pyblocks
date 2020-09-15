@@ -25,7 +25,7 @@ from typing import NoReturn, Optional
 import pulsectl
 
 from i3pyblocks import blocks, types
-from i3pyblocks._internal import models, utils
+from i3pyblocks._internal import misc, models
 
 
 # Based on: https://git.io/fjbHp
@@ -158,8 +158,8 @@ class PulseAudioBlock(blocks.ExecutorBlock):
             self.update(self.format_mute, color=self.color_mute)
         else:
             volume = self.pulse.volume_get_all_chans(self.sink) * 100
-            color = utils.calculate_threshold(self.colors, volume)
-            icon = utils.calculate_threshold(self.icons, volume)
+            color = misc.calculate_threshold(self.colors, volume)
+            icon = misc.calculate_threshold(self.icons, volume)
             self.update(
                 self.ex_format(self.format, volume=volume, icon=icon),
                 color=color,

@@ -27,7 +27,7 @@ import psutil
 from psutil._common import bytes2human
 
 from i3pyblocks import blocks, types
-from i3pyblocks._internal import models, utils
+from i3pyblocks._internal import misc, models
 
 # Default CPU count to be used in LoadAvgBlock
 _CPU_COUNT = psutil.cpu_count()
@@ -89,8 +89,8 @@ class CpuPercentBlock(blocks.PollingBlock):
     async def run(self) -> None:
         percent = psutil.cpu_percent(interval=None)
 
-        color = utils.calculate_threshold(self.colors, percent)
-        icon = utils.calculate_threshold(self.icons, percent)
+        color = misc.calculate_threshold(self.colors, percent)
+        icon = misc.calculate_threshold(self.icons, percent)
 
         self.update(
             self.ex_format(
@@ -182,8 +182,8 @@ class DiskUsageBlock(blocks.PollingBlock):
     async def run(self) -> None:
         disk = psutil.disk_usage(str(self.path))
 
-        color = utils.calculate_threshold(self.colors, disk.percent)
-        icon = utils.calculate_threshold(self.icons, disk.percent)
+        color = misc.calculate_threshold(self.colors, disk.percent)
+        icon = misc.calculate_threshold(self.icons, disk.percent)
 
         self.update(
             self.ex_format(
@@ -246,7 +246,7 @@ class LoadAvgBlock(blocks.PollingBlock):
     async def run(self) -> None:
         load1, load5, load15 = psutil.getloadavg()
 
-        color = utils.calculate_threshold(self.colors, load1)
+        color = misc.calculate_threshold(self.colors, load1)
 
         self.update(
             self.ex_format(self.format, load1=load1, load5=load5, load15=load15),
@@ -346,7 +346,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
             # KeyError. In this case, just set upload and download to 0.
             upload, download = 0, 0
 
-        color = utils.calculate_threshold(self.colors, max(upload, download))
+        color = misc.calculate_threshold(self.colors, max(upload, download))
 
         self.update(
             self.ex_format(
@@ -440,8 +440,8 @@ class SensorsBatteryBlock(blocks.PollingBlock):
             self.abort(self.format_no_battery)
             return
 
-        color = utils.calculate_threshold(self.colors, battery.percent)
-        icon = utils.calculate_threshold(self.icons, battery.percent)
+        color = misc.calculate_threshold(self.colors, battery.percent)
+        icon = misc.calculate_threshold(self.icons, battery.percent)
 
         if battery.power_plugged or battery.secsleft == psutil.POWER_TIME_UNLIMITED:
             self.format = self.format_plugged
@@ -534,8 +534,8 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
         temperatures = psutil.sensors_temperatures(self.fahrenheit)[self.sensor]
         temperature = temperatures[0]
 
-        color = utils.calculate_threshold(self.colors, temperature.current)
-        icon = utils.calculate_threshold(self.icons, temperature.current)
+        color = misc.calculate_threshold(self.colors, temperature.current)
+        icon = misc.calculate_threshold(self.icons, temperature.current)
 
         self.update(
             self.ex_format(
@@ -621,8 +621,8 @@ class VirtualMemoryBlock(blocks.PollingBlock):
     async def run(self) -> None:
         memory = psutil.virtual_memory()
 
-        color = utils.calculate_threshold(self.colors, memory.percent)
-        icon = utils.calculate_threshold(self.icons, memory.percent)
+        color = misc.calculate_threshold(self.colors, memory.percent)
+        icon = misc.calculate_threshold(self.icons, memory.percent)
 
         self.update(
             self.ex_format(

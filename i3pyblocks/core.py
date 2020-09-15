@@ -17,7 +17,7 @@ import uuid
 from typing import AnyStr, Awaitable, Dict, Iterable, List, Optional, Union
 
 from i3pyblocks import blocks
-from i3pyblocks._internal import models, utils
+from i3pyblocks._internal import misc, models
 
 logger = logging.getLogger("i3pyblocks")
 logger.addHandler(logging.NullHandler())
@@ -194,7 +194,7 @@ class Runner:
     # Based on: https://git.io/fjbHx
     async def click_events(self) -> None:
         """Reads stdin for new click events."""
-        reader = await utils.get_aio_reader(self.loop)
+        reader = await misc.get_aio_reader(self.loop)
         await reader.readline()
 
         while True:
