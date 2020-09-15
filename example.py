@@ -16,7 +16,7 @@ from i3pyblocks.blocks import (  # x11,
     inotify,
     ps,
     pulse,
-    subprocess,
+    shell,
 )
 
 # Configure logging, so we can have debug information available in
@@ -108,7 +108,7 @@ async def main():
     # When `format_on` is being shown, clicking on it runs `command_off`,
     # while when `format_off` is being shown, clicking on it runs `command_on`
     await runner.register_block(
-        subprocess.ToggleBlock(
+        shell.ToggleBlock(
             command_state="xset q | grep -Fo 'DPMS is Enabled'",
             command_on="xset s on +dpms",
             command_off="xset s off -dpms",
@@ -145,7 +145,7 @@ async def main():
     # `command_on_click` runs some command when the mouse click is captured,
     # in this case when the user scrolls up or down
     # await runner.register_block(
-    #     subprocess.ShellBlock(
+    #     shell.ShellBlock(
     #         command="xkblayout-state print %s",
     #         format=" {output}",
     #         command_on_click={

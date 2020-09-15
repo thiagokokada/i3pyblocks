@@ -1,5 +1,3 @@
-# This filename is proposital, since otherwise it would conflict with blocks/test_subprocess.py
-
 import pytest
 
 from i3pyblocks._internal import subprocess

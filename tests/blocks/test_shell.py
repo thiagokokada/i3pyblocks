@@ -5,14 +5,14 @@ from asynctest import CoroutineMock, call, patch
 from helpers import misc
 
 from i3pyblocks import types
-from i3pyblocks.blocks import subprocess as m_sub
+from i3pyblocks.blocks import shell
 
 
 @pytest.mark.asyncio
 async def test_shell_block():
     # This test is not mocked, since basic Linux tools should be available
     # in any place that have an i3 setup
-    instance = m_sub.ShellBlock(
+    instance = shell.ShellBlock(
         command="""
         echo Hello World | cut -d" " -f1
         echo Someone 1>&2
@@ -43,10 +43,8 @@ async def test_shell_block_click_handler():
         "PIPE": subprocess.PIPE,
     }
 
-    with patch(
-        "i3pyblocks.blocks.subprocess.subprocess", **mock_config
-    ) as mock_subprocess:
-        instance = m_sub.ShellBlock(
+    with patch("i3pyblocks.blocks.shell.subprocess", **mock_config) as mock_subprocess:
+        instance = shell.ShellBlock(
             command="exit 0",
             command_on_click={
                 types.MouseButton.LEFT_BUTTON: "LEFT_BUTTON",
@@ -86,7 +84,7 @@ async def test_toggle_block(tmpdir):
 
     # This test is not mocked, since basic Linux tools should be available
     # in any place that have an i3 setup
-    instance = m_sub.ToggleBlock(
+    instance = shell.ToggleBlock(
         command_state="echo",
         command_on=f"touch {file_on}",
         command_off=f"touch {file_off}",
