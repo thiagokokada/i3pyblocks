@@ -67,7 +67,7 @@ async def main():
 
     # Using custom icons to show the temperature visually
     # So when the temperature is above 75,  is shown, when it is above 50,
-    #  is shown, etc.
+    #  is shown, etc
     # Needs Font Awesome 5 installed
     await runner.register_block(
         ps.SensorsTemperaturesBlock(
@@ -85,7 +85,20 @@ async def main():
         ps.CpuPercentBlock(format=" {percent}%"),
     )
 
-    await runner.register_block(ps.LoadAvgBlock(format=" {load1}"))
+    # Load only makes sense depending of the number of CPUs installed in
+    # machine, so get the number of CPUs here and calculate the color mapping
+    # dynamically
+    cpu_count = psutil.cpu_count()
+    await runner.register_block(
+        ps.LoadAvgBlock(
+            format=" {load1}",
+            colors={
+                0: types.Color.NEUTRAL,
+                cpu_count / 2: types.Color.WARN,
+                cpu_count: types.Color.URGENT,
+            },
+        ),
+    )
 
     await runner.register_block(
         ps.SensorsBatteryBlock(

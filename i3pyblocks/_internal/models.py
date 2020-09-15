@@ -1,12 +1,12 @@
 import sys
-from typing import List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Mapping, Optional, Tuple, Union
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict
 else:
-    try:
+    if TYPE_CHECKING:
         from typing_extensions import TypedDict
-    except ImportError:
+    else:
         from typing import Dict
 
         class TypedDict(Dict):

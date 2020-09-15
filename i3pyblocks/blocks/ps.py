@@ -29,9 +29,6 @@ from psutil._common import bytes2human
 from i3pyblocks import blocks, types
 from i3pyblocks._internal import misc, models
 
-# Default CPU count to be used in LoadAvgBlock
-_CPU_COUNT = psutil.cpu_count()
-
 
 class CpuPercentBlock(blocks.PollingBlock):
     r"""Block that shows the current CPU percentage.
@@ -218,11 +215,6 @@ class LoadAvgBlock(blocks.PollingBlock):
         When the load1 is between [0, 2) the color is set to "000000", from
         [2, 4) is set to "FF0000" and from 4 and beyond it is "#FFFFFF".
 
-        Since the load generally only makes sense according to the number of
-        logical CPUs in the system, by default this block returns
-        ``types.Color.WARN`` for ``load1 == <cpu count> / 2`` and
-        ``types.Color.URGENT`` for ``load1 == <cpu count>``.
-
     :param sleep: Sleep in seconds between each call to ``run()``.
 
     :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
@@ -233,8 +225,8 @@ class LoadAvgBlock(blocks.PollingBlock):
         format: str = "L: {load1}",
         colors: models.Threshold = {
             0: types.Color.NEUTRAL,
-            _CPU_COUNT // 2: types.Color.WARN,
-            _CPU_COUNT: types.Color.URGENT,
+            2: types.Color.WARN,
+            4: types.Color.URGENT,
         },
         sleep: int = 5,
         **kwargs,
