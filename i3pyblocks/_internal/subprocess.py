@@ -1,3 +1,4 @@
+from asyncio.subprocess import STDOUT  # noqa: F401
 from asyncio.subprocess import (
     DEVNULL,
     PIPE,

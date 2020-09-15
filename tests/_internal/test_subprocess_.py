@@ -25,10 +25,12 @@ async def test_aio_run():
     assert process.returncode == 1
 
     process = await subprocess.aio_run(
-        args=["echo", "Another hello"],
+        args=["cat", "-"],
         capture_output=True,
         text=True,
+        input="Another hello",
+        stdin=subprocess.PIPE,
     )
 
-    assert process.stdout == "Another hello\n"
+    assert process.stdout == "Another hello"
     assert process.returncode == 0
