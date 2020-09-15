@@ -11,19 +11,18 @@ or dbus based approaches.
 .. _asyncio.subprocess:
     https://docs.python.org/3/library/asyncio-subprocess.html
 """
-from asyncio import subprocess
 from typing import Mapping, Optional
 
 from i3pyblocks import blocks, types
-from i3pyblocks._internal import utils
+from i3pyblocks._internal import models, subprocess
 
 
 class ShellBlock(blocks.PollingBlock):
     r"""Block that shows the result of a command running in shell.
 
-    :param command: Command to be run. This will be parsed by shell, so it can
-        also be multiple arbitrary commands separated by newlines, or multiple
-        commands connected by pipes.
+    :param command_state: Command to be run. By default this will be parsed by
+        shell, so it can also be multiple arbitrary commands separated by
+        newlines, or multiple commands connected by pipes.
 
     :param format: Format string to shown. Supports both ``{output}`` (stdout)
         and ``{output_err}`` (stderr) placeholders.
@@ -38,7 +37,7 @@ class ShellBlock(blocks.PollingBlock):
 
     def __init__(
         self,
-        command: str,
+        command: models.CommandArgs,
         format: str = "{output}",
         command_on_click: Mapping[int, Optional[str]] = {
             types.MouseButton.LEFT_BUTTON: None,
@@ -63,18 +62,21 @@ class ShellBlock(blocks.PollingBlock):
         if not command:
             return
 
-        await utils.shell_run(command)
+        await subprocess.aio_run(command)
         await self.run()
 
     async def run(self) -> None:
-        stdout, stderr, process = await utils.shell_run(
-            self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        process = await subprocess.aio_run(
+            self.command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
         )
 
-        color = self.color_by_returncode.get(process.returncode or 0)
+        color = self.color_by_returncode.get(process.returncode)
 
-        output = stdout.decode().strip()
-        output_err = stderr.decode().strip()
+        output = process.stdout.strip()
+        output_err = process.stderr.strip()
 
         self.update(
             self.format.format(output=output, output_err=output_err), color=color
@@ -88,9 +90,9 @@ class ToggleBlock(blocks.PollingBlock):
     outputs something in stdout, this is interpreted as ON, while when the
     command outputs nothing in stdout, this is interpreted as OFF.
 
-    :param command_state: Command to be run to determine state. This will be
-        parsed by shell, so it can also be multiple arbitrary commands
-        separated by newlines, or multiple commands connected by pipes.
+    :param command_state: Command to be run to determine state. By default
+        this will be parsed by shell, so it can also be multiple arbitrary
+        commands separated by newlines, or multiple commands connected by pipes.
 
     :param command_on: Command to be called when the current state is OFF, so
         it can be turned to ON.
@@ -109,12 +111,13 @@ class ToggleBlock(blocks.PollingBlock):
 
     def __init__(
         self,
-        command_state: str,
-        command_on: str,
-        command_off: str,
+        command_state: models.CommandArgs,
+        command_on: models.CommandArgs,
+        command_off: models.CommandArgs,
         format_on: str = "ON",
         format_off: str = "OFF",
         sleep: int = 1,
+        shell: bool = True,
         **kwargs
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
@@ -125,9 +128,13 @@ class ToggleBlock(blocks.PollingBlock):
         self.format_off = format_off
 
     async def get_state(self) -> bool:
-        stdout, _, _ = await utils.shell_run(self.command_state, stdout=subprocess.PIPE)
+        process = await subprocess.aio_run(
+            self.command_state,
+            stdout=subprocess.PIPE,
+            text=True,
+        )
 
-        output = stdout.decode().strip()
+        output = process.stdout.strip()
 
         return bool(output)
 
@@ -139,7 +146,7 @@ class ToggleBlock(blocks.PollingBlock):
         else:
             command = self.command_off
 
-        await utils.shell_run(command)
+        await subprocess.aio_run(command)
         await self.run()
 
     async def run(self) -> None:

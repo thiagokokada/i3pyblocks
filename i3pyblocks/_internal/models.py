@@ -1,5 +1,5 @@
 import sys
-from typing import Mapping, Optional
+from typing import List, Mapping, Optional, Tuple, Union
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict
@@ -35,3 +35,4 @@ class State(TypedDict, total=False):
 
 
 Threshold = Mapping[float, Optional[str]]
+CommandArgs = Union[str, Union[List[str], Tuple[str]]]
