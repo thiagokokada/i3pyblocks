@@ -5,7 +5,14 @@
 , makeWrapper
   # Use Python from system so we ensure that we are using the same glibc
 , pythonPkg ? pkgs.python38
-, extraFeatures ? [ "dbus" "http" "i3ipc" "inotify" "ps" "pulse" ]
+, extraFeatures ? [
+    "dbus"
+    "http"
+    "i3ipc"
+    "inotify"
+    "ps"
+    "pulse"
+  ]
 }:
 
 let
@@ -36,8 +43,7 @@ mach-nix.buildPythonApplication rec {
 
   meta = with stdenv.lib; {
     homepage = "https://github.com/thiagokokada/i3pyblocks";
-    description =
-      "A replacement for i3status, written in Python using asyncio.";
+    description = "A replacement for i3status, written in Python using asyncio.";
     license = licenses.mit;
     platforms = platforms.linux;
     maintainers = [ maintainers.thiagokokada ];
