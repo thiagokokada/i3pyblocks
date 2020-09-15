@@ -7,11 +7,12 @@ from typing import List, Optional
 from i3pyblocks.__version__ import __version__
 
 
-async def clock_example():
+async def config_example():
     from i3pyblocks import core
-    from i3pyblocks.blocks import datetime
+    from i3pyblocks.blocks import basic, datetime
 
     runner = core.Runner()
+    await runner.register_block(basic.TextBlock("Welcome to i3pyblocks!"))
     await runner.register_block(datetime.DateTimeBlock())
 
     await runner.start()
@@ -43,4 +44,4 @@ def main(args: Optional[List[str]] = None) -> None:
         mod = types.ModuleType(loader.name)
         loader.exec_module(mod)
     else:
-        asyncio.run(clock_example())
+        asyncio.run(config_example())

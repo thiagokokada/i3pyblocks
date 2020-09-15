@@ -31,6 +31,7 @@ def test_example(capfd):
 
     assert '{"version": 1, "click_events": true}' in captured.out
     assert "DateTimeBlock" in captured.out
+    assert "TextBlock" in captured.out
 
 
 def test_config(capfd, tmpdir):
