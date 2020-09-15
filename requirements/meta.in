@@ -1,5 +1,5 @@
 # This is an workaround until those issue are fixed:
 # https://github.com/jazzband/pip-tools/issues/625
 # https://github.com/jazzband/pip-tools/issues/204#issuecomment-550051424
--e file:.#egg=i3pyblocks[dev,dbus,http,inotify,i3ipc,ps,pulse]
+-e file:.#egg=i3pyblocks[dev,dbus,http,inotify,i3ipc,ps,pulse,test]
 git+https://github.com/python-xlib/python-xlib@128c60c681a40a843f2935efcc30d80614a065bf#python-xlib

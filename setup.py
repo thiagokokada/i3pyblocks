@@ -25,14 +25,17 @@ setuptools.setup(
         "pulse": ["pulsectl>=18.10.5"],
         # Future version not released yet
         "x11": ["python-xlib>0.2.7"],
+        # Non-runtime deps
         "dev": [
-            "asynctest",
             "black",
             "flake8",
             "flake8-bugbear",
             "isort",
             "mypy",
             "pip-tools",
+        ],
+        "test": [
+            "asynctest",
             "pytest",
             "pytest-aiohttp",
             "pytest-asyncio",
