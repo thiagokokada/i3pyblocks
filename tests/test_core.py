@@ -316,7 +316,7 @@ async def test_runner_with_click_events(capsys):
     mock_input = [b"[\n", click_event, b","]
 
     with patch(
-        "i3pyblocks._internal.utils.get_aio_reader", new=CoroutineMock()
+        "i3pyblocks._internal.misc.get_aio_reader", new=CoroutineMock()
     ) as get_aio_reader_mock:
         reader_mock = get_aio_reader_mock.return_value
         reader_mock.readline = CoroutineMock()

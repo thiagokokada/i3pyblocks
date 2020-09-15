@@ -13,7 +13,7 @@ from concurrent.futures import Executor
 from typing import Callable, List, Optional
 
 from i3pyblocks import core
-from i3pyblocks._internal import formatter, models, utils
+from i3pyblocks._internal import formatter, misc, models
 
 
 class Block(metaclass=abc.ABCMeta):
@@ -79,7 +79,7 @@ class Block(metaclass=abc.ABCMeta):
         self.update_queue: Optional[asyncio.Queue] = None
 
         # Those are default values for properties if they are not overriden
-        self._default_state = utils.non_nullable_dict(
+        self._default_state = misc.non_nullable_dict(
             name=self.block_name, instance=str(self.id), **(default_state or {})
         )
 
@@ -167,7 +167,7 @@ class Block(metaclass=abc.ABCMeta):
         .. _i3bar's protocol specification:
             https://i3wm.org/docs/i3bar-protocol.html#_blocks_in_detail
         """
-        self._state = utils.non_nullable_dict(
+        self._state = misc.non_nullable_dict(
             full_text=full_text,
             short_text=short_text,
             color=color,
