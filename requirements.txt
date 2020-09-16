@@ -9,6 +9,7 @@ aiohttp==3.6.2            # via i3pyblocks, pytest-aiohttp
 aionotify==0.2.0          # via i3pyblocks
 alabaster==0.7.12         # via sphinx
 appdirs==1.4.4            # via black
+astroid==2.4.2            # via sphinx-autoapi
 async-timeout==3.0.1      # via aiohttp
 asynctest==0.13.0         # via i3pyblocks
 attrs==20.2.0             # via aiohttp, flake8-bugbear, pytest
@@ -27,7 +28,8 @@ idna==2.10                # via requests, yarl
 imagesize==1.2.0          # via sphinx
 iniconfig==1.0.1          # via pytest
 isort==5.5.2              # via i3pyblocks
-jinja2==2.11.2            # via sphinx
+jinja2==2.11.2            # via sphinx, sphinx-autoapi
+lazy-object-proxy==1.4.3  # via astroid
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via flake8
 more-itertools==8.5.0     # via pytest
@@ -51,12 +53,13 @@ pytest-cov==2.10.1        # via i3pyblocks
 pytest==6.0.2             # via i3pyblocks, pytest-aiohttp, pytest-asyncio, pytest-cov
 git+https://github.com/python-xlib/python-xlib@128c60c681a40a843f2935efcc30d80614a065bf#python-xlib  # via -r requirements/meta.in, i3ipc
 pytz==2020.1              # via babel
+pyyaml==5.3.1             # via sphinx-autoapi
 regex==2020.7.14          # via black
 requests==2.24.0          # via sphinx
-six==1.15.0               # via packaging, pip-tools, python-xlib
+six==1.15.0               # via astroid, packaging, pip-tools, python-xlib
 snowballstemmer==2.0.0    # via sphinx
-sphinx-autodoc-typehints==1.11.0  # via i3pyblocks
-sphinx==3.2.1             # via i3pyblocks, sphinx-autodoc-typehints
+sphinx-autoapi==1.5.0     # via i3pyblocks
+sphinx==3.2.1             # via i3pyblocks, sphinx-autoapi
 sphinxcontrib-applehelp==1.0.2  # via sphinx
 sphinxcontrib-devhelp==1.0.2  # via sphinx
 sphinxcontrib-htmlhelp==1.0.3  # via sphinx
@@ -66,7 +69,9 @@ sphinxcontrib-serializinghtml==1.1.4  # via sphinx
 toml==0.10.1              # via black, pytest
 typed-ast==1.4.1          # via black, mypy
 typing-extensions==3.7.4.3  # via black, mypy
+unidecode==1.1.1          # via sphinx-autoapi
 urllib3==1.25.10          # via requests
+wrapt==1.12.1             # via astroid
 yarl==1.5.1               # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:

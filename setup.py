@@ -34,7 +34,7 @@ setuptools.setup(
             "mypy",
             "pip-tools",
             "sphinx",
-            "sphinx-autodoc-typehints",
+            "sphinx-autoapi",
         ],
         "test": [
             "asynctest",
