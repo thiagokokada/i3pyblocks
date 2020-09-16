@@ -3,7 +3,7 @@ SRC_PATHS := *.py i3pyblocks $(TEST_PATHS)
 PYTHON := venv/bin/python
 .PHONY: all deps lint \
 	black black-fix clean deps-compile deps-upgrade deps-sync dev-install \
-	gen-docstrings isort isort-fix flake8 mypy test test-coverage
+	isort isort-fix flake8 mypy test test-coverage
 
 all: lint test-coverage
 deps: deps-compile deps-sync
@@ -28,9 +28,6 @@ deps-sync:
 
 dev-install:
 	$(PYTHON) -m pip install -r requirements.txt
-
-gen-docstrings:
-	$(PYTHON) -m sphinx.ext.apidoc -f -o docs/ i3pyblocks
 
 isort:
 	$(PYTHON) -m isort --check $(SRC_PATHS)
