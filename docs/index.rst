@@ -6,6 +6,9 @@
 Welcome to i3pyblocks's documentation!
 ======================================
 
+.. image:: _static/screenshot.png
+   :alt: Screenshot of i3pyblocks bar.
+
 **i3pyblocks** is a replacement for `i3status`_, written in Python using
 `asyncio`_.
 
