@@ -428,8 +428,9 @@ class SensorsBatteryBlock(blocks.PollingBlock):
     async def run(self):
         battery = psutil.sensors_battery()
 
+        # This state maybe temporary trigged by a battery connection/disconnection
         if not battery:
-            self.abort(self.format_no_battery)
+            self.update(self.format_no_battery)
             return
 
         color = misc.calculate_threshold(self.colors, battery.percent)
