@@ -109,7 +109,7 @@ class Block(metaclass=abc.ABCMeta):
         unless another update occurs before a Block's ``push_update()`` method
         is called.
 
-        Each of this method arguments is from `i3bar's protocol specification`_,
+        Each of this method arguments is from `blocks in i3bar protocol`_,
         since they're mapped directly from it (so a ``full_text="foo"`` results
         in a ``{"full_text": "foo"}`` in the Block's output).
 
@@ -164,7 +164,7 @@ class Block(metaclass=abc.ABCMeta):
         :param markup: A string that indicates how the text of the block should
             be parsed. Pango markup only works if you use a pango font.
 
-        .. _i3bar's protocol specification:
+        .. _blocks in i3bar protocol:
             https://i3wm.org/docs/i3bar-protocol.html#_blocks_in_detail
         """
         self._state = misc.non_nullable_dict(
@@ -277,7 +277,7 @@ class Block(metaclass=abc.ABCMeta):
     ) -> None:
         """Callback called when a click event happens to this Block.
 
-        Each of this method arguments is from `i3bar's protocol specification`_,
+        Each of this method arguments is from `click events in i3bar protocol`
         since they're mapped directly (so a ``{"x": 1}`` results in a ``x=1``).
 
         :param x: X11 root window coordinates where the click occurred.
@@ -307,7 +307,7 @@ class Block(metaclass=abc.ABCMeta):
             ``i3pyblocks.types.KeyModifier`` has the mapping of the available
             modifiers.
 
-        .. i3bar's protocol specification:
+        .. _click events in i3bar protocol:
           https://i3wm.org/docs/i3bar-protocol.html#_click_events
         """
         pass
