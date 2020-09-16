@@ -191,12 +191,7 @@ class Block(metaclass=abc.ABCMeta):
         This will combine both the default state and the current state to
         generate the current state of the Block.
 
-        :returns: A State dict, ready to be converted to JSON. For example::
-
-                {
-                    "full_text": "Some funny text",
-                    "background": "#FF0000",
-                }
+        :returns: A State dict, ready to be converted to JSON.
         """
         return {**self._default_state, **self._state}  # type: ignore
 
