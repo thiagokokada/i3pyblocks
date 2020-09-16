@@ -33,8 +33,11 @@ setuptools.setup(
             "isort",
             "mypy",
             "pip-tools",
+        ],
+        "docs": [
             "sphinx",
             "sphinx-autoapi",
+            "sphinx-rtd-theme",
         ],
         "test": [
             "asynctest",

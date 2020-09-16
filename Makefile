@@ -3,7 +3,7 @@ SRC_PATHS := *.py docs/*.py i3pyblocks $(TEST_PATHS)
 PYTHON := venv/bin/python
 .PHONY: all deps lint \
 	black black-fix clean deps-compile deps-upgrade deps-sync dev-install \
-	isort isort-fix flake8 mypy test test-coverage
+	docs isort isort-fix flake8 mypy test test-coverage
 
 all: lint test-coverage
 deps: deps-compile deps-sync
@@ -28,6 +28,10 @@ deps-sync:
 
 dev-install:
 	$(PYTHON) -m pip install -r requirements.txt
+
+docs:
+	cd docs && make html
+	@echo -e "\033[95m\n\nBuild successful! View the docs homepage at docs/_build/html/index.html.\n\033[0m"
 
 isort:
 	$(PYTHON) -m isort --check $(SRC_PATHS)
