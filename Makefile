@@ -1,5 +1,5 @@
 TEST_PATHS := tests
-SRC_PATHS := *.py i3pyblocks $(TEST_PATHS)
+SRC_PATHS := *.py docs/*.py i3pyblocks $(TEST_PATHS)
 PYTHON := venv/bin/python
 .PHONY: all deps lint \
 	black black-fix clean deps-compile deps-upgrade deps-sync dev-install \
