@@ -37,6 +37,7 @@ setuptools.setup(
         "docs": [
             "sphinx",
             "sphinx-autoapi",
+            "sphinx-rtd-theme",
         ],
         "test": [
             "asynctest",
