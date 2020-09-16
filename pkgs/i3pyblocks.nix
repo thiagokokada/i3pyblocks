@@ -34,12 +34,19 @@ mach-nix.buildPythonApplication rec {
     ref = "master";
   };
 
-  extras = extraFeatures;
+  extras = extraFeatures ++ [ "test" ];
 
   buildInputs = libs ++ [ makeWrapper ];
 
   makeWrapperArgs =
     [ "--suffix" "LD_LIBRARY_PATH" ":" "${stdenv.lib.makeLibraryPath libs}" ];
+
+  disable_checks = false;
+
+  checkPhase = ''
+    export LD_LIBRARY_PATH="${stdenv.lib.makeLibraryPath libs}"
+    ${pythonPkg.interpreter} -m pytest
+  '';
 
   meta = with stdenv.lib; {
     homepage = "https://github.com/thiagokokada/i3pyblocks";
