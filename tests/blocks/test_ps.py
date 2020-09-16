@@ -165,26 +165,14 @@ async def test_network_speed_block_up():
 
 
 @pytest.mark.asyncio
-async def test_sensors_battery_block_without_battery():
-    mock_config = {"sensors_battery.return_value": None}
-    with patch("i3pyblocks.blocks.ps.psutil", **mock_config):
-        instance = ps.SensorsBatteryBlock()
-
-        await instance.run()
-
-        result = instance.result()
-
-        assert result["full_text"] == "No battery"
-
-
-@pytest.mark.asyncio
-async def test_sensors_battery_block_with_battery():
+async def test_sensors_battery_block():
     mock_config = {
         "sensors_battery.side_effect": [
             misc.AttributeDict(
                 percent=93, secsleft=psutil.POWER_TIME_UNLIMITED, power_plugged=True
             ),
             misc.AttributeDict(percent=23, secsleft=16628, power_plugged=False),
+            None,
             misc.AttributeDict(
                 percent=9, secsleft=psutil.POWER_TIME_UNKNOWN, power_plugged=False
             ),
@@ -204,16 +192,16 @@ async def test_sensors_battery_block_with_battery():
         assert result["full_text"] == "B: PLUGGED 93%"
 
         await instance.run()
-
         result = instance.result()
-
         assert result["full_text"] == "B: ▂ 23% 4:37:08"
         assert result["color"] == types.Color.WARN
 
         await instance.run()
-
         result = instance.result()
+        assert result["full_text"] == "No battery"
 
+        await instance.run()
+        result = instance.result()
         assert result["full_text"] == "B: ▁ 9%"
         assert result["color"] == types.Color.URGENT
 
