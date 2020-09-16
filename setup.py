@@ -33,6 +33,8 @@ setuptools.setup(
             "isort",
             "mypy",
             "pip-tools",
+        ],
+        "docs": [
             "sphinx",
             "sphinx-autoapi",
         ],
