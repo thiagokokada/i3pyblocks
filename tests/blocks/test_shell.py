@@ -32,8 +32,8 @@ async def test_shell_block():
 @pytest.mark.asyncio
 async def test_shell_block_click_handler():
     mock_config = {
-        "aio_run": CoroutineMock(),
-        "aio_run.return_value": (
+        "arun": CoroutineMock(),
+        "arun.return_value": (
             misc.AttributeDict(
                 stdout="stdout\n",
                 stderr="stderr\n",
@@ -63,7 +63,7 @@ async def test_shell_block_click_handler():
             "SCROLL_DOWN",
         ]:
             await instance.click_handler(getattr(types.MouseButton, button))
-            mock_subprocess.aio_run.assert_has_calls(
+            mock_subprocess.arun.assert_has_calls(
                 [
                     call(button),
                     call(
@@ -74,7 +74,7 @@ async def test_shell_block_click_handler():
                     ),
                 ]
             )
-            mock_subprocess.aio_run.reset_mock()
+            mock_subprocess.arun.reset_mock()
 
 
 @pytest.mark.asyncio

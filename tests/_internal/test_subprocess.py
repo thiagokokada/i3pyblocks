@@ -4,8 +4,8 @@ from i3pyblocks._internal import subprocess
 
 
 @pytest.mark.asyncio
-async def test_aio_run():
-    process = await subprocess.aio_run(
+async def test_arun():
+    process = await subprocess.arun(
         args="""
         cat -
         echo Hello World | cut -d" " -f2
@@ -22,7 +22,7 @@ async def test_aio_run():
     assert process.stderr == b"Someone\n"
     assert process.returncode == 1
 
-    process = await subprocess.aio_run(
+    process = await subprocess.arun(
         args=["cat", "-"],
         capture_output=True,
         text=True,

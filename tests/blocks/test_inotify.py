@@ -158,8 +158,8 @@ async def test_backlight_block_without_backlight(tmpdir):
 @pytest.mark.asyncio
 async def test_backlight_block_click_handler(tmpdir):
     mock_config = {
-        "aio_run": CoroutineMock(),
-        "aio_run.return_value": (misc.AttributeDict(returncode=0)),
+        "arun": CoroutineMock(),
+        "arun.return_value": (misc.AttributeDict(returncode=0)),
     }
     with patch(
         "i3pyblocks.blocks.inotify.subprocess", **mock_config
@@ -183,5 +183,5 @@ async def test_backlight_block_click_handler(tmpdir):
             "SCROLL_DOWN",
         ]:
             await instance.click_handler(getattr(types.MouseButton, button))
-            mock_subprocess.aio_run.assert_called_once_with(button)
-            mock_subprocess.aio_run.reset_mock()
+            mock_subprocess.arun.assert_called_once_with(button)
+            mock_subprocess.arun.reset_mock()

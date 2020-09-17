@@ -62,11 +62,11 @@ class ShellBlock(blocks.PollingBlock):
         if not command:
             return
 
-        await subprocess.aio_run(command)
+        await subprocess.arun(command)
         await self.run()
 
     async def run(self) -> None:
-        process = await subprocess.aio_run(
+        process = await subprocess.arun(
             self.command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -128,7 +128,7 @@ class ToggleBlock(blocks.PollingBlock):
         self.format_off = format_off
 
     async def get_state(self) -> bool:
-        process = await subprocess.aio_run(
+        process = await subprocess.arun(
             self.command_state,
             stdout=subprocess.PIPE,
             text=True,
@@ -146,7 +146,7 @@ class ToggleBlock(blocks.PollingBlock):
         else:
             command = self.command_off
 
-        await subprocess.aio_run(command)
+        await subprocess.arun(command)
         await self.run()
 
     async def run(self) -> None:
