@@ -42,7 +42,7 @@ def test_config(capfd, tmpdir):
             """\
             import asyncio
 
-            from i3pyblocks import Runner
+            from i3pyblocks import Runner, utils
             from i3pyblocks.blocks import basic, datetime
 
 
@@ -56,7 +56,7 @@ def test_config(capfd, tmpdir):
 
 
             if __name__ == "__main__":
-                asyncio.run(main())
+                utils.asyncio_run(main())
             """
         )
         f.write(config)

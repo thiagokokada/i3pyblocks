@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import asyncio
 import logging
 import signal
 from pathlib import Path
@@ -228,4 +227,4 @@ async def main():
 
 if __name__ == "__main__":
     # Start the i3pyblocks
-    asyncio.run(main())
+    utils.asyncio_run(main())

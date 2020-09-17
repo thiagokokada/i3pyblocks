@@ -25,7 +25,7 @@ Why?
 - Most blocks are implemented in a very efficient way, based on events instead
   of polling
 - Flexible API allowing for full customization. Includes `Pango`_ markup support
-- Modern Python 3.7+ codebase fully type annotated, thanks to `mypy`_
+- Modern Python 3.6+ codebase fully type annotated, thanks to `mypy`_
 
 .. _Pango:
    https://pango.gnome.org/

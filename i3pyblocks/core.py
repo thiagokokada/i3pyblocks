@@ -82,7 +82,7 @@ class Runner:
                 )
 
         def callback_fn(sig: signal.Signals):
-            return asyncio.create_task(signal_handler(sig))
+            return asyncio.ensure_future(signal_handler(sig))
 
         for signum in signums:
             sig = signal.Signals(signum)  # Make sure this is a Signals instance
@@ -95,7 +95,7 @@ class Runner:
         :param awaitable: Either a coroutine, task or future that will be added
             to the task list to be schedule inside main loop in i3pyblocks.
         """
-        task = asyncio.create_task(awaitable)
+        task = asyncio.ensure_future(awaitable)
         self.tasks.append(task)
         logger.debug(f"Registered async task {awaitable} in {self}")
 

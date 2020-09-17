@@ -20,7 +20,7 @@ error when trying to run this module::
 
 import subprocess
 import time
-from typing import NoReturn, Optional
+from typing import Optional
 
 import pulsectl
 
@@ -135,7 +135,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
             time.sleep(0.5)
             self._initialize_pulse()
 
-    def _event_callback(self, event) -> NoReturn:
+    def _event_callback(self, event) -> None:
         self.event = event
         raise pulsectl.PulseLoopStop()
 

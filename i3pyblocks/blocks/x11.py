@@ -53,7 +53,7 @@ class DPMSBlock(blocks.PollingBlock):
         self.format_on = format_on
         self.format_off = format_off
         self.display = Xdisplay.Display()
-        self.loop = asyncio.get_running_loop()
+        self.loop = asyncio.get_event_loop()
         self.executor = ThreadPoolExecutor(max_workers=1)
 
     async def get_state(self) -> bool:
