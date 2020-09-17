@@ -1,5 +1,5 @@
 import sys
-from typing import TYPE_CHECKING, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     if sys.version_info >= (3, 8):
@@ -26,8 +26,6 @@ if TYPE_CHECKING:
 
 
 else:
-    from typing import Dict, Union
-
     State = Dict[str, Union[str, int, bool]]
 
 

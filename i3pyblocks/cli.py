@@ -1,5 +1,4 @@
 import argparse
-import asyncio
 import types
 from importlib import machinery
 from typing import List, Optional
