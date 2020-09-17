@@ -191,7 +191,7 @@ class BacklightBlock(FileWatcherBlock):
         if not command:
             return
 
-        await subprocess.aio_run(command)
+        await subprocess.arun(command)
 
     def _get_max_brightness(self) -> int:
         if self.device_path:

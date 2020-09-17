@@ -11,7 +11,7 @@ from typing import AnyStr, Iterable, Optional
 from i3pyblocks._internal import models
 
 
-async def aio_run(
+async def arun(
     args: models.CommandArgs,
     *,
     stdin: Optional[int] = DEVNULL,
