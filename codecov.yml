@@ -7,3 +7,5 @@ coverage:
     patch:
       default:
         informational: true
+ignore:
+  - "i3pyblocks/_internal/models.py"
