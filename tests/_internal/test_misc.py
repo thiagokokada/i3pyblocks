@@ -55,7 +55,7 @@ async def test_get_aio_reader(capsys):
     with patch("sys.stdin") as mock_stdin:
         mock_stdin.return_value = b"Hello!"
 
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_event_loop()
 
         with capsys.disabled():
             reader = await misc.get_aio_reader(loop)

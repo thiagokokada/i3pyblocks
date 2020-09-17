@@ -1,11 +1,7 @@
 with import <nixpkgs> {};
 let
   venvDir = "./venv";
-  pythonEnv = python38.withPackages (ps: with ps; [
-    pip
-    setuptools
-    wheel
-  ]);
+  pythonEnv = python38Full;
 in mkShell {
   name = "i3pyblocks";
   buildInputs = [

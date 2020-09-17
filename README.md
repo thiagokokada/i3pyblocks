@@ -10,7 +10,7 @@
 
 A replacement for i3status, written in [Python][1] using [asyncio][2].
 
-For Python 3.7+.
+For Python 3.6+.
 
 ## Installation
 

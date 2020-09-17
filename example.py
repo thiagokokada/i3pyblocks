@@ -228,4 +228,4 @@ async def main():
 
 if __name__ == "__main__":
     # Start the i3pyblocks
-    asyncio.run(main())
+    utils.asyncio_run(main())

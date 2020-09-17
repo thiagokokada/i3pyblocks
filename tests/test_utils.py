@@ -1,3 +1,4 @@
+import asyncio
 import doctest
 
 from i3pyblocks import utils
@@ -19,3 +20,12 @@ def test_pango_markup():
         utils.pango_markup("Big italic", tag="i", size="x-large")
         == '<i size="x-large">Big italic</i>'
     )
+
+
+def test_asyncio_run():
+    async def fn():
+        await asyncio.sleep(0.1)
+        return "Hello!"
+
+    result = utils.asyncio_run(fn())
+    assert result == "Hello!"

@@ -441,7 +441,7 @@ class ExecutorBlock(Block):
 
     async def start(self) -> None:
         try:
-            loop = asyncio.get_running_loop()
+            loop = asyncio.get_event_loop()
             await loop.run_in_executor(self.executor, self.run)
         except Exception as e:
             core.logger.exception(f"Exception in {self.block_name}")

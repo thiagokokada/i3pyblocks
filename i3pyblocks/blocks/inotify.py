@@ -107,7 +107,7 @@ class FileWatcherBlock(blocks.Block):
         watcher.watch(str(self.path), flags=self.flags)
 
         try:
-            loop = asyncio.get_running_loop()
+            loop = asyncio.get_event_loop()
             await watcher.setup(loop)
             while True:
                 await self.run()

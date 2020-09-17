@@ -44,4 +44,6 @@ def main(args: Optional[List[str]] = None) -> None:
         mod = types.ModuleType(loader.name)
         loader.exec_module(mod)
     else:
-        asyncio.run(config_example())
+        from i3pyblocks import utils
+
+        utils.asyncio_run(config_example())
