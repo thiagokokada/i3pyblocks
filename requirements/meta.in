@@ -1,5 +1,16 @@
 # This is an workaround until those issue are fixed:
 # https://github.com/jazzband/pip-tools/issues/625
 # https://github.com/jazzband/pip-tools/issues/204#issuecomment-550051424
--e file:.#egg=i3pyblocks[dev,docs,dbus,http,inotify,i3ipc,ps,pulse,test]
+-e file:.#egg=i3pyblocks[\
+blocks.dbus,\
+blocks.http,\
+blocks.i3ipc,\
+blocks.inotify,\
+blocks.ps,\
+blocks.pulse,\
+dev,\
+docs,\
+test\
+]
+# Pinning manually a version here until python-xlib 0.28 is released
 git+https://github.com/python-xlib/python-xlib@128c60c681a40a843f2935efcc30d80614a065bf#python-xlib
