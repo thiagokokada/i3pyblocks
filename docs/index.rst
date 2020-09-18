@@ -139,3 +139,5 @@ you interested about this project, then maybe this is the project for you.
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+   creating-a-new-block
