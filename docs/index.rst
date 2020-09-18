@@ -16,10 +16,16 @@ Welcome to i3pyblocks's documentation!
 **i3pyblocks** is a replacement for `i3status`_, written in Python using
 `asyncio`_.
 
+Works in both `i3wm`_ and `sway`_.
+
 .. _i3status:
    https://i3wm.org/i3status/manpage.html
 .. _asyncio:
    https://docs.python.org/3/library/asyncio.html
+.. _i3wm:
+   https://i3wm.org/
+.. _sway:
+   https://swaywm.org/
 
 Why? (short version)
 --------------------

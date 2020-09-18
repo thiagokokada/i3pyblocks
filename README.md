@@ -10,11 +10,13 @@
 
 A replacement for i3status, written in [Python][1] using [asyncio][2].
 
+Works in both [i3wm][3] and [sway][4].
+
 For Python 3.6+.
 
 ## Installation
 
-First, it is recommended to create [venv][3] so this package is isolated
+First, it is recommended to create [venv][5] so this package is isolated
 from other Python packages in your system.
 
 ```shell
@@ -64,8 +66,8 @@ its capabilities. This file also has comments explaining how the basics of
 `i3pyblocks` works, so it serves as a great start point for your own
 configuration file.
 
-Afterwards, you can put something like this in your `$HOME/.config/i3/config`
-file:
+Afterwards, you can put something like this in your `$HOME/.config/i3/config` or
+`$HOME/.config/sway/config` file:
 
 ```
 bar {
@@ -79,7 +81,7 @@ as an overlay. Check branch's `README.md` for details.
 
 ## Development
 
-To setup a development environment, create a new [venv][3] first and run:
+To setup a development environment, create a new [venv][5] first and run:
 
 ```shell
 make dev-install
@@ -115,4 +117,6 @@ Please make sure to update tests as appropriate.
 
 [1]: https://www.python.org/
 [2]: https://docs.python.org/3/library/asyncio.html
-[3]: https://docs.python.org/3/library/venv.html
+[3]: i3wm.org/
+[4]: https://swaywm.org/
+[5]: https://docs.python.org/3/library/venv.html
