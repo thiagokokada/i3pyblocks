@@ -6,12 +6,12 @@
   # Use Python from system so we ensure that we are using the same glibc
 , pythonPkg ? pkgs.python38
 , extraFeatures ? [
-    "dbus"
-    "http"
-    "i3ipc"
-    "inotify"
-    "ps"
-    "pulse"
+    "blocks.dbus"
+    "blocks.http"
+    "blocks.i3ipc"
+    "blocks.inotify"
+    "blocks.ps"
+    "blocks.pulse"
   ]
 }:
 
