@@ -17,14 +17,14 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={"console_scripts": ["i3pyblocks = i3pyblocks.cli:main"]},
     extras_require={
-        "dbus": ["dbus-next>=0.1.1"],
-        "http": ["aiohttp>=3.4.0"],
-        "i3ipc": ["i3ipc>=2.0.1"],
-        "inotify": ["aionotify>=0.2.0"],
-        "ps": ["psutil>=5.4.8"],
-        "pulse": ["pulsectl>=18.10.5"],
+        "blocks.dbus": ["dbus-next>=0.1.1"],
+        "blocks.http": ["aiohttp>=3.4.0"],
+        "blocks.i3ipc": ["i3ipc>=2.0.1"],
+        "blocks.inotify": ["aionotify>=0.2.0"],
+        "blocks.ps": ["psutil>=5.4.8"],
+        "blocks.pulse": ["pulsectl>=18.10.5"],
         # Future version not released yet
-        "x11": ["python-xlib>0.2.7"],
+        "blocks.x11": ["python-xlib>0.2.7"],
         # Non-runtime deps
         "dev": [
             "black",
