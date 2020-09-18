@@ -119,8 +119,10 @@ so common that **i3pyblocks** has an abstraction for it, the
 
   utils.asyncio_run(main())
 
-Running it will result in the exact same result as the ``CounterBlock``. We
-can increase the interval between each update by passing
+
+:class:`~i3pyblocks.blocks.base.PollingBlock` will call
+:meth:`~i3pyblocks.blocks.base.PollingBlock.run` at each second, exactly like
+our previous example. We can increase the interval between each update by passing
 ``super.__init__(sleep=X)``, where ``X`` is the seconds between each update.
 
 .. [1] Since both :class:`~i3pyblocks.blocks.base.Block` and
