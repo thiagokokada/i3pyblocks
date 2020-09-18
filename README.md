@@ -117,6 +117,6 @@ Please make sure to update tests as appropriate.
 
 [1]: https://www.python.org/
 [2]: https://docs.python.org/3/library/asyncio.html
-[3]: i3wm.org/
+[3]: https://i3wm.org/
 [4]: https://swaywm.org/
 [5]: https://docs.python.org/3/library/venv.html
