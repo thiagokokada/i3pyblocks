@@ -165,8 +165,8 @@ results in::
 
     {"version": 1, "click_events": true}
     [
-    [{"name": "HelloWorldBlock", "instance": "98753263-ea0f-4813-85a1-8779786e8276", "full_text": "Hello World!"}],
-    [{"name": "HelloWorldBlock", "instance": "98753263-ea0f-4813-85a1-8779786e8276", "full_text": "Bye!"}],
+    [{"name": "HelloWorldBlock", "instance": "<random-id>", "full_text": "Hello World!"}],
+    [{"name": "HelloWorldBlock", "instance": "<random-id>", "full_text": "Bye!"}],
     ^C
 
 To handle mouse clicks, there is a similar method called
