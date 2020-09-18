@@ -9,36 +9,41 @@ reasonable easy. Let's start with a simple, "Hello World!" example:
 
 .. code-block:: python
 
-  from i3pyblocks import Runner, blocks, utils
+    from i3pyblocks import Runner, blocks, utils
 
-  class HelloWorldBlock(blocks.Block):
-      """Block that shows a 'Hello World!' text."""
-      async def start(self) -> None:
-          self.update("Hello World!")
-
-
-  async def main():
-      runner = Runner()
-      await runner.register_block(HelloWorldBlock())
-      await runner.start()
+    class HelloWorldBlock(blocks.Block):
+        """Block that shows a 'Hello World!' text."""
+        async def start(self) -> None:
+            self.update("Hello World!")
 
 
-  utils.asyncio_run(main())
+    async def main():
+        runner = Runner()
+        await runner.register_block(HelloWorldBlock())
+        await runner.start()
+
+
+    utils.asyncio_run(main())
 
 It is a very silly example, but it should be sufficient to illustrate. We are
 using the :class:`~i3pyblocks.blocks.base.Block`, that is the root of all blocks
 in **i3pyblocks**.
 
 Save the content above in a file called ``hello_world.py``. To test in terminal,
-we can run it using::
+we can run it using:
 
-  $ i3pyblocks -c hello_world.py
+.. code-block:: sh
 
-And we should saw the following being printed in terminal::
+    $ i3pyblocks -c hello_world.py
 
-  {"version": 1, "click_events": true}
-  [
-  [{"name": "HelloWorldBlock", "instance": "<random-id>", "full_text": "Hello World!"}],
+And we should saw the following being printed in terminal:
+
+.. code-block:: sh
+
+    {"version": 1, "click_events": true}
+    [
+    [{"name": "HelloWorldBlock", "instance": "<random-id>", "full_text": "Hello World!"}],
+    ^C
 
 There is only one update since this block doesn't do anything interesting. Use
 ``Ctrl+C`` (you may need to press twice) to exit.
@@ -77,7 +82,9 @@ example:
 
   utils.asyncio_run(main())
 
-Running it in terminal for ~5 seconds results in::
+Running it in terminal for ~5 seconds results in:
+
+.. code-block:: sh
 
     $ i3pyblocks -c example.py
     {"version": 1, "click_events": true}
@@ -88,7 +95,7 @@ Running it in terminal for ~5 seconds results in::
     [{"name": "HelloWorldBlock", "instance": "<random-id>", "full_text": "Counter: 3"}],
     [{"name": "HelloWorldBlock", "instance": "<random-id>", "full_text": "Counter: 4"}],
     [{"name": "HelloWorldBlock", "instance": "<random-id>", "full_text": "Counter: 5"}],
-    C^
+    ^C
 
 As we would expect. Actually, blocks that run an update at each *X* seconds are
 so common that **i3pyblocks** has an abstraction for it, the
@@ -96,28 +103,28 @@ so common that **i3pyblocks** has an abstraction for it, the
 
 .. code-block:: python
 
-  import asyncio
+    import asyncio
 
-  from i3pyblocks import Runner, blocks, utils
+    from i3pyblocks import Runner, blocks, utils
 
-  class ImprovedCounterBlock(blocks.PollingBlock):
-      """Block that shows a 'Hello World!' text."""
-      def __init__(self):
-          super().__init__(sleep=1)
-          self.counter = 0
+    class ImprovedCounterBlock(blocks.PollingBlock):
+        """Block that shows a 'Hello World!' text."""
+        def __init__(self):
+            super().__init__(sleep=1)
+            self.counter = 0
 
-      async def run(self) -> None:
-          self.update(f"Counter: {self.counter}")
-          self.counter += 1
-
-
-  async def main():
-      runner = Runner()
-      await runner.register_block(ImprovedCounterBlock())
-      await runner.start()
+        async def run(self) -> None:
+            self.update(f"Counter: {self.counter}")
+            self.counter += 1
 
 
-  utils.asyncio_run(main())
+    async def main():
+        runner = Runner()
+        await runner.register_block(ImprovedCounterBlock())
+        await runner.start()
+
+
+    utils.asyncio_run(main())
 
 
 :class:`~i3pyblocks.blocks.base.PollingBlock` will call
@@ -126,9 +133,9 @@ our previous example. We can increase the interval between each update by passin
 ``super.__init__(sleep=X)``, where ``X`` is the seconds between each update.
 
 .. [1] Since both :class:`~i3pyblocks.blocks.base.Block` and
-  :class:`~i3pyblocks.blocks.base.PollingBlock` are blocks used to construct
-  other blocks, they're kept in the same namespace, :mod:`i3pyblocks.blocks.base`.
-  There is also some other base blocks that will be shown later on.
+   :class:`~i3pyblocks.blocks.base.PollingBlock` are blocks used to construct
+   other blocks, they're kept in the same namespace, :mod:`i3pyblocks.blocks.base`.
+   There is also some other base blocks that will be shown later on.
 
 Clicks and signals
 ------------------
@@ -139,30 +146,33 @@ we will implement :meth:`~i3pyblocks.blocks.base.Block.signal_handler`:
 
 .. code-block:: python
 
-  import signal
+    import signal
 
-  from i3pyblocks import Runner, blocks, utils
+    from i3pyblocks import Runner, blocks, utils
 
-  class HelloWorldBlock(blocks.Block):
-      async def signal_handler(self, *, sig: int) -> None:
-          if sig == signal.SIGUSR1:
-              self.update("Bye!")
+    class HelloWorldBlock(blocks.Block):
+        async def signal_handler(self, *, sig: signal.Signals) -> None:
+            if sig == signal.SIGUSR1:
+                self.update("Bye!")
 
-      async def start(self) -> None:
-          self.update("Hello World!")
-
-
-  async def main():
-      runner = Runner()
-      await runner.register_block(HelloWorldBlock(), signals=(signal.SIGUSR1,))
-      await runner.start()
+        async def start(self) -> None:
+            self.update("Hello World!")
 
 
-  utils.asyncio_run(main())
+    async def main():
+        runner = Runner()
+        await runner.register_block(HelloWorldBlock(), signals=(signal.SIGUSR1,))
+        await runner.start()
+
+
+    utils.asyncio_run(main())
 
 Now running this in one terminal and running ``pkill -SIGUSR1 i3pyblocks``
-results in::
+results in:
 
+.. code-block:: sh
+
+    $ i3pyblocks -c example.py
     {"version": 1, "click_events": true}
     [
     [{"name": "HelloWorldBlock", "instance": "<random-id>", "full_text": "Hello World!"}],
