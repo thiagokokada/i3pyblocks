@@ -78,6 +78,8 @@ class DPMSBlock(blocks.PollingBlock):
             self.display.sync,
         )
 
+        self.run()
+
     async def run(self) -> None:
         state = await self.get_state()
 
