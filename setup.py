@@ -13,7 +13,11 @@ setuptools.setup(
     description="A replacement for i3status, written in Python using asyncio.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/thiagokokada/i3pyblocks",
+    url="https://i3pyblocks.readthedocs.io",
+    project_urls={
+        "Documentation": "https://i3pyblocks.readthedocs.io",
+        "Source": "https://github.com/thiagokokada/i3pyblocks",
+    },
     packages=setuptools.find_packages(),
     entry_points={"console_scripts": ["i3pyblocks = i3pyblocks.cli:main"]},
     extras_require={
