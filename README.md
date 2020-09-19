@@ -16,7 +16,8 @@ For Python 3.6+.
 
 ## Installation and Usage
 
-Check the [User guide][user-guide] section of documentation.
+Look at the [example.py][example.py] file for inspiration and check the
+[User guide][user-guide] section of documentation.
 
 ## Development
 
@@ -65,3 +66,4 @@ Please make sure to update tests as appropriate.
 [user-guide]: https://i3pyblocks.readthedocs.io/en/latest/user-guide.html
 [nixos]: https://nixos.org/
 [creating-a-new-block]: https://i3pyblocks.readthedocs.io/en/latest/creating-a-new-block.html
+[example.py]: https://github.com/thiagokokada/i3pyblocks/blob/master/example.py
