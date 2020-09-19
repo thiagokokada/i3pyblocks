@@ -41,3 +41,16 @@ jobs:
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ secrets.pypi_password }}
+
+    - name: Commit new development version
+      run: |
+        # from refs/tags/v1.2.3 get 1.2.3
+        VERSION="${GITHUB_REF##*/}-dev"
+        VERSION_FILE='i3pyblocks/__version__.py'
+        echo "__version__ = \"${VERSION}\"" > "${VERSION_FILE}"
+        git config --global user.name 'Thiago Kenji Okada'
+        git config --global user.email 'thiagokokada@users.noreply.github.com'
+        git add "${VERSION_FILE}"
+        git commit -m "Bump version"
+        git push
+      shell: bash
