@@ -30,9 +30,11 @@ class DPMSBlock(blocks.PollingBlock):
 
     :param format_off: format string to shown when DPMS is off.
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
 
     .. _DPMS:
         https://en.wikipedia.org/wiki/VESA_Display_Power_Management_Signaling

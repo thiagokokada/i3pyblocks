@@ -55,11 +55,8 @@ class FileWatcherBlock(blocks.Block):
     :param format_file_not_found: Format string to shown when the file in passed
         in ``path`` is not found.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``Block`` class.
-
-    .. seealso::
-
-        ``Block()`` arguments.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.Block` class.
 
     .. _in aionotify repo:
         https://github.com/rbarrois/aionotify/blob/master/aionotify/enums.py
@@ -141,8 +138,8 @@ class BacklightBlock(FileWatcherBlock):
         interacts with mouse inside this block. Can be useful to adjust the
         backlight using scroll, for example.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``FileWatcherBlock``
-        class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.FileWatcherBlock` class.
 
     .. _sysfs backlight interface:
         https://www.kernel.org/doc/Documentation/ABI/stable/sysfs-class-backlight

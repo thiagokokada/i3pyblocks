@@ -64,7 +64,8 @@ class PulseAudioBlock(blocks.ExecutorBlock):
 
     :param command: Program to run when this block is right clicked.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``BlockExecutor`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.ExecutorBlock` class.
 
     .. _pavucontrol:
       https://freedesktop.org/software/pulseaudio/pavucontrol/

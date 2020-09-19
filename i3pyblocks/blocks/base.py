@@ -30,14 +30,14 @@ class Block(metaclass=abc.ABCMeta):
     :param block_name: Allows you to set a custom internal representation for
         the class. This should only be useful if you need to differentiate
         between multiple instances of the same module in a consistent way
-        (i.e.: you can't rely on something random like the ``Module.id``).
+        (i.e.: you can't rely on something random like the :attr:`id`).
         If not passed this will use by default the string representation of
         the class name.
 
     :param default_state: Defines the default state of the Block, that is, the
-        value that will be shown unless the state is updated by Block's
-        ``update_state()`` method. For example, let's say you want a block that
-        has a permanent green background (unless overriden), so you can do
+        value that will be shown unless the state is updated by
+        :meth:`update_state()` method. For example, let's say you want a block
+        that has a permanent green background (unless overriden), so you can do
         something like::
 
             block_instance = Block(
@@ -46,12 +46,15 @@ class Block(metaclass=abc.ABCMeta):
                 },
             )
 
-        And all calls to `result()` will have ``background == "#008000"``,
-        unless overriden by ``update_status()`` with a different value.
+        And all calls to :meth:`result()` will have ``background == "#008000"``,
+        unless overriden by :meth:`update_state()` with a different value.
 
-    :cvar ex_format: Extended format function accessible to all children. It
-        supports some additional funcionality compared to the default
-        ``str().format()`` method, for example::
+    :ivar id: Unique identifier for Block based on UUIDv4.
+
+    :cvar ex_format: Reference of :class:`~i3pyblocks.formatter.ExtendedFormatter`'s
+        ``format()`` method available to all children. Supports some additional
+        funcionality compared to the default ``str().format()`` method, for
+        example::
 
             s = "HellO WorlD!"
             print(self.ex_format("{!u}", s))  # "HELLO WORLD!"
@@ -61,8 +64,8 @@ class Block(metaclass=abc.ABCMeta):
 
     .. seealso::
 
-        For details about each of the keys available in ``default_state``, see
-        ``update_state()`` documentation.
+        For details about each of the keys available in ``default_state``
+        parameter, see :meth:`update_state()` documentation.
     """
 
     ex_format: Callable[..., str] = formatter.ExtendedFormatter().format
@@ -106,8 +109,8 @@ class Block(metaclass=abc.ABCMeta):
         """Updates Block's state.
 
         The state is what will be shown by the Block in the next update,
-        unless another update occurs before a Block's ``push_update()`` method
-        is called.
+        unless another update occurs before a Block's :meth:`push_update`
+        method is called.
 
         Each of this method arguments is from `blocks in i3bar protocol`_,
         since they're mapped directly from it (so a ``full_text="foo"`` results
@@ -191,7 +194,8 @@ class Block(metaclass=abc.ABCMeta):
         This will combine both the default state and the current state to
         generate the current state of the Block.
 
-        :returns: A State dict, ready to be converted to JSON.
+        :returns: A :class:`~i3pyblocks._internal.models.State` dict, ready
+            to be converted to JSON.
         """
         return {**self._default_state, **self._state}  # type: ignore
 
@@ -210,15 +214,11 @@ class Block(metaclass=abc.ABCMeta):
 
         This method will immediately updates a Block, so its new contents
         should be shown in the next redraw of i3bar. It is basically the
-        equivalent of calling Method's ``update_state()`` followed by
-        ``push_update()``.
+        equivalent of calling Method's :meth:`update_state()` followed by
+        :meth:`push_update()`.
 
         The parameters of this method is passed as-is to Block's
-        ``update_state()``.
-
-        .. seealso::
-
-            ``Block.update_state()`` arguments.
+        :meth:`update_state()`.
         """
         self.update_state(*args, **kwargs)
         self.push_update()
@@ -231,14 +231,11 @@ class Block(metaclass=abc.ABCMeta):
 
         Note that this does not necessary stops the Block from working
         (i.e.: its loop may still be running), it just stops the updates
-        from showing in i3bar.
+        from showing in i3bar. Each Block is responsible to stop updating
+        after this method is called, if this is desired.
 
         The parameters of this method is passed as-is to Block's
-        ``update_state()``.
-
-        .. seealso:
-
-            ``Block.update_state()`` arguments.
+        :meth:`update_state()`.
         """
         self.update(*args, **kwargs)
         self.frozen = True
@@ -246,16 +243,19 @@ class Block(metaclass=abc.ABCMeta):
     async def setup(self, queue: Optional[asyncio.Queue] = None) -> None:
         """Setup a Block.
 
-        This method is called just before ``start()`` to setup some things
+        This method is called just before :meth:`start()` to setup some things
         necessary to make the Block work.
 
-        If you want to do some kinda of asynchronous initialization, override
+        If you want to do some kinda of async initialization, override
         this function and put your code here. However, do not forget to call
         ``await super().setup(queue=queue)`` after your code to prepare your
         Block for updates.
 
-        :param queue: ``asyncio.Queue`` instance that will be used to notify
+        :param queue: `asyncio.Queue`_ instance that will be used to notify
             updates from this Block.
+
+        .. _asyncio.Queue:
+            https://docs.python.org/3/library/asyncio-queue.html#asyncio.Queue
         """
         if queue:
             self.update_queue = queue
@@ -302,9 +302,10 @@ class Block(metaclass=abc.ABCMeta):
 
         .. seealso::
 
-            ``i3pyblocks.types.MouseButton`` has the mapping of the available
+            :class:`i3pyblocks.types.MouseButton` has the mapping of the available
             mouse button IDs.
-            ``i3pyblocks.types.KeyModifier`` has the mapping of the available
+
+            :class:`i3pyblocks.types.KeyModifier` has the mapping of the available
             modifiers.
 
         .. _click events in i3bar protocol:
@@ -315,8 +316,11 @@ class Block(metaclass=abc.ABCMeta):
     async def signal_handler(self, *, sig: signal.Signals) -> None:
         """Callback called when a signal event happens to this Block.
 
-        :param sig: Signals enum with the signal that originated this event.
+        :param sig: `Signal enum`_ with the signal that originated this event.
             This can be used to differentiate between different signals.
+
+        .. _Signal enum:
+            https://docs.python.org/3/library/signal.html#module-contents
         """
         pass
 
@@ -329,7 +333,7 @@ class Block(metaclass=abc.ABCMeta):
         This method is where you generally wants to put your main loop to
         update the state of the Block. This loop can either be triggered by
         events or can be an infinity loop. It can even be a single call
-        to ``update()``, but in this case your Block will only be updated
+        to :meth:`update()`, but in this case your Block will only be updated
         once.
         """
         pass
@@ -339,20 +343,16 @@ class PollingBlock(Block):
     """Polling Block.
 
     This is the most common Block implementation. It is a Block that runs
-    a loop where it executes ``run()`` method and sleeps for ``sleep`` seconds,
-    afterwards running ``run()`` again, keeping this cycle forever.
+    a loop where it executes :meth:`run()` method and sleeps for ``sleep``
+    seconds, afterwards running :meth:`run()` again, keeping this cycle forever.
 
     By default, a click or a signal event will refresh the contents of this
     Block.
 
     You must not instantiate this class directly, instead you should
-    subclass it and implement ``run()`` method first.
+    subclass it and implement :meth:`run()` method first.
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
-
-    .. seealso::
-
-        ``Block()`` arguments.
+    :param sleep: Sleep in seconds between each call to :meth:`run()`.
     """
 
     def __init__(self, sleep: int = 1, **kwargs) -> None:
@@ -404,20 +404,16 @@ class ExecutorBlock(Block):
     to implement functionality using asyncio, for example, when a external
     library uses its own event loop.
 
-    What this block does is to call ``run()`` method inside an `executor`_,
+    What this block does is to call :meth:`run()` method inside an `executor`_,
     that is run in a separate thread or process depending of the selected
     executor. Since it is running in a separate thread/process, it does not
     interfere with the main asyncio loop.
 
     You must not instantiate this class directly, instead you should
-    subclass it and implement ``run()`` method first.
+    subclass it and implement :meth:`run()` method first.
 
     :param executor: An optional `Executor instance`_. If not passed it will
         use the default one.
-
-    .. seealso::
-
-        ``Block()`` arguments.
 
     .. _executor:
         https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor

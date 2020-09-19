@@ -22,11 +22,12 @@ from i3pyblocks import blocks, core, types
 class DbusBlock(blocks.Block):
     """D-Bus Block.
 
-    This Block extends the ``i3pyblocks.blocks.Block`` by offering some helper
-    methods to work with D-Bus, alongside with a proper ``setup()`` method.
+    This Block extends the :class:`i3pyblocks.blocks.base.Block` by offering
+    some helper methods to work with D-Bus, alongside with a proper :meth:`setup()`
+    method.
 
     You must not instantiate this class directly, instead you should subclass
-    it and implement ``start()`` method first.
+    it and implement :meth:`start()` method first.
     """
 
     async def setup(self, queue: Optional[asyncio.Queue] = None) -> None:

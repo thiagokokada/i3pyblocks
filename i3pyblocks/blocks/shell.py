@@ -31,8 +31,11 @@ class ShellBlock(blocks.PollingBlock):
         interacts with mouse inside this block. After running this Block will
         be updated. Can be useful to change the keyboard layout for example.
 
-    :param \*\*kwargs:
-        Extra arguments to be passed to ``PollingBlock`` class.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
+
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
     """
 
     def __init__(
@@ -104,9 +107,11 @@ class ToggleBlock(blocks.PollingBlock):
 
     :param format_off: Format string to be shown when state is OFF.
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
     """
 
     def __init__(
