@@ -12,8 +12,8 @@ import uuid
 from concurrent.futures import Executor
 from typing import Callable, List, Optional
 
-from i3pyblocks import core
-from i3pyblocks._internal import formatter, misc, models
+from i3pyblocks import core, formatter
+from i3pyblocks._internal import misc, models
 
 
 class Block(metaclass=abc.ABCMeta):

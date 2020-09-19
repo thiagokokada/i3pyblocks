@@ -43,12 +43,14 @@ class DateTimeBlock(blocks.PollingBlock):
         self.format_time = format_time
         self.format = self.format_time
 
-    async def click_handler(self, **_kwargs) -> None:
+    def toggle_date_time(self) -> None:
         if self.format == self.format_date:
             self.format = self.format_time
         else:
             self.format = self.format_date
 
+    async def click_handler(self, **_kwargs) -> None:
+        self.toggle_date_time()
         await self.run()
 
     async def run(self) -> None:
