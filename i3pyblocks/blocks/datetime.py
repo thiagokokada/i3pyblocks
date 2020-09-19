@@ -22,10 +22,12 @@ class DateTimeBlock(blocks.PollingBlock):
     :param format_time: Format string when showing time. Uses `strftime`_
         placeholders.
 
-    :param sleep: Sleep in seconds between each call to ``run()``. If you're
-        not showing seconds in this block it makes sense to increase this value.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`. If you're not
+        showing seconds in this block it makes sense to increase this value.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
 
     .. _strftime:
         https://strftime.org/

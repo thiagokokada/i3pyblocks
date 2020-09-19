@@ -22,7 +22,8 @@ class WindowTitleBlock(blocks.Block):
     :param format: Format string to shown. Supports ``{window_title}``
         placeholder.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``Block`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.Block` class.
     """
 
     def __init__(

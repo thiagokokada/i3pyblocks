@@ -71,9 +71,11 @@ class PollingRequestBlock(blocks.PollingBlock):
         This function would result in ``Hello world`` on ``{response}``
         placeholder.
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
 
     .. _aiohttp docs:
       https://docs.aiohttp.org/en/stable/client_reference.html#aiohttp.ClientSession.request

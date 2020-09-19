@@ -52,9 +52,11 @@ class CpuPercentBlock(blocks.PollingBlock):
         graphic representation of the CPU %. Only displayed when ``format``
         includes ``{icon}`` placeholder.
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
     """
 
     def __init__(
@@ -134,9 +136,11 @@ class DiskUsageBlock(blocks.PollingBlock):
     :param divisor: Divisor used for all size reportings for this Block. For
         example, using ``1024 ** 1024`` here makes all sizes return in MiB.
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
     """
 
     def __init__(
@@ -215,9 +219,11 @@ class LoadAvgBlock(blocks.PollingBlock):
         When the load1 is between [0, 2) the color is set to "000000", from
         [2, 4) is set to "FF0000" and from 4 and beyond it is "#FFFFFF".
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
     """
 
     def __init__(
@@ -280,9 +286,11 @@ class NetworkSpeedBlock(blocks.PollingBlock):
          already includes the most common ones and excludes things like ``lo``
          (loopback interface).
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
     """
 
     def __init__(
@@ -388,9 +396,11 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         graphic representation of the battery %. Only displayed when ``format``
         includes ``{icon}`` placeholder.
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
     """
 
     def __init__(
@@ -485,9 +495,11 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
 
     :param fahrenheit: Show temperature in in Fahrenheit instead of Celsius.
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
     """
 
     def __init__(
@@ -575,9 +587,11 @@ class VirtualMemoryBlock(blocks.PollingBlock):
         graphic representation of the used memory. Only displayed when ``format``
         includes ``{icon}`` placeholder.
 
-    :param sleep: Sleep in seconds between each call to ``run()``.
+    :param sleep: Sleep in seconds between each call to
+        :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
-    :param \*\*kwargs: Extra arguments to be passed to ``PollingBlock`` class.
+    :param \*\*kwargs: Extra arguments to be passed to
+        :class:`~i3pyblocks.blocks.base.PollingBlock` class.
     """
 
     def __init__(

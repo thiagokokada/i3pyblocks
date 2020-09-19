@@ -10,7 +10,7 @@ class TextBlock(blocks.Block):
         Text to be shown.
 
     :param \*\*kwargs: Arguments to be passed to
-        ``i3pyblocks.Block.update_state()`` method.
+        :meth:`i3pyblocks.blocks.base.Block.update_state()` method.
     """
 
     def __init__(self, full_text: str, **kwargs) -> None:
