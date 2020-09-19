@@ -27,8 +27,7 @@ setuptools.setup(
         "blocks.inotify": ["aionotify>=0.2.0"],
         "blocks.ps": ["psutil>=5.4.8"],
         "blocks.pulse": ["pulsectl>=18.10.5"],
-        # Future version not released yet
-        "blocks.x11": ["python-xlib>0.2.7"],
+        "blocks.x11": ["python-xlib>=0.2.8"],
         # Non-runtime deps
         "dev": [
             "black",
