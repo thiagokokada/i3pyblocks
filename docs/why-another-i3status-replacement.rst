@@ -34,8 +34,9 @@ while *i3pystatus* had many solutions that predates some of the later features
 introduced on Python's stdlib [2]_.
 
 So I decided to start a new project that it is this one. I was also interested
-in testing `asyncio`_ and this seemed to be the perfect project to use it. After
-playing with it a little and making a proof-of-concept, I started to implement
+in testing `asyncio`_ and this seemed to be the perfect project to use it,
+since by definition each block must be independent from another. After playing
+with it a little and making a proof-of-concept, I started to implement
 multiple ``blocks`` (still called ``modules`` at the time) for my necessities
 and also new features accordingly I was needing it. Eventually, I substituted
 my old *i3status-rust* config and **i3pyblocks** was officialy born.
@@ -50,14 +51,15 @@ But of course not everything is the same. For one, the usage of asyncio vs.
 the more traditional threading approach from *i3pystatus* makes for some really
 interesting techniques to update the i3bar. AFAIK, **i3pyblocks** is the only
 Python-based i3bar's protocol implementation that have a completely asynchronous
-update of each individual block. A `Queue`_ is responsible to receive any
-updates from each block, and once there is something to update the i3bar is
-refreshed. If you have a bar with blocks that only update at each minute, for
-example, the number of drawings in i3bar will be much less than other
-polling-based solutions.
+update of each individual block.
+
+In **i3pyblocks**, a `Queue`_ is responsible to receive any updates from each
+block, and once there is something to update the i3bar is refreshed. If you
+have a bar with blocks that only update at each minute, for example, the number
+of drawings in i3bar will be much less than other polling-based solutions.
 
 Also, inspired by *i3status-rs* many blocks does a much smarter update technique
-than simply polling. For example, ``i3pyblocks.blocks.inotify.BacklightBlock``
+than simply polling. For example, :class:`i3pyblocks.blocks.inotify.BacklightBlock`
 uses `inotify`_ to listen to any updates to ``/sys/class/backlight/*`` before
 updating the i3bar. This brings two advantages:
 
@@ -98,3 +100,5 @@ you interested about this project, then maybe this is the project for you.
    https://docs.python.org/3/library/asyncio-queue.html
 .. _inotify:
    https://en.wikipedia.org/wiki/Inotify
+.. _asyncio:
+   https://docs.python.org/3/library/asyncio.html
