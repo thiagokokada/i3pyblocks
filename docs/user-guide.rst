@@ -246,6 +246,8 @@ can override :meth:`~i3pyblocks.blocks.base.Block.signal_handler`:
                 self.format = self.format_time
             elif sig == signal.SIGUSR2:
                 self.format = self.format_date
+            # Calling the run method here so the block is updated immediately
+            self.run()
 
     async def main():
         runner = core.Runner()
