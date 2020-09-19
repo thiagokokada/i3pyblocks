@@ -146,4 +146,5 @@ you interested about this project, then maybe this is the project for you.
    :maxdepth: 2
    :caption: Contents:
 
+   user-guide
    creating-a-new-block
