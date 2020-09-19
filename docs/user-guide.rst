@@ -84,6 +84,15 @@ may) need to press twice to exit:
     [{"name": "TextBlock", "instance": "<random-id>", "full_text": "Welcome to i3pyblocks!"}, {"name": "DateTimeBlock", "instance": "<random-id>", "full_text": "18:02:54"}],
     ^C
 
+Now, to start using it in your i3wm, add it to your ``$HOME/.config/i3/config``
+file (or ``$HOME/.config/sway/config`` if using sway)::
+
+    bar {
+        position top
+        status_command i3pyblocks -c /path/to/your/config.py
+    }
+
+
 Customizing blocks
 ------------------
 
