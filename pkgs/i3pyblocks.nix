@@ -12,7 +12,7 @@
     "blocks.inotify"
     "blocks.ps"
     "blocks.pulse"
-    # "blocks.x11"
+    "blocks.x11"
   ]
 }:
 
@@ -38,21 +38,6 @@ mach-nix.buildPythonApplication rec {
   extras = extraFeatures ++ [ "test" ];
 
   buildInputs = libs ++ [ makeWrapper ];
-
-  overrides_pre = [
-    (
-      pySelf: pySuper: {
-        xlib = pySuper.xlib.overrideAttrs (
-          oldAttrs: {
-            src = builtins.fetchTarball "https://github.com/python-xlib/python-xlib/tarball/efc07c4132e48098a0e81ac577b22f63cd7356d9";
-            pname = "python-xlib";
-          }
-        );
-      }
-    )
-  ];
-
-  providers.python-xlib = "nixpkgs";
 
   makeWrapperArgs =
     [ "--suffix" "LD_LIBRARY_PATH" ":" "${stdenv.lib.makeLibraryPath libs}" ];
