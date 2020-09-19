@@ -24,7 +24,7 @@ from typing import Optional
 
 import pulsectl
 
-from i3pyblocks import blocks, types
+from i3pyblocks import blocks, logger, types
 from i3pyblocks._internal import misc, models
 
 
@@ -115,10 +115,13 @@ class PulseAudioBlock(blocks.ExecutorBlock):
 
     def _find_sink_index(self) -> None:
         server_info = self.pulse.server_info()
-        default_sink_name = server_info.default_sink_name
-        sink_list = self.pulse.sink_list()
 
+        default_sink_name = server_info.default_sink_name
+        logger.debug(f"Found new default sink: {default_sink_name}")
+
+        sink_list = self.pulse.sink_list()
         assert len(sink_list) > 0, "No sinks found"
+        logger.debug(f"Current available sinks: {sink_list}")
 
         self.sink_index = next(
             # Find the sink with default_sink_name
@@ -133,6 +136,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         except pulsectl.PulseError:
             # Waiting a little before trying to connect again so we don't
             # burn CPU in a infinity loop
+            logger.debug("Error while updating sink info, reinitializing Pulse.")
             time.sleep(0.5)
             self._initialize_pulse()
 

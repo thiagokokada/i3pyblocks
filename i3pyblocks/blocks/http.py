@@ -25,7 +25,7 @@ from typing import Any, Awaitable, Callable, Mapping
 
 import aiohttp
 
-from i3pyblocks import blocks, core
+from i3pyblocks import blocks, logger
 
 DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=5)
 
@@ -125,4 +125,4 @@ class PollingRequestBlock(blocks.PollingBlock):
             asyncio.TimeoutError,
         ) as exception:
             self.update(self.format_error.format(exception=str(exception)))
-            core.logger.exception(exception)
+            logger.exception(exception)

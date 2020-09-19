@@ -11,16 +11,12 @@ Attributes:
 
 import asyncio
 import json
-import logging
 import signal
 import uuid
 from typing import AnyStr, Awaitable, Dict, Iterable, List, Optional, Union
 
-from i3pyblocks import blocks
+from i3pyblocks import blocks, logger
 from i3pyblocks._internal import misc, models
-
-logger = logging.getLogger("i3pyblocks")
-logger.addHandler(logging.NullHandler())
 
 
 class Runner:

@@ -16,7 +16,7 @@ from typing import Optional
 from dbus_next import aio as dbus_aio
 from dbus_next import errors
 
-from i3pyblocks import blocks, core, types
+from i3pyblocks import blocks, logger, types
 
 
 class DbusBlock(blocks.Block):
@@ -34,7 +34,7 @@ class DbusBlock(blocks.Block):
         try:
             self.bus = await dbus_aio.MessageBus().connect()
         except errors.DBusError:
-            core.logger.exception(
+            logger.exception(
                 f"Cannot connect to D-Bus. Block {self.block_name} is disabled!"
             )
             return
@@ -129,15 +129,13 @@ class KbddBlock(DbusBlock):
                     self.interface_name,
                 )
             except errors.DBusError:
-                core.logger.debug(
-                    f"D-Bus {self.bus_name} service not found, retrying..."
-                )
+                logger.debug(f"D-Bus {self.bus_name} service not found, retrying...")
                 await asyncio.sleep(self.sleep)
 
         try:
             await self.update_layout()
             self.interface.on_layout_name_changed(self.update_callback)
         except Exception as e:
-            core.logger.exception(f"Exception in {self.block_name}")
+            logger.exception(f"Exception in {self.block_name}")
             self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
             raise e
