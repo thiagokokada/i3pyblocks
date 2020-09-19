@@ -1,10 +1,10 @@
 # i3pyblocks
 
+[![PyPI version](https://badge.fury.io/py/i3pyblocks.svg)](https://badge.fury.io/py/i3pyblocks)
 [![Test](https://github.com/thiagokokada/i3pyblocks/workflows/Test/badge.svg)](https://github.com/thiagokokada/i3pyblocks/actions)
 [![Lint](https://github.com/thiagokokada/i3pyblocks/workflows/Lint/badge.svg)](https://github.com/thiagokokada/i3pyblocks/actions)
 [![Documentation Status](https://readthedocs.org/projects/i3pyblocks/badge/?version=latest)](https://i3pyblocks.readthedocs.io/en/latest/?badge=latest)
 [![Codecov](https://codecov.io/gh/thiagokokada/i3pyblocks/branch/master/graph/badge.svg)](https://codecov.io/gh/thiagokokada/i3pyblocks)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ![Screenshot](https://raw.github.com/thiagokokada/i3pyblocks/master/docs/_static/screenshot.png)
 

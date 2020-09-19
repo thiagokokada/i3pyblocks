@@ -9,6 +9,9 @@ Welcome to i3pyblocks's documentation!
 .. image:: https://img.shields.io/github/stars/thiagokokada/i3pyblocks.svg?style=social&label=Star&maxAge=2592000
    :target: https://github.com/thiagokokada/i3pyblocks/stargazers/
    :alt: GitHub stars
+.. image:: https://badge.fury.io/py/i3pyblocks.svg
+   :target: https://badge.fury.io/py/i3pyblocks
+   :alt: PyPI version
 
 .. image:: _static/screenshot.png
    :alt: Screenshot of i3pyblocks bar.
