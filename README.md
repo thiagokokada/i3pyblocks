@@ -35,13 +35,13 @@ dependencies are not installed most blocks won't work.
 
 Each block dependency is declared in `extra_requires` dictionary inside 
 `setup.py` file, so for example if you want to use `i3pyblocks.blocks.inotify`
-you have to install the extra dependencies declared in `inotify` feature:
+you have to install the extra dependencies declared in `blocks.inotify` feature:
 
 ```shell
 # This will install the dependencies for `i3pyblocks.blocks.inotify`
-pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[inotify]'
+pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[blocks.inotify]'
 # You can also pass multiple dependencies separated by comma
-pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[i3ipc,ps]'
+pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[blocks.i3ipc,blocks.ps]'
 ```
 
 ## Usage
