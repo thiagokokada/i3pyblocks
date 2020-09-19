@@ -1,6 +1,23 @@
 Creating a new block
 ====================
 
+Development setup
+-----------------
+
+If you want to quick start the development of **i3pyblocks**, make sure you
+have Python >=3.6 installed and run:
+
+.. code-block:: sh
+
+   $ git clone https://github.com/thiagokokada/i3pyblocks
+   $ cd i3pyblocks
+   $ python3 -m venv venv
+   $ source venv/bin/activate
+   $ make dev-install
+
+To test if everything is working, you try to run ``i3pyblocks -c example.py``
+in your terminal.
+
 Let's start with a "Hello World!"
 ---------------------------------
 
@@ -262,3 +279,48 @@ add the following to ``setup.py``:
 
 Don't forget to add your module to ``requirements/dev.in`` file and run
 ``make deps`` to update the dev/CI dependencies.
+
+Collaborating
+-------------
+
+i3pyblocks use `Continuous Integration (CI)`_ to ensure the quality of codebase.
+We use `Black`_ to automatically format the code, `Read the Docs`_ to
+automatically generate the documentation and multiple linters to check possible
+issues of the code.
+
+Also, writing automated tests are **strongly** recommended for new blocks since
+they're the only way to ensure that we don't break something in case of changes.
+
+If you want to test your modifications locally, you can use:
+
+.. code-block:: sh
+
+    $ make
+
+This will run everything that the CI run. If you want to run only tests, use:
+
+.. code-block:: sh
+
+    $ make test
+
+To run linters, use:
+
+.. code-block:: sh
+
+    $ make lint
+
+To automatically fix code issues, run:
+
+.. code-block:: sh
+
+    $ make lint-fix
+
+But keep in mind that not all fixes are automatically, so running ``make lint``
+is still necessary.
+
+.. _`Continuous Integration (CI)`:
+    https://en.wikipedia.org/wiki/Continuous_integration
+.. _`Black`:
+    https://github.com/psf/black
+.. _`Read the Docs`:
+    https://readthedocs.org/
