@@ -4,8 +4,17 @@ User guide
 Installation
 ------------
 
-To install **i3pyblocks**, make sure you have Python >=3.6 installed and simply
-run this simple command in your terminal of choice:
+Before installing, it is recommended to create a `venv`_ to isolate
+i3pyblocks (and its dependencies) from other Python packages in your system [1]_.
+To do it, you can run:
+
+.. code-block:: sh
+
+    $ python3 -m venv venv
+    $ source venv/bin/activate
+
+To actually install i3pyblocks, make sure you have Python >=3.6 installed and
+simply run this simple command in your terminal of choice:
 
 .. code-block:: sh
 
@@ -36,9 +45,25 @@ similar to below:
 
     $ python3 -m pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[blocks.i3ipc,blocks.ps]'
 
+As an alternative way to install, if you're using `NixOS`_ or nix package manager,
+check `nix-overlay`_ branch.
+
+.. [1] Other options are `pipx`_, `poetry`_ or `pipenv`_. Use the solution you
+    feel most confortable to use.
+.. _venv:
+    https://docs.python.org/3/library/venv.html
+.. _pipx:
+    https://pypi.org/project/pipx/
+.. _poetry:
+    https://python-poetry.org/
+.. _pipenv:
+    https://pipenv.pypa.io/en/latest/
 .. _setup.py:
     https://github.com/thiagokokada/i3pyblocks/blob/master/setup.py
-
+.. _NixOS:
+    https://nixos.org/
+.. _nix-overlay:
+    https://github.com/thiagokokada/i3pyblocks/tree/nix-overlay
 
 Configuring your i3pyblocks
 ---------------------------
@@ -90,6 +115,13 @@ file (or ``$HOME/.config/sway/config`` if using sway)::
     bar {
         position top
         status_command i3pyblocks -c /path/to/your/config.py
+    }
+
+Or, if using a venv::
+
+    bar {
+        position top
+        status_command /path/to/venv/bin/i3pyblocks -c /path/to/your/config.py
     }
 
 
