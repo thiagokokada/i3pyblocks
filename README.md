@@ -25,3 +25,16 @@ commit from i3pyblocks. Just add the following to your
   # ...
 }
 ```
+
+## Testing local
+
+You can test without installing by using the included `shell.nix`, just run:
+
+```sh
+nix-shell
+```
+
+With that you will have a shell with your built derivation.
+
+Also, using `nix-shell --pure` allows you to test just your derivation without
+your system packages, making it easier to debug issues.
