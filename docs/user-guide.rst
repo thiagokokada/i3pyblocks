@@ -1,6 +1,45 @@
 User guide
 ==========
 
+Installation
+------------
+
+To install **i3pyblocks**, make sure you have Python >=3.6 installed and simply
+run this simple command in your terminal of choice:
+
+.. code-block:: sh
+
+    $ python3 -m pip install i3pyblocks
+
+This will install a basic installation without dependencies, so most blocks will
+not work. Check ``extras_require`` section in `setup.py`_ file to see the current
+available optional dependencies for each block.
+
+For example, if you want to use :mod:`i3pyblocks.blocks.pulse` you can will need
+to install the dependencies listed in ``blocks.pulse``. It is very easy to do
+this using ``pip`` itself:
+
+.. code-block:: sh
+
+    $ python3 -m pip install 'i3pyblocks[blocks.pulse]'
+
+You can also pass multiple blocks dependencies at the same time:
+
+.. code-block:: sh
+
+    $ python3 -m pip install 'i3pyblocks[blocks.dbus,blocks.i3ipc,blocks.inotify]'
+
+If you want to install the latest version from git, you can also run something
+similar to below:
+
+.. code-block:: sh
+
+    $ python3 -m pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[blocks.i3ipc,blocks.ps]'
+
+.. _setup.py:
+    https://github.com/thiagokokada/i3pyblocks/blob/master/setup.py
+
+
 Configuring your i3pyblocks
 ---------------------------
 
