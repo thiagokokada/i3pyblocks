@@ -12,7 +12,7 @@ import uuid
 from concurrent.futures import Executor
 from typing import Callable, List, Optional
 
-from i3pyblocks import core, formatter
+from i3pyblocks import formatter, logger
 from i3pyblocks._internal import misc, models
 
 
@@ -204,7 +204,7 @@ class Block(metaclass=abc.ABCMeta):
         if self.update_queue and not self.frozen:
             self.update_queue.put_nowait((self.id, self.result()))
         else:
-            core.logger.debug(
+            logger.debug(
                 f"Not pushing update since block {self.block_name} with "
                 f"id {self.id} is either not initialized or frozen"
             )
@@ -392,7 +392,7 @@ class PollingBlock(Block):
                 await self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:
-            core.logger.exception(f"Exception in {self.block_name}")
+            logger.exception(f"Exception in {self.block_name}")
             self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
             raise e
 
@@ -440,6 +440,6 @@ class ExecutorBlock(Block):
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(self.executor, self.run)
         except Exception as e:
-            core.logger.exception(f"Exception in {self.block_name}")
+            logger.exception(f"Exception in {self.block_name}")
             self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
             raise e

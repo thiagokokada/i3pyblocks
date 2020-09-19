@@ -13,7 +13,7 @@ only updating when it is actually needed.
 from i3ipc import Event
 from i3ipc import aio as i3ipc_aio
 
-from i3pyblocks import blocks, core
+from i3pyblocks import blocks, logger
 
 
 class WindowTitleBlock(blocks.Block):
@@ -63,6 +63,6 @@ class WindowTitleBlock(blocks.Block):
             await self.update_title(connection)
             await connection.main()
         except Exception as e:
-            core.logger.exception(f"Exception in {self.block_name}")
+            logger.exception(f"Exception in {self.block_name}")
             self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
             raise e
