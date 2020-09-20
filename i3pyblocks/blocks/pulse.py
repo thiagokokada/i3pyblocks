@@ -101,14 +101,11 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         self.icons = icons
         self.command = command
 
-    def _event_callback(self, event) -> None:
+    def _event_callback(self, event: pulsectl.PulseEventInfo) -> None:
         if event.facility == "server":
             self.find_sink_index()
 
         self.update_status()
-
-    def _get_sink_info(self, pulse):
-        return pulse.sink_info(self.sink_index)
 
     def find_sink_index(self) -> None:
         with pulsectl.Pulse("find-sink") as pulse:
@@ -130,7 +127,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
     def update_status(self) -> None:
         """Update the PulseAudioBlock state."""
         with pulsectl.Pulse("update-status") as pulse:
-            sink = self._get_sink_info(pulse)
+            sink = pulse.sink_info(self.sink_index)
 
             if sink.mute:
                 self.update(self.format_mute, color=self.color_mute)
@@ -146,7 +143,8 @@ class PulseAudioBlock(blocks.ExecutorBlock):
     def toggle_mute(self) -> None:
         """Toggle mute on/off."""
         with pulsectl.Pulse("toggle-mute") as pulse:
-            sink = self._get_sink_info(pulse)
+            sink = pulse.sink_info(self.sink_index)
+
             if sink.mute:
                 pulse.mute(sink, mute=False)
             else:
@@ -163,7 +161,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         # when successive operations are done
         # We probably need have better control over loop in pulsectl
         with pulsectl.Pulse("volume-changer") as pulse:
-            sink = self._get_sink_info(pulse)
+            sink = pulse.sink_info(self.sink_index)
             pulse.volume_change_all_chans(sink, volume)
 
     async def click_handler(self, button: int, **_kwargs) -> None:
