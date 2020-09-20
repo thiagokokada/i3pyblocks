@@ -1,4 +1,4 @@
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from helpers import misc
@@ -19,12 +19,15 @@ SINK_MUTE = misc.AttributeDict(description="description", index=1, name="sink", 
 ANOTHER_SINK = misc.AttributeDict(
     description="another description", index=2, name="another_sink", mute=1
 )
-MOCK_CONFIG = {
+DEFAULT_MOCK_CONFIG = {
     "Pulse.return_value.__enter__": Mock(),
     "Pulse.return_value.__exit__": Mock(),
-    "Pulse.return_value.sink_list.return_value": [SINK, ANOTHER_SINK],
-    "Pulse.return_value.sink_info.side_effect": [SINK, SINK_MUTE],
-    "Pulse.return_value.volume_get_all_chans.side_effect": [0, 0.2, 0.8],
+    "Pulse.return_value.__enter__.return_value.sink_list.return_value": [
+        SINK,
+        ANOTHER_SINK,
+    ],
+    "Pulse.return_value.__enter__.return_value.sink_info.return_value": SINK,
+    "Pulse.return_value.__enter__.return_value.volume_get_all_chans.return_value": 0.8,
     # Unmock those exceptions
     "PulseLoopStop": pulsectl.PulseLoopStop,
     "PulseError": pulsectl.PulseError,
@@ -32,72 +35,78 @@ MOCK_CONFIG = {
 
 
 def mock_event(block_instance, facility):
-    with pytest.raises(pulsectl.PulseLoopStop):
-        event = Mock(pulsectl.PulseEventInfo)
-        event.facility = facility
-        block_instance._event_callback(event)
+    event = Mock(pulsectl.PulseEventInfo)
+    event.facility = facility
+    block_instance._event_callback(event)
 
 
 def test_pulse_audio_block():
-    with patch("i3pyblocks.blocks.pulse.pulsectl", **MOCK_CONFIG):
+    mock_config = {
+        **DEFAULT_MOCK_CONFIG,
+        "Pulse.return_value.__enter__.return_value.sink_info.side_effect": [
+            SINK,
+            SINK,
+            SINK,
+            SINK_MUTE,
+        ],
+        "Pulse.return_value.__enter__.return_value.volume_get_all_chans.side_effect": [
+            0.0,
+            0.2,
+            0.8,
+        ],
+    }
+    with patch("i3pyblocks.blocks.pulse.pulsectl", **mock_config):
         instance = pulse.PulseAudioBlock()
 
         # If volume is 0%, returns Colors.URGENT
-        instance.update_status()
+        mock_event(instance, facility="server")
         result = instance.result()
-        assert result["full_text"] == "V: 0%"
-        assert result["color"] == types.Color.URGENT
+        assert result.get("full_text") == "V: 0%"
+        assert result.get("color") == types.Color.URGENT
 
         # If volume is 20%, returns Colors.WARN
-        instance.update_status()
+        mock_event(instance, facility="sink")
         result = instance.result()
-        assert result["full_text"] == "V: 20%"
-        assert result["color"] == types.Color.WARN
+        assert result.get("full_text") == "V: 20%"
+        assert result.get("color") == types.Color.WARN
 
         # If volume is 80%, returns Colors.NEUTRAL (None)
-        instance.update_status()
-        result = instance.result()
-        assert result["full_text"] == "V: 80%"
-        assert not result.get("color")
-
-        # Simulate a normal event
         mock_event(instance, facility="sink")
-        instance.handle_event()
-        instance.update_status()
+        result = instance.result()
+        assert result.get("full_text") == "V: 80%"
+        assert result.get("color") == types.Color.NEUTRAL
 
+        # If mute, returns Color.URGENT
+        mock_event(instance, facility="server")
         result = instance.result()
 
-        assert result["full_text"] == "V: MUTE"
-        assert result["color"] == types.Color.URGENT
-
-
-def test_pulse_audio_block_exception():
-    with patch("i3pyblocks.blocks.pulse.pulsectl", **MOCK_CONFIG) as mock_pulsectl:
-        instance = pulse.PulseAudioBlock()
-
-        mock_pulse = mock_pulsectl.Pulse.return_value
-
-        # Simulate an event going wrong
-        mock_event(instance, facility="server")
-        mock_pulse.sink_info.side_effect = [pulsectl.PulseError(), SINK]
-        instance.handle_event()
-
-        mock_pulse.sink_info.assert_called()
-        # Why 3 times?
-        # - The first is during setup
-        # - The second is during handle_event() (raising an Exception)
-        # - The third is called by retry logic in _update_sink_info()
-        assert mock_pulse.sink_info.call_count == 3
+        assert result.get("full_text") == "V: MUTE"
+        assert result.get("color") == types.Color.URGENT
 
 
 @pytest.mark.asyncio
 async def test_pulse_audio_block_click_handler():
+    mock_config = {
+        **DEFAULT_MOCK_CONFIG,
+        "Pulse.return_value.__enter__.return_value.sink_info.side_effect": [
+            SINK,
+            SINK,
+            SINK,
+            SINK,
+            SINK,
+            SINK,
+            SINK,
+            SINK,
+            SINK_MUTE,
+        ],
+    }
     with patch(
-        "i3pyblocks.blocks.pulse.pulsectl", **MOCK_CONFIG
+        "i3pyblocks.blocks.pulse.pulsectl", **mock_config
     ) as mock_pulsectl, patch("i3pyblocks.blocks.pulse.subprocess") as mock_subprocess:
         instance = pulse.PulseAudioBlock(
             command="command -c",
         )
+        mock_event(instance, facility="server")
 
         mock_pulse = mock_pulsectl.Pulse.return_value
 
@@ -108,26 +117,23 @@ async def test_pulse_audio_block_click_handler():
         context_manager_mock = mock_pulse.__enter__
         mute_mock = context_manager_mock.return_value.mute
 
+        # Scroll Up/Down should trigger volume increase/decrease
+        volume_change_all_chans_mock = (
+            context_manager_mock.return_value.volume_change_all_chans
+        )
+        await instance.click_handler(types.MouseButton.SCROLL_UP)
+        volume_change_all_chans_mock.assert_called_once_with(SINK, 0.05)
+
+        volume_change_all_chans_mock.reset_mock()
+
+        await instance.click_handler(types.MouseButton.SCROLL_DOWN)
+        volume_change_all_chans_mock.assert_called_once_with(SINK, -0.05)
+
         # When not mute, pressing RIGHT_BUTTON will mute it
-        instance.sink.mute = 0
         await instance.click_handler(types.MouseButton.RIGHT_BUTTON)
         mute_mock.assert_called_once_with(SINK, mute=True)
 
         mute_mock.reset_mock()
 
-        # When not mute, pressing RIGHT_BUTTON will unmute it
-        instance.sink.mute = 1
         await instance.click_handler(types.MouseButton.RIGHT_BUTTON)
-        mute_mock.assert_called_once_with(SINK, mute=False)
-
-        # Scroll Up/Down should trigger volume increase/decrease
-        await instance.click_handler(types.MouseButton.SCROLL_UP)
-        await instance.click_handler(types.MouseButton.SCROLL_DOWN)
-        context_manager_mock.assert_has_calls(
-            [
-                call(),
-                call().volume_change_all_chans(SINK, 0.05),
-                call(),
-                call().volume_change_all_chans(SINK, -0.05),
-            ]
-        )
+        mute_mock.assert_called_once_with(SINK_MUTE, mute=False)

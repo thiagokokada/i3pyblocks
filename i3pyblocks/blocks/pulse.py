@@ -19,7 +19,6 @@ error when trying to run this module::
 """
 
 import subprocess
-import time
 from typing import Optional
 
 import pulsectl
@@ -102,83 +101,58 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         self.icons = icons
         self.command = command
 
-        # https://pypi.org/project/pulsectl/#event-handling-code-threads
-        self.pulse = pulsectl.Pulse(__name__, connect=False)
-        self._initialize_pulse()
-
-    def _initialize_pulse(self):
-        self.pulse.connect(autospawn=True)
-
-        self._find_sink_index()
-        self._update_sink_info()
-        self._setup_event_callback()
-
-    def _find_sink_index(self) -> None:
-        server_info = self.pulse.server_info()
-
-        default_sink_name = server_info.default_sink_name
-        logger.debug(f"Found new default sink: {default_sink_name}")
-
-        sink_list = self.pulse.sink_list()
-        assert len(sink_list) > 0, "No sinks found"
-        logger.debug(f"Current available sinks: {sink_list}")
-
-        self.sink_index = next(
-            # Find the sink with default_sink_name
-            (sink.index for sink in sink_list if sink.name == default_sink_name),
-            # Returns the first from the list as fallback
-            0,
-        )
-
-    def _update_sink_info(self) -> None:
-        try:
-            self.sink = self.pulse.sink_info(self.sink_index)
-        except pulsectl.PulseError:
-            # Waiting a little before trying to connect again so we don't
-            # burn CPU in a infinity loop
-            logger.debug("Error while updating sink info, reinitializing Pulse.")
-            time.sleep(0.5)
-            self._initialize_pulse()
-
     def _event_callback(self, event) -> None:
-        self.event = event
-        raise pulsectl.PulseLoopStop()
+        if event.facility == "server":
+            self.find_sink_index()
 
-    def _setup_event_callback(self) -> None:
-        self.pulse.event_mask_set("sink", "server")
-        self.pulse.event_callback_set(self._event_callback)
+        self.update_status()
 
-    def handle_event(self) -> None:
-        self.pulse.event_listen()
+    def _get_sink_info(self, pulse):
+        return pulse.sink_info(self.sink_index)
 
-        if self.event.facility == "server":
-            self._find_sink_index()
-            self._update_sink_info()
-        elif self.event.facility == "sink":
-            self._update_sink_info()
+    def find_sink_index(self) -> None:
+        with pulsectl.Pulse("find-sink") as pulse:
+            server_info = pulse.server_info()
 
-    def update_status(self):
-        """Update the PulseAudioBlock state."""
-        if self.sink.mute:
-            self.update(self.format_mute, color=self.color_mute)
-        else:
-            volume = self.pulse.volume_get_all_chans(self.sink) * 100
-            color = misc.calculate_threshold(self.colors, volume)
-            icon = misc.calculate_threshold(self.icons, volume)
-            self.update(
-                self.ex_format(self.format, volume=volume, icon=icon),
-                color=color,
+            default_sink_name = server_info.default_sink_name
+            logger.debug(f"Found new default sink: {default_sink_name}")
+
+            sink_list = pulse.sink_list()
+            logger.debug(f"Current available sinks: {sink_list}")
+
+            self.sink_index = next(
+                # Find the sink with default_sink_name
+                (sink.index for sink in sink_list if sink.name == default_sink_name),
+                # Returns the first from the list as fallback
+                0,
             )
 
-    def toggle_mute(self):
+    def update_status(self) -> None:
+        """Update the PulseAudioBlock state."""
+        with pulsectl.Pulse("update-status") as pulse:
+            sink = self._get_sink_info(pulse)
+
+            if sink.mute:
+                self.update(self.format_mute, color=self.color_mute)
+            else:
+                volume = pulse.volume_get_all_chans(sink) * 100
+                color = misc.calculate_threshold(self.colors, volume)
+                icon = misc.calculate_threshold(self.icons, volume)
+                self.update(
+                    self.ex_format(self.format, volume=volume, icon=icon),
+                    color=color,
+                )
+
+    def toggle_mute(self) -> None:
         """Toggle mute on/off."""
         with pulsectl.Pulse("toggle-mute") as pulse:
-            if self.sink.mute:
-                pulse.mute(self.sink, mute=False)
+            sink = self._get_sink_info(pulse)
+            if sink.mute:
+                pulse.mute(sink, mute=False)
             else:
-                pulse.mute(self.sink, mute=True)
+                pulse.mute(sink, mute=True)
 
-    def change_volume(self, volume: float):
+    def change_volume(self, volume: float) -> None:
         """Change volume of the current PulseAudio sink.
 
         :param volume: Float to be increased/decreased relative to the current
@@ -189,7 +163,8 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         # when successive operations are done
         # We probably need have better control over loop in pulsectl
         with pulsectl.Pulse("volume-changer") as pulse:
-            pulse.volume_change_all_chans(self.sink, volume)
+            sink = self._get_sink_info(pulse)
+            pulse.volume_change_all_chans(sink, volume)
 
     async def click_handler(self, button: int, **_kwargs) -> None:
         """PulseAudioBlock click handlers
@@ -211,6 +186,10 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         self.update_status()
 
     def run(self) -> None:
-        while True:
-            self.update_status()
-            self.handle_event()
+        self.find_sink_index()
+        self.update_status()
+
+        with pulsectl.Pulse("event-loop") as pulse:
+            pulse.event_mask_set("sink", "server")
+            pulse.event_callback_set(self._event_callback)
+            pulse.event_listen()
