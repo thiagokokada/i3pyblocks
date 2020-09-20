@@ -12,19 +12,16 @@
     "blocks.inotify"
     "blocks.ps"
     "blocks.pulse"
-    # "blocks.x11"
+    "blocks.x11"
   ]
 }:
 
 let
   libs = with pkgs; [ libpulseaudio ];
-  mach-nix = import (
-    builtins.fetchGit {
-      url = "https://github.com/DavHau/mach-nix/";
-      rev = "7efb5de273cf0c7556fe2f318d2593b5e17d77c3";
-      ref = "master";
-    }
-  );
+  mach-nix = import (builtins.fetchGit {
+    url = "https://github.com/DavHau/mach-nix/";
+    ref = "refs/tags/2.4.0";
+  });
 in
 mach-nix.buildPythonApplication rec {
   pname = "i3pyblocks";
@@ -38,21 +35,6 @@ mach-nix.buildPythonApplication rec {
   extras = extraFeatures ++ [ "test" ];
 
   buildInputs = libs ++ [ makeWrapper ];
-
-  overrides_pre = [
-    (
-      pySelf: pySuper: {
-        xlib = pySuper.xlib.overrideAttrs (
-          oldAttrs: {
-            src = builtins.fetchTarball "https://github.com/python-xlib/python-xlib/tarball/efc07c4132e48098a0e81ac577b22f63cd7356d9";
-            pname = "python-xlib";
-          }
-        );
-      }
-    )
-  ];
-
-  providers.python-xlib = "nixpkgs";
 
   makeWrapperArgs =
     [ "--suffix" "LD_LIBRARY_PATH" ":" "${stdenv.lib.makeLibraryPath libs}" ];
