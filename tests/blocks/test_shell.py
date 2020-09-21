@@ -31,19 +31,22 @@ async def test_shell_block():
 
 @pytest.mark.asyncio
 async def test_shell_block_click_handler():
-    mock_config = {
-        "arun": CoroutineMock(),
-        "arun.return_value": (
-            misc.AttributeDict(
-                stdout="stdout\n",
-                stderr="stderr\n",
-                returncode=0,
-            )
-        ),
-        "PIPE": subprocess.PIPE,
-    }
-
-    with patch("i3pyblocks.blocks.shell.subprocess", **mock_config) as mock_subprocess:
+    with patch(
+        "i3pyblocks.blocks.shell.subprocess", autospec=True, spec_set=True
+    ) as mock_subprocess:
+        mock_subprocess.configure_mock(
+            **{
+                "arun": CoroutineMock(),
+                "arun.return_value": (
+                    misc.AttributeDict(
+                        stdout="stdout\n",
+                        stderr="stderr\n",
+                        returncode=0,
+                    )
+                ),
+                "PIPE": subprocess.PIPE,
+            }
+        )
         instance = shell.ShellBlock(
             command="exit 0",
             command_on_click={

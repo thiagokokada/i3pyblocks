@@ -41,21 +41,25 @@ def mock_event(block_instance, facility):
 
 
 def test_pulse_audio_block():
-    mock_config = {
-        **DEFAULT_MOCK_CONFIG,
-        "Pulse.return_value.__enter__.return_value.sink_info.side_effect": [
-            SINK,
-            SINK,
-            SINK,
-            SINK_MUTE,
-        ],
-        "Pulse.return_value.__enter__.return_value.volume_get_all_chans.side_effect": [
-            0.0,
-            0.2,
-            0.8,
-        ],
-    }
-    with patch("i3pyblocks.blocks.pulse.pulsectl", **mock_config):
+    with patch(
+        "i3pyblocks.blocks.pulse.pulsectl", autospec=True, spec_set=True
+    ) as mock_pulse:
+        mock_pulse.configure_mock(
+            **{
+                **DEFAULT_MOCK_CONFIG,
+                "Pulse.return_value.__enter__.return_value.sink_info.side_effect": [
+                    SINK,
+                    SINK,
+                    SINK,
+                    SINK_MUTE,
+                ],
+                "Pulse.return_value.__enter__.return_value.volume_get_all_chans.side_effect": [
+                    0.0,
+                    0.2,
+                    0.8,
+                ],
+            }
+        )
         instance = pulse.PulseAudioBlock()
 
         # If volume is 0%, returns Colors.URGENT
@@ -86,23 +90,27 @@ def test_pulse_audio_block():
 
 @pytest.mark.asyncio
 async def test_pulse_audio_block_click_handler():
-    mock_config = {
-        **DEFAULT_MOCK_CONFIG,
-        "Pulse.return_value.__enter__.return_value.sink_info.side_effect": [
-            SINK,
-            SINK,
-            SINK,
-            SINK,
-            SINK,
-            SINK,
-            SINK,
-            SINK,
-            SINK_MUTE,
-        ],
-    }
     with patch(
-        "i3pyblocks.blocks.pulse.pulsectl", **mock_config
-    ) as mock_pulsectl, patch("i3pyblocks.blocks.pulse.subprocess") as mock_subprocess:
+        "i3pyblocks.blocks.pulse.pulsectl", autospec=True, spec_set=True
+    ) as mock_pulsectl, patch(
+        "i3pyblocks.blocks.pulse.subprocess", autospec=True, spec_set=True
+    ) as mock_subprocess:
+        mock_pulsectl.configure_mock(
+            **{
+                **DEFAULT_MOCK_CONFIG,
+                "Pulse.return_value.__enter__.return_value.sink_info.side_effect": [
+                    SINK,
+                    SINK,
+                    SINK,
+                    SINK,
+                    SINK,
+                    SINK,
+                    SINK,
+                    SINK,
+                    SINK_MUTE,
+                ],
+            }
+        )
         instance = pulse.PulseAudioBlock(
             command="command -c",
         )

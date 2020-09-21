@@ -11,11 +11,15 @@ async def test_dbus_block():
         async def start(self):
             pass
 
-    mock_config = {
-        "MessageBus.return_value.connect": CoroutineMock(),
-        "MessageBus.return_value.connect.return_value.introspect": CoroutineMock(),
-    }
-    with patch("i3pyblocks.blocks.dbus.dbus_aio", **mock_config) as mock_dbus_aio:
+    with patch(
+        "i3pyblocks.blocks.dbus.dbus_aio", autospec=True, spec_set=True
+    ) as mock_dbus_aio:
+        mock_dbus_aio.configure_mock(
+            **{
+                "MessageBus.return_value.connect": CoroutineMock(),
+                "MessageBus.return_value.connect.return_value.introspect": CoroutineMock(),
+            }
+        )
         instance = ValidDbusBlock()
         await instance.setup()
 
@@ -38,11 +42,15 @@ async def test_dbus_block():
 
 @pytest.mark.asyncio
 async def test_kbdd_block():
-    mock_config = {
-        "MessageBus.return_value.connect": CoroutineMock(),
-        "MessageBus.return_value.connect.return_value.introspect": CoroutineMock(),
-    }
-    with patch("i3pyblocks.blocks.dbus.dbus_aio", **mock_config) as mock_dbus_aio:
+    with patch(
+        "i3pyblocks.blocks.dbus.dbus_aio", autospec=True, spec_set=True
+    ) as mock_dbus_aio:
+        mock_dbus_aio.configure_mock(
+            **{
+                "MessageBus.return_value.connect": CoroutineMock(),
+                "MessageBus.return_value.connect.return_value.introspect": CoroutineMock(),
+            }
+        )
         instance = dbus.KbddBlock(format="{full_layout:.2s}")
         await instance.setup()
 
