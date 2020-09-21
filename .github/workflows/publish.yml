@@ -4,7 +4,7 @@ name: Publish
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   deploy:
@@ -40,7 +40,7 @@ jobs:
         python setup.py sdist bdist_wheel
 
     - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@v1
       with:
         password: ${{ secrets.pypi_password }}
 
@@ -50,9 +50,13 @@ jobs:
         VERSION="${GITHUB_REF##*/}-dev"
         VERSION_FILE='i3pyblocks/__version__.py'
         echo "__version__ = \"${VERSION}\"" > "${VERSION_FILE}"
-        git config --global user.name 'Thiago Kenji Okada'
-        git config --global user.email 'thiagokokada@users.noreply.github.com'
-        git add "${VERSION_FILE}"
-        git commit -m "Bump version"
-        git push origin HEAD:master
       shell: bash
+
+    - name: Create PR to bump version
+      uses: peter-evans/create-pull-request@v3
+      with:
+        commit-message: Bump version
+        title: Bump version
+        body: Bump development version.
+        branch: bump-version
+        base: master
