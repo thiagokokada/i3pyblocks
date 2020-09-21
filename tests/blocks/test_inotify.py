@@ -157,13 +157,17 @@ async def test_backlight_block_without_backlight(tmpdir):
 
 @pytest.mark.asyncio
 async def test_backlight_block_click_handler(tmpdir):
-    mock_config = {
-        "arun": CoroutineMock(),
-        "arun.return_value": (misc.AttributeDict(returncode=0)),
-    }
     with patch(
-        "i3pyblocks.blocks.inotify.subprocess", **mock_config
+        "i3pyblocks.blocks.inotify.subprocess",
+        autospec=True,
+        spec_set=True,
     ) as mock_subprocess:
+        mock_subprocess.configure_mock(
+            **{
+                "arun": CoroutineMock(),
+                "arun.return_value": (misc.AttributeDict(returncode=0)),
+            }
+        )
         instance = inotify.BacklightBlock(
             base_path=tmpdir,
             command_on_click={

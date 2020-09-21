@@ -8,8 +8,13 @@ from i3pyblocks.blocks import datetime as m_datetime
 
 @pytest.mark.asyncio
 async def test_datetime_block():
-    mock_config = {"now.return_value": datetime(2020, 8, 25, 23, 30, 0)}
-    with patch("i3pyblocks.blocks.datetime.datetime", **mock_config):
+    with patch(
+        "i3pyblocks.blocks.datetime.datetime", autospec=True, spec_set=True
+    ) as mock_datetime:
+        mock_datetime.configure_mock(
+            **{"now.return_value": datetime(2020, 8, 25, 23, 30, 0)}
+        )
+
         # Use a non locale dependent format
         instance = m_datetime.DateTimeBlock(
             format_time="%H:%M:%S", format_date="%y-%m-%d"
