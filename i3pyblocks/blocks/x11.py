@@ -15,6 +15,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 from Xlib import display as Xdisplay
+from Xlib.ext import dpms  # noqa: F401 (ensure that Xlib.ext.dpms is available)
 
 from i3pyblocks import blocks
 
