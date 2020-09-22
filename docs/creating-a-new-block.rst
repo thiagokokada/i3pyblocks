@@ -221,8 +221,8 @@ in volume), and after we receives this event we trigger an update. This is
 exactly what :class:`~i3pyblocks.blocks.pulse.PulseAudioBlock` does, waiting
 for any change in the `PulseAudio`_ configuration to trigger updates.
 
-Implementing an event loop goes out of this tutorial, but keep in mind that
-there is generally a `Python package`_ that does it for you, and all you need
+Implementing an event loop goes out the scope of this tutorial, but keep in mind
+that there is generally a `Python package`_ that does it for you, and all you need
 is to add it as a dependency to **i3pyblocks** and integrate it inside a block.
 For this, you can use :class:`~i3pyblocks.blocks.base.Block` as we saw before,
 for projects that integrates well with `asyncio`_. Just implement
