@@ -49,11 +49,11 @@ have the right skills.
 
 But of course not everything is the same. For one, the usage of asyncio vs.
 the more traditional threading approach from *i3pystatus* makes for some really
-interesting techniques to update the i3bar. AFAIK, **i3pyblocks** is the only
+interesting techniques to update the i3bar. AFAIK, i3pyblocks is the only
 Python-based i3bar's protocol implementation that have a completely asynchronous
 update of each individual block.
 
-In **i3pyblocks**, a `Queue`_ is responsible to receive any updates from each
+In i3pyblocks, a `Queue`_ is responsible to receive any updates from each
 block, and once there is something to update the i3bar is refreshed. If you
 have a bar with blocks that only update at each minute, for example, the number
 of drawings in i3bar will be much less than other polling-based solutions.
@@ -67,7 +67,7 @@ updating the i3bar. This brings two advantages:
 - Faster updates, since any change in backlight will trigger a i3bar update
   instantaneously
 
-So this is basically it. If I didn't convice you to use **i3pyblocks** with
+So this is basically it. If I didn't convice you to use i3pyblocks with
 this text probably this project is not for you. But if the text above made
 you interested about this project, then maybe this is the project for you.
 

@@ -4,9 +4,9 @@ User guide
 Installation
 ------------
 
-Before installing, it is recommended to create a `venv`_ to isolate
-i3pyblocks (and its dependencies) from other Python packages in your system [1]_.
-To do it, you can run:
+Before installing, it is recommended to create a `venv`_ to isolate i3pyblocks
+(and its dependencies) from other Python packages in your system [1]_. To do
+it, you can run:
 
 .. code-block:: sh
 
@@ -24,7 +24,7 @@ This will install a basic installation without dependencies, so most blocks will
 not work. Check ``extras_require`` section in `setup.py`_ file to see the current
 available optional dependencies for each block.
 
-For example, if you want to use :mod:`i3pyblocks.blocks.pulse` you can will need
+For example, if you want to use :mod:`i3pyblocks.blocks.pulse` you will need
 to install the dependencies listed in ``blocks.pulse``. It is very easy to do
 this using ``pip`` itself:
 
@@ -45,8 +45,10 @@ similar to below:
 
     $ python3 -m pip install -e 'git+https://github.com/thiagokokada/i3pyblocks#egg=i3pyblocks[blocks.i3ipc,blocks.ps]'
 
-As an alternative way to install, if you're using `NixOS`_ or nix package manager,
-check `nix-overlay`_ branch.
+.. seealso::
+
+   If you're using `NixOS`_ or nixpkgs, check `nix-overlay`_ branch for an
+   alternative way to install using `Nix overlays`_.
 
 .. [1] Other options are `pipx`_, `poetry`_ or `pipenv`_. Use the solution you
     feel most confortable to use.
@@ -64,6 +66,8 @@ check `nix-overlay`_ branch.
     https://nixos.org/
 .. _nix-overlay:
     https://github.com/thiagokokada/i3pyblocks/tree/nix-overlay
+.. _Nix overlays:
+    https://nixos.wiki/wiki/Overlays
 
 Configuring your i3pyblocks
 ---------------------------
@@ -87,6 +91,14 @@ Let's start with a basic configuration showing a simple text
 
 
     utils.asyncio_run(main())
+
+In the code above we are creating a new :class:`~i3pyblocks.core.Runner`
+instance, the most important class in i3pyblocks, responsible to manage
+blocks, update the i3bar, receive signal and mouse clicks, etc. To register a
+block we need to call :meth:`~i3pyblocks.core.Runner.register_block` with a
+instance of :class:`~i3pyblocks.blocks.base.Block` as the first parameter.
+We call two separate blocks here, :class:`~i3pyblocks.blocks.basic.TextBlock`
+and :class:`~i3pyblocks.blocks.datetime.DateTimeBlock`.
 
 Save the content above in a file called ``config.py``. To test in terminal,
 we can run it using:

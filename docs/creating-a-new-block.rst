@@ -15,13 +15,22 @@ have Python >=3.6 installed and run:
    $ source venv/bin/activate
    $ make dev-install
 
-To test if everything is working, you try to run ``i3pyblocks -c example.py``
-in your terminal.
+To test if everything is working, try to run ``i3pyblocks -c example.py`` in
+your terminal.
+
+.. seealso::
+
+   NixOS users can use setup a development environment by simply running
+   ``nix-shell`` at the root of the repository, thanks to the included
+   `shell.nix`_ file.
+
+.. _shell.nix:
+    https://github.com/thiagokokada/i3pyblocks/blob/master/shell.nix
 
 Let's start with a "Hello World!"
 ---------------------------------
 
-Creating a new block ("thing that display something in **i3pyblocks**") is
+Creating a new block ("thing that display something in i3pyblocks") is
 reasonable easy. Let's start with a simple, "Hello World!" example:
 
 .. code-block:: python
@@ -42,12 +51,12 @@ reasonable easy. Let's start with a simple, "Hello World!" example:
 
     utils.asyncio_run(main())
 
-It is a very silly example, but it should be sufficient to illustrate. We are
-using the :class:`~i3pyblocks.blocks.base.Block`, that is the root of all blocks
-in **i3pyblocks**.
+It is a silly example, but it should be sufficient to illustrate. We are using
+the :class:`~i3pyblocks.blocks.base.Block`, that is the root of all blocks in
+i3pyblocks.
 
 Save the content above in a file called ``hello_world.py``. To test in terminal,
-we can run it using:
+we can run it by using:
 
 .. code-block:: sh
 
@@ -62,15 +71,22 @@ And we should saw the following being printed in terminal:
     [{"name": "HelloWorldBlock", "instance": "<random-id>", "full_text": "Hello World!"}],
     ^C
 
-There is only one update since this block doesn't do anything interesting. Use
-``Ctrl+C`` (you may need to press twice) to exit.
+There is only one update since this block just update itself once. Use ``Ctrl+C``
+(you may need to press twice) to exit.
+
+.. seealso::
+
+   Check :class:`~i3pyblocks.blocks.base.Block` documentation for its methods
+   so you can see what it is possible to do with it.
 
 A more advanced example
 -----------------------
 
 To do something more interesting, we need to have some kind of event that will
-trigger block events. One of the easiest ways to do it is to use time, for
-example:
+trigger block events. Also, we need to do things inside a loop, so we can update
+the block more than once.
+
+One of the easiest ways to do it is to use time, for example:
 
 .. code-block:: python
 
@@ -115,7 +131,7 @@ Running it in terminal for ~5 seconds results in:
     ^C
 
 As we would expect. Actually, blocks that run an update at each *X* seconds are
-so common that **i3pyblocks** has an abstraction for it, the
+so common that i3pyblocks has an abstraction for it, the
 :class:`~i3pyblocks.blocks.base.PollingBlock` [1]_:
 
 .. code-block:: python
@@ -158,7 +174,7 @@ Clicks and signals
 ------------------
 
 Let's expand our ``HelloWorldBlock`` to change the text when the user sends
-a common `Unix signal`_, ``SIGUSR1``, to the **i3pyblocks** process. To do this
+a common `Unix signal`_, ``SIGUSR1``, to the i3pyblocks process. To do this
 we will implement :meth:`~i3pyblocks.blocks.base.Block.signal_handler`:
 
 .. code-block:: python
@@ -184,8 +200,8 @@ we will implement :meth:`~i3pyblocks.blocks.base.Block.signal_handler`:
 
     utils.asyncio_run(main())
 
-Now running this in one terminal and running ``pkill -SIGUSR1 i3pyblocks``
-results in:
+Now running this in one terminal and running ``pkill -SIGUSR1 i3pyblocks`` in
+another results in:
 
 .. code-block:: sh
 
@@ -197,8 +213,8 @@ results in:
     ^C
 
 To handle mouse clicks, there is a similar method called
-:meth:`~i3pyblocks.blocks.base.Block.click_handler` that you can implement.
-in a similar way.
+:meth:`~i3pyblocks.blocks.base.Block.click_handler` that you can implement in
+a similar way.
 
 .. _`Unix signal`:
     https://en.wikipedia.org/wiki/Signal_(IPC)
@@ -223,7 +239,7 @@ for any change in the `PulseAudio`_ configuration to trigger updates.
 
 Implementing an event loop goes out the scope of this tutorial, but keep in mind
 that there is generally a `Python package`_ that does it for you, and all you need
-is to add it as a dependency to **i3pyblocks** and integrate it inside a block.
+is to add it as a dependency to i3pyblocks and integrate it inside a block.
 For this, you can use :class:`~i3pyblocks.blocks.base.Block` as we saw before,
 for projects that integrates well with `asyncio`_. Just implement
 :meth:`~i3pyblocks.blocks.base.Block.start` with something like this:
@@ -237,10 +253,10 @@ for projects that integrates well with `asyncio`_. Just implement
 
 However, some projects doesn't integrate well with *asyncio* (i.e.: their
 methods are not *async*). Using them with :class:`~i3pyblocks.blocks.base.Block`
-would freeze **i3pyblocks** completely until some update on them happened.
+would freeze i3pyblocks completely until some update on them happened.
 In those cases, you can use :class:`~i3pyblocks.blocks.base.ExecutorBlock`.
 It runs the code inside an `Executor`_, that can be either a thread or a process,
-so the updates inside this block doesn't affect the rest of **i3pyblocks**. The
+so the updates inside this block doesn't affect the rest of i3pyblocks. The
 usage ends up being very similar to before, just without *async/await* keywords:
 
 .. code-block:: python
@@ -261,10 +277,20 @@ usage ends up being very similar to before, just without *async/await* keywords:
 .. _`Executor`:
     https://docs.python.org/3/library/concurrent.futures.html
 
+.. seealso::
+
+   There is multiple examples of each kind of base block usage in i3pyblocks
+   already. For examples of :class:`~i3pyblocks.blocks.base.PollingBlock`
+   check :mod:`i3pyblocks.blocks.ps` namespace, for examples of
+   :class:`~i3pyblocks.blocks.base.ExecutorBlock` check
+   :class:`~i3pyblocks.blocks.pulse.PulseAudioBlock`, and for examples of
+   event-based blocks using :class:`~i3pyblocks.blocks.base.Block` check
+   :mod:`i3pyblocks.blocks.inotify` namespace.
+
 Handling dependencies
 ---------------------
 
-To add a new dependency to **i3pyblocks**, add it to ``setup.py`` file in
+To add a new dependency to i3pyblocks, add it to ``setup.py`` file in
 ``extras_require`` section, using the namespace of your module without
 ``i3pyblocks``. For example, if your module depend on ``foo`` version ``>=1.0``
 and any version of ``bar`` and it uses the namespace ``i3pyblocks.blocks.spam``,
@@ -288,7 +314,7 @@ We use `Black`_ to automatically format the code, `Read the Docs`_ to
 automatically generate the documentation and multiple linters to check possible
 issues of the code.
 
-Also, writing automated tests are **strongly** recommended for new blocks since
+Also, writting automated tests are **strongly** recommended for new blocks since
 they're the only way to ensure that we don't break something in case of changes.
 
 If you want to test your modifications locally, you can use:
@@ -303,7 +329,7 @@ This will run everything that the CI run. If you want to run only tests, use:
 
     $ make test
 
-To run linters, use:
+To run only linters, use:
 
 .. code-block:: sh
 
@@ -315,8 +341,8 @@ To automatically fix code issues, run:
 
     $ make lint-fix
 
-But keep in mind that not all fixes are automatically, so running ``make lint``
-is still necessary.
+But keep in mind that not all issues are fixed automatically, so running
+``make lint`` and fixing the code manually is still necessary in some cases.
 
 .. _`Continuous Integration (CI)`:
     https://en.wikipedia.org/wiki/Continuous_integration
