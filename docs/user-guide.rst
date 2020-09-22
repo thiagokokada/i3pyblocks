@@ -136,14 +136,13 @@ Or, if using a venv::
         status_command /path/to/venv/bin/i3pyblocks -c /path/to/your/config.py
     }
 
-
 Customizing blocks
 ------------------
 
 Most blocks can be customized by passing optional parameters to its constructor.
 Let's say that you want to use a custom formatting to show date and time in
-:class:`~i3pyblocks.blocks.datetime.DateTimeBlock`, you can do something like
-this:
+:class:`~i3pyblocks.blocks.datetime.DateTimeBlock`, and use a white background
+instead of the default one. You can do something like this:
 
 .. code-block:: python
 
@@ -157,6 +156,7 @@ this:
             datetime.DateTimeBlock(
                 format_date="%Y-%m-%d",
                 format_time="%H:%M:%S",
+                default_state={"background": "#FFFFFF"},
             )
         )
 
@@ -171,12 +171,17 @@ Running this for ~5 seconds in terminal results:
 
     {"version": 1, "click_events": true}
     [
-    [{"name": "DateTimeBlock", "instance": "<random-id>", "full_text": "21:28:11"}],
-    [{"name": "DateTimeBlock", "instance": "<random-id>", "full_text": "21:28:12"}],
-    [{"name": "DateTimeBlock", "instance": "<random-id>", "full_text": "21:28:13"}],
-    [{"name": "DateTimeBlock", "instance": "<random-id>", "full_text": "21:28:14"}],
-    [{"name": "DateTimeBlock", "instance": "<random-id>", "full_text": "21:28:15"}],
+    [{"name": "DateTimeBlock", "instance": "<random-id>", "background": "#FFFFFF", "full_text": "19:57:09"}],
+    [{"name": "DateTimeBlock", "instance": "<random-id>", "background": "#FFFFFF", "full_text": "19:57:10"}],
+    [{"name": "DateTimeBlock", "instance": "<random-id>", "background": "#FFFFFF", "full_text": "19:57:11"}],
+    [{"name": "DateTimeBlock", "instance": "<random-id>", "background": "#FFFFFF", "full_text": "19:57:12"}],
+    [{"name": "DateTimeBlock", "instance": "<random-id>", "background": "#FFFFFF", "full_text": "19:57:13"}],
     ^C
+
+``default_state`` receives any value allowed by the `i3bar's protocol`_ and
+sets it in the result, unless it is overwritten by the
+:meth:`~i3pyblocks.blocks.base.Block.update_state` method inside the block. So
+it is a good place to use custom formatting to make your block unique.
 
 It is **strongly** recommended that you use keyword parameters in constructors
 (i.e.: ``format_date="%Y-%m-%d"``) instead of positional parameters
@@ -240,6 +245,83 @@ parameters, you can always extend the class:
 
 .. _`Python's format`:
     https://pyformat.info/
+.. _`i3bar's protocol`:
+    https://i3wm.org/docs/i3bar-protocol.html#_blocks_in_detail
+
+Using Pango markup
+------------------
+
+Using `Pango markup`_ allows for greater customization of text. It is basically
+a simplified version of HTML, including tags that allow you to make show in
+a different font, in **bold** or *italic*, increase or decrease the size, etc.
+
+While it is possible to create the Pango markup manually, using
+:func:`i3pyblocks.utils.pango_markup` make things much easier. For example:
+
+.. code-block:: python
+
+    from i3pyblocks import core, utils, types
+    from i3pyblocks.blocks import basic
+
+
+    async def main():
+        runner = core.Runner()
+        await runner.register_block(
+            basic.TextBlock(
+                utils.pango_markup("Welcome to i3pyblocks!", font_size="large"),
+                markup=types.MarkupText.PANGO
+            )
+        )
+
+        await runner.start()
+
+
+    utils.asyncio_run(main())
+
+Running this in terminal:
+
+.. code-block:: sh
+
+    $ i3pyblocks -c config.py
+    {"version": 1, "click_events": true}
+    [
+    [{"name": "TextBlock", "instance": "<random-id>", "full_text": "<span font_size=\"large\">Welcome to i3pyblocks!</span>", "markup": "pango"}],
+    ^C
+
+Use Pango markup with the i3pyblocks placeholders to archive the same effect
+even with dynamic text:
+
+.. code-block:: python
+
+    from i3pyblocks import core, utils, types
+    from i3pyblocks.blocks import ps
+
+
+    async def main():
+        runner = core.Runner()
+        await runner.register_block(
+            ps.LoadAvgBlock(
+                format=utils.pango_markup("{load1}", font_weight="heavy"),
+                default_state={"markup": types.MarkupText.PANGO},
+            )
+        )
+
+        await runner.start()
+
+
+    utils.asyncio_run(main())
+
+.. warning::
+
+   The Pango markup requires a Pango font. Make sure you configured `i3bar`_ to
+   use a Pango font. For example::
+
+       font pango:Inconsolata, Icons 12
+
+.. _Pango markup:
+    https://developer.gnome.org/pango/stable/pango-Markup.html
+.. _i3bar:
+    https://i3wm.org/docs/userguide.html#_font
 
 Clicks and signals
 ------------------
@@ -320,3 +402,11 @@ Running it and sending ``pkill -SIGUSR2 i3pyblocks`` in another terminal result 
 
 The same can be applied to mouse clicks overriding the
 :meth:`~i3pyblocks.blocks.base.Block.click_handler`.
+
+.. seealso::
+
+   For inspiration on how to configure your i3pyblocks, look at `example.py`_
+   file. It includes many examples and it is heavily commented.
+
+.. _example.py:
+    https://github.com/thiagokokada/i3pyblocks/blob/master/example.py

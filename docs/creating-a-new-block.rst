@@ -170,6 +170,48 @@ our previous example. We can increase the interval between each update by passin
    other blocks, they're kept in the same namespace, :mod:`i3pyblocks.blocks.base`.
    There is also some other base blocks that will be shown later on.
 
+Customizing output
+------------------
+
+Sometimes you want to give some emphasis in an output. For example, if the
+user battery is too low you probably want to alert the user. In this case,
+you can pass some keyword arguments to :meth:`~i3pyblocks.blocks.base.Block.update`
+that will alter the output of i3bar. For example:
+
+.. code-block:: python
+
+    from i3pyblocks import Runner, blocks, utils
+
+    class WhiteHelloWorldBlock(blocks.Block):
+        """Block that shows a 'Hello World!' text."""
+        async def start(self) -> None:
+            self.update("Hello World!", background="#FFFFFF")
+
+
+    async def main():
+        runner = Runner()
+        await runner.register_block(HelloWorldBlock())
+        await runner.start()
+
+
+    utils.asyncio_run(main())
+
+Running it in terminal:
+
+.. code-block:: sh
+
+    $ i3pyblocks -c hello_world.py
+    {"version": 1, "click_events": true}
+    [
+    [{"name": "WhiteHelloWorldBlock", "instance": "<random-id>", "full_text": "Hello World!", "background": "#FFFFFF"}],
+    ^C
+
+Those keyword arguments follow the `i3bar's protocol`_, so check its
+documentation for more information.
+
+.. _i3bar's protocol:
+    https://i3wm.org/docs/i3bar-protocol.html#_blocks_in_detail
+
 Clicks and signals
 ------------------
 
