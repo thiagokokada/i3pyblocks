@@ -151,6 +151,9 @@ async def main():
         )
     )
 
+    # MediaPlayerBlock listen for updates in your player (in this case Spotify)
+    await runner.register_block(dbus.MediaPlayerBlock(player="spotify"))
+
     # In case of `kbdd` isn't available for you, here is a alternative using
     # ShellBlock and `xkblayout-state` program.  ShellBlock just show the output
     # of `command` (if it is empty this block is hidden)
