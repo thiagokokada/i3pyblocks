@@ -173,12 +173,12 @@ class KbddBlock(DbusBlock):
             button == types.MouseButton.LEFT_BUTTON
             or button == types.MouseButton.SCROLL_UP
         ):
-            self.safe_interface_call("call_next_layout")
+            await self.safe_interface_call("call_next_layout")
         elif (
             button == types.MouseButton.RIGHT_BUTTON
             or button == types.MouseButton.SCROLL_DOWN
         ):
-            self.safe_interface_call("call_prev_layout")
+            await self.safe_interface_call("call_prev_layout")
 
         await self.run()
 
