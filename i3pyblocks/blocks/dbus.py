@@ -10,9 +10,8 @@ To inspect and debug a D-Bus protocol, `DFeet`_ can help.
     https://wiki.gnome.org/Apps/DFeet
 """
 
-import abc
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from dbus_next import Variant
 from dbus_next import aio as dbus_aio
@@ -25,23 +24,19 @@ class DbusBlock(blocks.Block):
     r"""D-Bus Block.
 
     This Block extends the :class:`i3pyblocks.blocks.base.Block` by offering
-    some helper methods to work with D-Bus, alongside with helper methods and
-    a loop.
+    some helper methods to work with D-Bus.
 
     You must not instantiate this class directly, instead you should subclass
-    it and implement :meth:`update_callback()` method first.
+    it and implement :meth:`start()` method first.
 
     :param bus_name: The D-Bus bus name to introspect, i.e.:
-        "org.mpris.MediaPlayer2.spotify".
+        ``org.mpris.MediaPlayer2.spotify``.
 
     :param object_name: The D-Bus object to introspect, i.e.:
-        "/org/mpris/MediaPlayer2".
+        ``/org/mpris/MediaPlayer2``.
 
     :param interface_name: The D-Bus interface to introspect, i.e.:
-        "org.mpris.MediaPlayer2"
-
-    :param loop_method: D-Bus method that will be called to listen for events.
-        Must start with "on_".
+        ``org.mpris.MediaPlayer2``.
 
     :param dbus_conn_sleep: Used only before the initial connection, as a sleep
         between the calls in loop before the connection is successful. After
@@ -57,7 +52,6 @@ class DbusBlock(blocks.Block):
         bus_name: str,
         object_path: str,
         interface_name: str,
-        loop_method: str,
         dbus_conn_sleep: int = 1,
         **kwargs,
     ):
@@ -65,7 +59,6 @@ class DbusBlock(blocks.Block):
         self.bus_name = bus_name
         self.object_path = object_path
         self.interface_name = interface_name
-        self.loop_method = loop_method
         self.dbus_conn_sleep = dbus_conn_sleep
         self.interface = None
 
@@ -77,6 +70,17 @@ class DbusBlock(blocks.Block):
                 f"Cannot connect to D-Bus. Block {self.block_name} is disabled!"
             )
             return
+
+        while not self.interface:
+            try:
+                self.interface = await self.get_interface_via_introspection(
+                    self.bus_name,
+                    self.object_path,
+                    self.interface_name,
+                )
+            except errors.DBusError:
+                logger.debug(f"D-Bus {self.bus_name} service not found, retrying...")
+                await asyncio.sleep(self.dbus_conn_sleep)
 
         await super().setup(queue)
 
@@ -95,39 +99,48 @@ class DbusBlock(blocks.Block):
         obj = await self.get_object_via_introspection(bus_name, object_path)
         return obj.get_interface(interface_name)
 
-    def safe_interface_call(self, method: str, *args, **kwargs) -> Any:
+    def _safe_interface_method_call(self, method: str, *args, **kwargs) -> Any:
         if self.interface:
             return getattr(self.interface, method)(*args, **kwargs)
 
-    @abc.abstractmethod
-    def update_callback(self, *args, **kwargs) -> None:
-        pass
+    async def safe_method_call(self, method: str, *args) -> Any:
+        r"""Safely call a D-Bus method from interface.
 
-    async def run(self) -> None:
-        pass
+        :param property: Name of a D-Bus method, just in ``snake_case`` form
+            instead of ``camelCase``.
 
-    async def start(self) -> None:
-        if self.frozen:
-            return
+        :param \*args: Positional arguments to be passed to the method.
+        """
+        return await self._safe_interface_method_call(f"call_{method}", *args)
 
-        while not self.interface:
-            try:
-                self.interface = await self.get_interface_via_introspection(
-                    self.bus_name,
-                    self.object_path,
-                    self.interface_name,
-                )
-            except errors.DBusError:
-                logger.debug(f"D-Bus {self.bus_name} service not found, retrying...")
-                await asyncio.sleep(self.dbus_conn_sleep)
+    async def safe_property_set(self, property: str, value: Any) -> None:
+        """Safely set a D-Bus property from interface.
 
-        try:
-            await self.run()
-            self.safe_interface_call(self.loop_method, self.update_callback)
-        except Exception as e:
-            logger.exception(f"Exception in {self.block_name}")
-            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
-            raise e
+        :param property: Name of a D-Bus property, just in ``snake_case`` form
+            instead of ``camelCase``.
+
+        :param value: Value to set the property.
+        """
+        await self._safe_interface_method_call(f"set_{property}", value)
+
+    async def safe_property_get(self, property: str) -> Any:
+        """Safely get a D-Bus property from interface.
+
+        :param property: Name of a D-Bus property, just in ``snake_case`` form
+            instead of ``camelCase``.
+        """
+        return await self._safe_interface_method_call(f"get_{property}")
+
+    def safe_signal_call(self, signal: str, callback: Callable[..., None]) -> None:
+        """Safely listen a D-Bus signal from interface.
+
+        :param signal: Name of a D-Bus signal, just in ``snake_case`` form
+            instead of ``camelCase``.
+
+        :param callback: Callback function to be run when the signal is
+            received.
+        """
+        self._safe_interface_method_call(f"on_{signal}", callback)
 
 
 class KbddBlock(DbusBlock):
@@ -163,7 +176,6 @@ class KbddBlock(DbusBlock):
             bus_name=self.bus_name,
             object_path=self.object_path,
             interface_name=self.interface_name,
-            loop_method="on_layout_name_changed",
             **kwargs,
         )
         self.format = format
@@ -173,27 +185,36 @@ class KbddBlock(DbusBlock):
             button == types.MouseButton.LEFT_BUTTON
             or button == types.MouseButton.SCROLL_UP
         ):
-            await self.safe_interface_call("call_next_layout")
+            await self.safe_method_call("next_layout")
         elif (
             button == types.MouseButton.RIGHT_BUTTON
             or button == types.MouseButton.SCROLL_DOWN
         ):
-            await self.safe_interface_call("call_prev_layout")
+            await self.safe_method_call("prev_layout")
 
-        await self.run()
+        await self.update_layout()
 
-    async def run(self) -> None:
-        current_layout: Optional[int] = await self.safe_interface_call(
-            "call_get_current_layout"
+    async def update_layout(self) -> None:
+        current_layout: Optional[int] = await self.safe_method_call(
+            "get_current_layout"
         )
-        layout_name: Optional[str] = await self.safe_interface_call(
-            "call_get_layout_name", current_layout
+        layout_name: Optional[str] = await self.safe_method_call(
+            "get_layout_name", current_layout
         )
 
         self.update(self.ex_format(self.format, full_layout=layout_name))
 
-    def update_callback(self, layout_name: str) -> None:  # type: ignore
+    def update_callback(self, layout_name: str) -> None:
         self.update(self.ex_format(self.format, full_layout=layout_name))
+
+    async def start(self) -> None:
+        try:
+            await self.update_layout()
+            self.safe_signal_call("layout_name_changed", self.update_callback)
+        except Exception as e:
+            logger.exception(f"Exception in {self.block_name}")
+            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
+            raise e
 
 
 class MediaPlayerBlock(DbusBlock):
@@ -224,12 +245,11 @@ class MediaPlayerBlock(DbusBlock):
             bus_name=self.bus_name.format(player=player),
             object_path=self.object_path,
             interface_name=self.interface_name,
-            loop_method="on_properties_changed",
             **kwargs,
         )
         self.format = format
 
-    def update_callback(  # type: ignore
+    def update_callback(
         self,
         interface_name: str,
         changed_properties: Dict[str, Variant],
@@ -244,3 +264,11 @@ class MediaPlayerBlock(DbusBlock):
                 track_number=metadata["xesam:trackNumber"].value,
             )
         )
+
+    async def start(self) -> None:
+        try:
+            self.safe_signal_call("properties_changed", self.update_callback)
+        except Exception as e:
+            logger.exception(f"Exception in {self.block_name}")
+            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
+            raise e

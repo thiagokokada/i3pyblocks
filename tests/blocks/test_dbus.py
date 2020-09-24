@@ -9,13 +9,17 @@ from i3pyblocks.blocks import dbus
 # TODO: Improve tests
 @pytest.mark.asyncio
 async def test_dbus_block():
+    def callback():
+        pass
+
     class ValidDbusBlock(dbus.DbusBlock):
-        async def run(self):
+        async def start(self):
             self.update("Hello!")
 
-        def update_callback(self):
-            self.update("Bye")
-
+    interface_mock = (
+        "MessageBus.return_value.connect.return_value."
+        "get_proxy_object.return_value.get_interface.return_value"
+    )
     with patch(
         "i3pyblocks.blocks.dbus.dbus_aio", autospec=True, spec_set=True
     ) as mock_dbus_aio:
@@ -23,17 +27,22 @@ async def test_dbus_block():
             **{
                 "MessageBus.return_value.connect": CoroutineMock(),
                 "MessageBus.return_value.connect.return_value.introspect": CoroutineMock(),
+                f"{interface_mock}.call_test": CoroutineMock(),
+                f"{interface_mock}.set_test": CoroutineMock(),
+                f"{interface_mock}.get_test": CoroutineMock(),
             }
         )
+        mock_bus = mock_dbus_aio.MessageBus.return_value.connect.return_value
+
         instance = ValidDbusBlock(
             bus_name="some.object",
             object_path="/some/path",
             interface_name="some.interface",
-            loop_method="some_method",
         )
         await instance.setup()
+        assert instance.interface
 
-        mock_bus = mock_dbus_aio.MessageBus.return_value.connect.return_value
+        mock_bus.reset_mock()
 
         # Testing get_object_via_introspection
         await instance.get_object_via_introspection("some.object", "/some/path")
@@ -51,6 +60,20 @@ async def test_dbus_block():
 
         await instance.start()
         assert instance.result()["full_text"] == "Hello!"
+
+        mock_interface = mock_obj.get_interface.return_value
+
+        instance.safe_signal_call("test", callback)
+        mock_interface.on_test.assert_called_once_with(callback)
+
+        await instance.safe_method_call("test", "foo", "bar")
+        mock_interface.call_test.assert_called_once_with("foo", "bar")
+
+        await instance.safe_property_get("test")
+        mock_interface.get_test.assert_called_once()
+
+        await instance.safe_property_set("test", "something")
+        mock_interface.set_test.assert_called_once_with("something")
 
 
 @pytest.mark.asyncio
