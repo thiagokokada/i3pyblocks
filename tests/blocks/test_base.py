@@ -35,116 +35,97 @@ async def test_valid_block():
                 markup=types.MarkupText.NONE,
             )
 
-    block = ValidBlock(
-        block_name="Name",
-        default_state=dict(
-            color="#000000",
-            background="#FFFFFF",
-            border="#FF0000",
-            border_top=1,
-            border_right=1,
-            border_bottom=1,
-            border_left=1,
-            min_width=10,
-            align=types.AlignText.CENTER,
-            urgent=True,
-            separator=False,
-            separator_block_width=9,
-            markup=types.MarkupText.PANGO,
-        ),
+    default_state = dict(
+        color="#000000",
+        background="#FFFFFF",
+        border="#FF0000",
+        border_top=1,
+        border_right=1,
+        border_bottom=1,
+        border_left=1,
+        min_width=10,
+        align=types.AlignText.CENTER,
+        urgent=True,
+        separator=False,
+        separator_block_width=9,
+        markup=types.MarkupText.PANGO,
     )
+
+    block = ValidBlock(block_name="Name", default_state=default_state)
 
     await block.setup(asyncio.Queue())
 
     assert block.result() == {
-        "align": "center",
-        "background": "#FFFFFF",
-        "border": "#FF0000",
-        "border_bottom": 1,
-        "border_left": 1,
-        "border_right": 1,
-        "border_top": 1,
-        "color": "#000000",
-        "full_text": "",
+        **default_state,
         "instance": str(block.id),
-        "min_width": 10,
+        "full_text": "",
         "name": "Name",
-        "separator": False,
-        "separator_block_width": 9,
-        "urgent": True,
-        "markup": "pango",
     }
 
     await block.start()
 
     assert block.result() == {
-        "align": "center",
-        "background": "#FFFFFF",
-        "border": "#FF0000",
-        "border_bottom": 1,
-        "border_left": 1,
-        "border_right": 1,
-        "border_top": 1,
-        "color": "#000000",
-        "full_text": "DONE!",
+        **default_state,
         "instance": str(block.id),
-        "min_width": 10,
+        "full_text": "DONE!",
         "name": "Name",
-        "separator": False,
-        "separator_block_width": 9,
-        "urgent": False,
         "markup": "none",
+        "urgent": False,
     }
 
     id_, result = await block.update_queue.get()
 
     assert id_ == block.id
     assert result == {
-        "align": "center",
-        "background": "#FFFFFF",
-        "border": "#FF0000",
-        "border_bottom": 1,
-        "border_left": 1,
-        "border_right": 1,
-        "border_top": 1,
-        "color": "#000000",
-        "full_text": "DONE!",
+        **default_state,
         "instance": str(block.id),
-        "min_width": 10,
+        "full_text": "DONE!",
         "name": "Name",
-        "separator": False,
-        "separator_block_width": 9,
-        "urgent": False,
         "markup": "none",
+        "urgent": False,
     }
 
+    # Testing abort()
     block.abort("Aborted!")
 
     _, result = await block.update_queue.get()
-
     assert result == {
-        "align": "center",
-        "background": "#FFFFFF",
-        "border": "#FF0000",
-        "border_bottom": 1,
-        "border_left": 1,
-        "border_right": 1,
-        "border_top": 1,
-        "color": "#000000",
-        "full_text": "Aborted!",
+        **default_state,
         "instance": str(block.id),
-        "min_width": 10,
+        "full_text": "Aborted!",
         "name": "Name",
-        "separator": False,
-        "separator_block_width": 9,
         "urgent": True,
-        "markup": "pango",
     }
 
     block.update("Shouldn't update since aborted")
 
     with pytest.raises(asyncio.QueueEmpty):
         await block.update_queue.get_nowait()
+
+    # Testing reset_state()
+    block.reset_state()
+
+    assert block.result() == {
+        **default_state,
+        "instance": str(block.id),
+        "name": "Name",
+    }
+
+    # Testing exception()
+    block.frozen = False
+
+    with pytest.raises(Exception):
+        block.exception(
+            Exception("Kaboom!"),
+            format="{block_name}: {exception}",
+            reraise=True,
+        )
+
+    result = block.result()
+
+    assert result["full_text"] == "Name: Kaboom!"
+    assert result["urgent"] is True
+    assert block.frozen
 
 
 def test_invalid_polling_block():

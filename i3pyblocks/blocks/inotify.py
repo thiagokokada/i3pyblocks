@@ -24,7 +24,7 @@ from typing import List, Mapping, Optional, Union
 
 import aionotify
 
-from i3pyblocks import blocks, logger, types
+from i3pyblocks import blocks, types
 from i3pyblocks._internal import models, subprocess
 
 
@@ -110,9 +110,7 @@ class FileWatcherBlock(blocks.Block):
                 await self.run()
                 self.event = await watcher.get_event()
         except Exception as e:
-            logger.exception(f"Exception in {self.block_name}")
-            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
-            raise e
+            self.exception(e)
 
 
 class BacklightBlock(FileWatcherBlock):

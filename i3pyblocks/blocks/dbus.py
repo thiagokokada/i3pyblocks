@@ -212,9 +212,7 @@ class KbddBlock(DbusBlock):
             await self.update_layout()
             self.safe_signal_call("layout_name_changed", self.update_callback)
         except Exception as e:
-            logger.exception(f"Exception in {self.block_name}")
-            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
-            raise e
+            self.exception(e)
 
 
 class MediaPlayerBlock(DbusBlock):
@@ -269,6 +267,4 @@ class MediaPlayerBlock(DbusBlock):
         try:
             self.safe_signal_call("properties_changed", self.update_callback)
         except Exception as e:
-            logger.exception(f"Exception in {self.block_name}")
-            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
-            raise e
+            self.exception(e)
