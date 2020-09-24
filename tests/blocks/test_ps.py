@@ -131,7 +131,9 @@ async def test_network_speed_block_down():
 
 @pytest.mark.asyncio
 async def test_network_speed_block_up():
-    with patch(**PSUTIL_MOCK_CONFIG) as mock_psutil:
+    with patch(**PSUTIL_MOCK_CONFIG) as mock_psutil, patch(
+        "i3pyblocks.blocks.ps.time"
+    ) as mock_time:
         mock_psutil.configure_mock(
             **{
                 "net_if_stats.return_value": {
@@ -174,8 +176,10 @@ async def test_network_speed_block_up():
                 ],
             }
         )
+        mock_time.time.return_value = 3.328857660293579
         instance = ps.NetworkSpeedBlock(format_up="{interface} {upload} {download}")
 
+        mock_time.time.return_value = 6.328857660293579
         await instance.run()
 
         result = instance.result()
