@@ -76,10 +76,10 @@ class Runner:
                 )
                 await block.signal_handler(sig=sig)
             except Exception as e:
-                logger.exception(f"Exception in {block.block_name} signal handler")
-                block.abort(
-                    f"Exception in {block.block_name} signal handler: {e}",
-                    urgent=True,
+                block.exception(
+                    e,
+                    format="Exception in {block_name} signal handler: {exception}",
+                    reraise=False,
                 )
 
         def callback_fn(sig: signal.Signals):
@@ -187,9 +187,10 @@ class Runner:
                 modifiers=click_event.get("modifiers"),
             )
         except Exception as e:
-            logger.exception(f"Error in {block.block_name} click handler")
-            block.abort(
-                f"Exception in {block.block_name} click handler: {e}", urgent=True
+            block.exception(
+                e,
+                format="Exception in {block_name} click handler: {exception}",
+                reraise=False,
             )
 
     # Based on: https://git.io/fjbHx

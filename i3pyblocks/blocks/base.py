@@ -90,7 +90,7 @@ class Block(metaclass=abc.ABCMeta):
 
     def update_state(
         self,
-        full_text: str = "",
+        full_text: Optional[str] = "",
         short_text: Optional[str] = None,
         color: Optional[str] = None,
         background: Optional[str] = None,
@@ -188,6 +188,14 @@ class Block(metaclass=abc.ABCMeta):
             markup=markup,
         )
 
+    def reset_state(self) -> None:
+        """Reset a block to default state.
+
+        Same as calling :meth:`~i3pyblocks.blocks.base.Block.update_state()`
+        with ``None``, but this makes the intetion clearer.
+        """
+        self.update_state(None)
+
     def result(self) -> models.State:
         """Returns the current state of Block as a dict.
 
@@ -239,6 +247,31 @@ class Block(metaclass=abc.ABCMeta):
         """
         self.update(*args, **kwargs)
         self.frozen = True
+
+    def exception(
+        self,
+        exception: Exception,
+        format: str = "Exception in {block_name}: {exception}",
+        reraise=True,
+    ) -> None:
+        """Log and show the exception in i3bar.
+
+        :param exception: Exception raised by block.
+
+        :param format: Format string to shown. Supports the ``{block_name}``
+            and ``{exception}`` placeholders
+
+        :param reraise: If the exception should be reraised. This should stop
+            the block from working.
+        """
+        formatted_msg = format.format(
+            block_name=self.block_name,
+            exception=exception,
+        )
+        logger.exception(formatted_msg)
+        self.abort(formatted_msg, urgent=True)
+        if reraise:
+            raise exception
 
     async def setup(self, queue: Optional[asyncio.Queue] = None) -> None:
         """Setup a Block.
@@ -392,9 +425,7 @@ class PollingBlock(Block):
                 await self.run()
                 await asyncio.sleep(self.sleep)
         except Exception as e:
-            logger.exception(f"Exception in {self.block_name}")
-            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
-            raise e
+            self.exception(e)
 
 
 class ExecutorBlock(Block):
@@ -440,6 +471,4 @@ class ExecutorBlock(Block):
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(self.executor, self.run)
         except Exception as e:
-            logger.exception(f"Exception in {self.block_name}")
-            self.abort(f"Exception in {self.block_name}: {e}", urgent=True)
-            raise e
+            self.exception(e)
