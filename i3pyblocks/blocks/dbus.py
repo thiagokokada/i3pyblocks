@@ -163,7 +163,7 @@ class KbddBlock(DbusBlock):
             bus_name=self.bus_name,
             object_path=self.object_path,
             interface_name=self.interface_name,
-            loop_method="on_layout_changed",
+            loop_method="on_layout_name_changed",
             **kwargs,
         )
         self.format = format
