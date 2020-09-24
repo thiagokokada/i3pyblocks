@@ -20,6 +20,7 @@ resources for it).
 
 import datetime
 import re
+import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
@@ -312,6 +313,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         self.colors = colors
         self.interface_regex = re.compile(interface_regex)
         self.previous = psutil.net_io_counters(pernic=True)
+        self.previous_time = time.time()
 
     def _find_interface(self) -> Optional[str]:
         interfaces = psutil.net_if_stats()
@@ -322,9 +324,11 @@ class NetworkSpeedBlock(blocks.PollingBlock):
 
         return None
 
-    def _calculate_speed(self, previous, now) -> Tuple[float, float]:
-        upload = (now.bytes_sent - previous.bytes_sent) / self.sleep
-        download = (now.bytes_recv - previous.bytes_recv) / self.sleep
+    def _calculate_speed(
+        self, previous, previous_time, now, now_time
+    ) -> Tuple[float, float]:
+        upload = (now.bytes_sent - previous.bytes_sent) / (now_time - previous_time)
+        download = (now.bytes_recv - previous.bytes_recv) / (now_time - previous_time)
 
         return upload, download
 
@@ -336,14 +340,16 @@ class NetworkSpeedBlock(blocks.PollingBlock):
             return
 
         now = psutil.net_io_counters(pernic=True)
+        now_time = time.time()
 
-        try:
+        if interface in now.keys():
             upload, download = self._calculate_speed(
-                self.previous[interface], now[interface]
+                self.previous[interface],
+                self.previous_time,
+                now[interface],
+                now_time,
             )
-        except KeyError:
-            # When the interface does not exist in self.previous, we will get a
-            # KeyError. In this case, just set upload and download to 0.
+        else:
             upload, download = 0, 0
 
         color = misc.calculate_threshold(self.colors, max(upload, download))
@@ -359,6 +365,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         )
 
         self.previous = now
+        self.previous_time = now_time
 
 
 class SensorsBatteryBlock(blocks.PollingBlock):
