@@ -14,18 +14,21 @@ do not take much time, this event should be rare, but it is better to be safe
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
-from Xlib import display as Xdisplay
+from Xlib import X, display
 from Xlib.ext import dpms  # noqa: F401 (ensure that Xlib.ext.dpms is available)
 
 from i3pyblocks import blocks
 
 
 class DPMSBlock(blocks.PollingBlock):
-    r"""Block that controls of X11 Display Power Management Signaling (DPMS).
+    r"""Block that controls of X11 DPMS and screensaver.
 
     It shows the state of `DPMS`_ and also allow toggling it ON and OFF,
-    basically enabling or disabling "screen saver". This is very similar to
-    `Caffeine`_ extension in Gnome, or `Amphetamine`_ on macOS.
+    basically enabling or disabling display energy savings, and also enables
+    disables the screensaver.
+
+    This is very similar to `Caffeine`_ extension in Gnome, or `Amphetamine`_
+    on macOS.
 
     :param format_on: format string to shown when DPMS is on.
 
@@ -55,7 +58,7 @@ class DPMSBlock(blocks.PollingBlock):
         super().__init__(sleep=sleep, **kwargs)
         self.format_on = format_on
         self.format_off = format_off
-        self.display = Xdisplay.Display()
+        self.display = display.Display()
         self.loop = asyncio.get_event_loop()
         self.executor = ThreadPoolExecutor(max_workers=1)
 
@@ -71,8 +74,20 @@ class DPMSBlock(blocks.PollingBlock):
 
         if state:
             self.display.dpms_disable()
+            self.display.set_screen_saver(
+                allow_exposures=X.DefaultExposures,
+                interval=0,
+                prefer_blank=X.DefaultBlanking,
+                timeout=0,
+            )
         else:
             self.display.dpms_enable()
+            self.display.set_screen_saver(
+                allow_exposures=X.DefaultExposures,
+                interval=-1,
+                prefer_blank=X.DefaultBlanking,
+                timeout=-1,
+            )
 
         await self.loop.run_in_executor(
             self.executor,
