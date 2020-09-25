@@ -70,18 +70,6 @@ class DbusBlock(blocks.Block):
                 f"Cannot connect to D-Bus. Block {self.block_name} is disabled!"
             )
             return
-
-        while not self.interface:
-            try:
-                self.interface = await self.get_interface_via_introspection(
-                    self.bus_name,
-                    self.object_path,
-                    self.interface_name,
-                )
-            except errors.DBusError:
-                logger.debug(f"D-Bus {self.bus_name} service not found, retrying...")
-                await asyncio.sleep(self.dbus_conn_sleep)
-
         await super().setup(queue)
 
     async def get_object_via_introspection(
@@ -98,6 +86,18 @@ class DbusBlock(blocks.Block):
     ) -> dbus_aio.ProxyInterface:
         obj = await self.get_object_via_introspection(bus_name, object_path)
         return obj.get_interface(interface_name)
+
+    async def wait_interface(self) -> None:
+        while not self.interface:
+            try:
+                self.interface = await self.get_interface_via_introspection(
+                    self.bus_name,
+                    self.object_path,
+                    self.interface_name,
+                )
+            except errors.DBusError:
+                logger.debug(f"D-Bus {self.bus_name} service not found, retrying...")
+                await asyncio.sleep(self.dbus_conn_sleep)
 
     def _safe_interface_method_call(self, method: str, *args, **kwargs) -> Any:
         if self.interface:
@@ -209,6 +209,7 @@ class KbddBlock(DbusBlock):
 
     async def start(self) -> None:
         try:
+            await self.wait_interface()
             await self.update_layout()
             self.safe_signal_call("layout_name_changed", self.update_callback)
         except Exception as e:
@@ -265,6 +266,7 @@ class MediaPlayerBlock(DbusBlock):
 
     async def start(self) -> None:
         try:
+            await self.wait_interface()
             self.safe_signal_call("properties_changed", self.update_callback)
         except Exception as e:
             self.exception(e)

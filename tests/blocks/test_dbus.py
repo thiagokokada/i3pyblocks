@@ -40,6 +40,7 @@ async def test_dbus_block():
             interface_name="some.interface",
         )
         await instance.setup()
+        await instance.wait_interface()
         assert instance.interface
 
         mock_bus.reset_mock()
