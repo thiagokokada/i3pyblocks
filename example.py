@@ -7,7 +7,7 @@ from pathlib import Path
 import psutil
 
 from i3pyblocks import Runner, types, utils
-from i3pyblocks.blocks import (  # x11,
+from i3pyblocks.blocks import (  # shell,
     datetime,
     dbus,
     http,
@@ -15,7 +15,7 @@ from i3pyblocks.blocks import (  # x11,
     inotify,
     ps,
     pulse,
-    shell,
+    x11,
 )
 
 # Configure logging, so we can have debug information available in
@@ -119,23 +119,25 @@ async def main():
     # is shown
     # When `format_on` is being shown, clicking on it runs `command_off`,
     # while when `format_off` is being shown, clicking on it runs `command_on`
-    await runner.register_block(
-        shell.ToggleBlock(
-            command_state="xset q | grep -Fo 'DPMS is Enabled'",
-            command_on="xset s on +dpms",
-            command_off="xset s off -dpms",
-            format_on="  ",
-            format_off="  ",
-        )
-    )
-
-    # This is equivalent to the example above, but using pure Python
+    # We are using it below to simulate the popular Caffeine extension in
+    # Gnome and macOS
     # await runner.register_block(
-    #     x11.DPMSBlock(
-    #         format_on="  ",
-    #         format_off="  ",
+    #     shell.ToggleBlock(
+    #         command_state="xset q | grep -Fo 'DPMS is Enabled'",
+    #         command_on="xset s on +dpms",
+    #         command_off="xset s off -dpms",
+    #         format_on="  ",
+    #         format_off="  ",
     #     )
     # )
+
+    # This is equivalent to the example above, but using pure Python
+    await runner.register_block(
+        x11.CaffeineBlock(
+            format_on="  ",
+            format_off="  ",
+        )
+    )
 
     # KbddBlock uses D-Bus to get the keyboard layout information updates, so
     # it is very efficient (i.e.: there is no polling). But it needs `kbdd`

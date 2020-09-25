@@ -1,7 +1,8 @@
 """Blocks related to X11, based on `python-xlib`_.
 
-Blocks dedicated to control some X11 features. For example, ``DPMSBlock``
-shows the state of DPMS and allow you to toggle DPMS between ON and OFF.
+Blocks dedicated to control some X11 features. For example, ``CaffeineBlock``
+shows the state of DPMS and screensaver and allow you to toggle DPMS between
+ON and OFF.
 
 Since query ``python-xlib`` calls are blocking, we execute than in a
 ThreadPoolExecutor to avoid locking up the i3pyblocks. Since most X11 calls
@@ -20,19 +21,17 @@ from Xlib.ext import dpms  # noqa: F401 (ensure that Xlib.ext.dpms is available)
 from i3pyblocks import blocks
 
 
-class DPMSBlock(blocks.PollingBlock):
+class CaffeineBlock(blocks.PollingBlock):
     r"""Block that controls of X11 DPMS and screensaver.
 
-    It shows the state of `DPMS`_ and also allow toggling it ON and OFF,
-    basically enabling or disabling display energy savings, and also enables
-    disables the screensaver.
+    When turned on, this blocks disables both `DPMS`_ and screensaver,
+    effectively, keeping your screen on. When it is turned off this block
+    re-enables both `DPMS`_ and screensaver. This is very similar to
+    `Caffeine`_ extension in Gnome, or `Amphetamine`_ on macOS.
 
-    This is very similar to `Caffeine`_ extension in Gnome, or `Amphetamine`_
-    on macOS.
+    :param format_on: format string to shown when DPMS and screensaver is off.
 
-    :param format_on: format string to shown when DPMS is on.
-
-    :param format_off: format string to shown when DPMS is off.
+    :param format_off: format string to shown when DPMS and screensaver is on.
 
     :param sleep: Sleep in seconds between each call to
         :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
@@ -50,8 +49,8 @@ class DPMSBlock(blocks.PollingBlock):
 
     def __init__(
         self,
-        format_on: str = "DPMS ON",
-        format_off: str = "DPMS OFF",
+        format_on: str = "CAFFEINE ON",
+        format_off: str = "CAFFEINE OFF",
         sleep: int = 1,
         **kwargs,
     ) -> None:
@@ -99,4 +98,4 @@ class DPMSBlock(blocks.PollingBlock):
     async def run(self) -> None:
         state = await self.get_state()
 
-        self.update(self.format_on if state else self.format_off)
+        self.update(self.format_off if state else self.format_on)

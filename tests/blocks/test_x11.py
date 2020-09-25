@@ -7,7 +7,7 @@ x11 = pytest.importorskip("i3pyblocks.blocks.x11")
 
 
 @pytest.mark.asyncio
-async def test_dpms_block():
+async def test_caffeine_block():
     with patch(
         # Display.dpms_info() is generated at runtime so can't autospec here
         "i3pyblocks.blocks.x11.display",
@@ -28,10 +28,10 @@ async def test_dpms_block():
         )
         mock_Display = mock_display.Display.return_value
 
-        instance = x11.DPMSBlock()
+        instance = x11.CaffeineBlock()
 
         await instance.run()
-        assert instance.result()["full_text"] == "DPMS ON"
+        assert instance.result()["full_text"] == "CAFFEINE OFF"
 
         await instance.click_handler()
         mock_Display.dpms_disable.assert_called_once()
@@ -45,7 +45,7 @@ async def test_dpms_block():
         mock_Display.reset_mock()
 
         await instance.run()
-        assert instance.result()["full_text"] == "DPMS OFF"
+        assert instance.result()["full_text"] == "CAFFEINE ON"
 
         await instance.click_handler()
         mock_Display.dpms_enable.assert_called_once()
