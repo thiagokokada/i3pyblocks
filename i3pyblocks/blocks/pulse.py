@@ -18,13 +18,12 @@ error when trying to run this module::
     https://www.freedesktop.org/wiki/Software/PulseAudio/
 """
 
-import subprocess
 from typing import Optional
 
 import pulsectl
 
 from i3pyblocks import blocks, logger, types
-from i3pyblocks._internal import misc, models
+from i3pyblocks._internal import misc, models, subprocess
 
 
 # Based on: https://git.io/fjbHp
@@ -90,7 +89,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
             75.0: "▇",
             87.5: "█",
         },
-        command: str = "pavucontrol",
+        command: models.CommandArgs = ("pavucontrol",),
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -173,7 +172,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
         On scroll down it decreases the volume.
         """
         if button == types.MouseButton.LEFT_BUTTON:
-            subprocess.Popen(self.command, shell=True)
+            subprocess.popener(self.command)
         elif button == types.MouseButton.RIGHT_BUTTON:
             self.toggle_mute()
         elif button == types.MouseButton.SCROLL_UP:

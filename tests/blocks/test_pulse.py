@@ -112,7 +112,7 @@ async def test_pulse_audio_block_click_handler():
             }
         )
         instance = pulse.PulseAudioBlock(
-            command="command -c",
+            command=("command", "-c"),
         )
         mock_event(instance, facility="server")
 
@@ -120,7 +120,7 @@ async def test_pulse_audio_block_click_handler():
 
         # LEFT_BUTTON should run command
         await instance.click_handler(types.MouseButton.LEFT_BUTTON)
-        mock_subprocess.Popen.assert_called_once_with("command -c", shell=True)
+        mock_subprocess.popener.assert_called_once_with(("command", "-c"))
 
         context_manager_mock = mock_pulse.__enter__
         mute_mock = context_manager_mock.return_value.mute
