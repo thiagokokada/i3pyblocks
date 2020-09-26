@@ -1,9 +1,10 @@
 import setuptools
 
-from i3pyblocks.__version__ import __version__
+with open("i3pyblocks/__version__.py", "r") as f:
+    exec(f.read())
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+with open("README.md", "r") as f:
+    long_description = f.read()
 
 setuptools.setup(
     name="i3pyblocks",
