@@ -11,6 +11,16 @@ from typing import AnyStr, Iterable, Optional
 from i3pyblocks._internal import models
 
 
+def _get_shell(args: models.CommandArgs, shell: Optional[bool]) -> bool:
+    if shell is None:
+        if isinstance(args, str):
+            return True
+        else:
+            return False
+
+    return shell
+
+
 async def arun(
     args: models.CommandArgs,
     *,
@@ -42,13 +52,7 @@ async def arun(
         stdout = PIPE
         stderr = PIPE
 
-    if shell is None:
-        if isinstance(args, str):
-            shell = True
-        else:
-            shell = False
-
-    if shell:
+    if _get_shell(args, shell):
         assert isinstance(args, str)
         process = await create_subprocess_shell(
             args,
@@ -104,17 +108,11 @@ def popener(
     .. _subprocess.Popen():
         https://docs.python.org/3/library/subprocess.html#subprocess.Popen
     """
-    if shell is None:
-        if isinstance(args, str):
-            shell = True
-        else:
-            shell = False
-
     return Popen(
         args,
         stdin=stdin,
         stdout=stdout,
         stderr=stderr,
-        shell=shell,
+        shell=_get_shell(args, shell),
         universal_newlines=text,
     )
