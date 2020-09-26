@@ -5,10 +5,20 @@ from asyncio.subprocess import (
     create_subprocess_exec,
     create_subprocess_shell,
 )
-from subprocess import CompletedProcess
+from subprocess import CompletedProcess, Popen
 from typing import AnyStr, Iterable, Optional
 
 from i3pyblocks._internal import models
+
+
+def _get_shell(args: models.CommandArgs, shell: Optional[bool]) -> bool:
+    if shell is None:
+        if isinstance(args, str):
+            return True
+        else:
+            return False
+
+    return shell
 
 
 async def arun(
@@ -20,7 +30,7 @@ async def arun(
     stderr: Optional[int] = DEVNULL,
     capture_output: bool = False,
     shell: Optional[bool] = None,
-    text: bool = None,
+    text: bool = False,
     **other_subprocess_kwargs,
 ) -> CompletedProcess:
     """Wrapper around asyncio.subprocess with an API similar to `subprocess.run()`_.
@@ -36,19 +46,13 @@ async def arun(
     expanded if/when needed.
 
     .. _subprocess.run():
-        https://docs.python.org/3.8/library/subprocess.html#subprocess.run
+        https://docs.python.org/3/library/subprocess.html#subprocess.run
     """
     if capture_output:
         stdout = PIPE
         stderr = PIPE
 
-    if shell is None:
-        if isinstance(args, str):
-            shell = True
-        else:
-            shell = False
-
-    if shell:
+    if _get_shell(args, shell):
         assert isinstance(args, str)
         process = await create_subprocess_shell(
             args,
@@ -77,4 +81,38 @@ async def arun(
         returncode=process.returncode or 0,
         stdout=result_stdout.decode() if (result_stdout and text) else result_stdout,
         stderr=result_stderr.decode() if (result_stderr and text) else result_stderr,
+    )
+
+
+def popener(
+    args: models.CommandArgs,
+    *,
+    stdin: Optional[int] = DEVNULL,
+    stdout: Optional[int] = DEVNULL,
+    stderr: Optional[int] = DEVNULL,
+    shell: Optional[bool] = None,
+    text: bool = False,
+) -> Popen:
+    """Wrapper around `subprocess.Popen`_, executing a child program in a new process.
+
+    This is not complete and there is some deliberately differences:
+
+        - Auto-detection of ``shell`` parameter based on arguments
+        - By default, stdin/stdout/stderr point to /dev/null, so the process
+          is isolated from outside
+
+    Recommended for those cases where :fun:`~i3pyblocks._internal.subprocess.arun`
+    does not cover, i.e.: need to run a program completely in background and the
+    result of its execution does not matter.
+
+    .. _subprocess.Popen():
+        https://docs.python.org/3/library/subprocess.html#subprocess.Popen
+    """
+    return Popen(
+        args,
+        stdin=stdin,
+        stdout=stdout,
+        stderr=stderr,
+        shell=_get_shell(args, shell),
+        universal_newlines=text,
     )
