@@ -303,7 +303,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
             2 * types.IECUnit.MiB: types.Color.WARN,
             5 * types.IECUnit.MiB: types.Color.URGENT,
         },
-        interface_regex: str = "en*|eth*|ppp*|sl*|wl*|ww*",
+        interface_regex: str = r"en*|eth*|ppp*|sl*|wl*|ww*",
         sleep: int = 3,
         **kwargs,
     ) -> None:
@@ -312,13 +312,23 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         self.format_down = format_down
         self.colors = colors
         self.interface_regex = re.compile(interface_regex)
+        self.interface = self._find_interface()
         self.previous = psutil.net_io_counters(pernic=True)
         self.previous_time = time.time()
 
-    def _find_interface(self) -> Optional[str]:
-        interfaces = psutil.net_if_stats()
+    def _find_interface(
+        self,
+        previous_interface: Optional[str] = None,
+    ) -> Optional[str]:
+        interfaces_stats = psutil.net_if_stats()
 
-        for interface, stats in interfaces.items():
+        # Give preference to the current interface if more than one interface
+        # match the rules
+        previous_stats = interfaces_stats.get(previous_interface)
+        if previous_stats and previous_stats.isup:
+            return previous_interface
+
+        for interface, stats in interfaces_stats.items():
             if stats.isup and self.interface_regex.match(interface):
                 return interface
 
@@ -333,20 +343,20 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         return upload, download
 
     async def run(self) -> None:
-        interface = self._find_interface()
+        self.interface = self._find_interface(self.interface)
 
-        if not interface:
+        if not self.interface:
             self.abort(self.format_down, color=types.Color.URGENT)
             return
 
         now = psutil.net_io_counters(pernic=True)
         now_time = time.time()
 
-        if interface in now.keys():
+        if self.interface in now.keys():
             upload, download = self._calculate_speed(
-                self.previous[interface],
+                self.previous[self.interface],
                 self.previous_time,
-                now[interface],
+                now[self.interface],
                 now_time,
             )
         else:
@@ -359,7 +369,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
                 self.format_up,
                 upload=bytes2human(upload),
                 download=bytes2human(download),
-                interface=interface,
+                interface=self.interface,
             ),
             color=color,
         )
