@@ -20,7 +20,7 @@ async def arun(
     stderr: Optional[int] = DEVNULL,
     capture_output: bool = False,
     shell: Optional[bool] = None,
-    text: bool = None,
+    text: bool = False,
     **other_subprocess_kwargs,
 ) -> CompletedProcess:
     """Wrapper around asyncio.subprocess with an API similar to `subprocess.run()`_.
@@ -87,7 +87,7 @@ def popener(
     stdout: Optional[int] = DEVNULL,
     stderr: Optional[int] = DEVNULL,
     shell: Optional[bool] = None,
-    text: bool = None,
+    text: bool = False,
 ) -> Popen:
     """Wrapper around `subprocess.Popen`_, executing a child program in a new process.
 
@@ -116,5 +116,5 @@ def popener(
         stdout=stdout,
         stderr=stderr,
         shell=shell,
-        text=text,
+        universal_newlines=text,
     )
