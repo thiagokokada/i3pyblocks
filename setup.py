@@ -1,6 +1,7 @@
 import setuptools
 
 with open("i3pyblocks/__version__.py", "r") as f:
+    __version__ = None
     exec(f.read())
 
 with open("README.md", "r") as f:
