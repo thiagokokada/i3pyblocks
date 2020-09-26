@@ -189,6 +189,82 @@ async def test_network_speed_block_up():
 
 
 @pytest.mark.asyncio
+async def test_network_speed_block_two_interfaces_up():
+    with patch(**PSUTIL_MOCK_CONFIG) as mock_psutil:
+        mock_psutil.configure_mock(
+            **{
+                "net_if_stats.side_effect": [
+                    {
+                        "eno1": misc.AttributeDict(
+                            isup=True,
+                            duplex=psutil.NIC_DUPLEX_FULL,
+                            speed=1000,
+                            mtu=1500,
+                        ),
+                        "eno2": misc.AttributeDict(
+                            isup=True,
+                            duplex=psutil.NIC_DUPLEX_FULL,
+                            speed=1000,
+                            mtu=1500,
+                        ),
+                    },
+                    {
+                        "eno2": misc.AttributeDict(
+                            isup=True,
+                            duplex=psutil.NIC_DUPLEX_FULL,
+                            speed=1000,
+                            mtu=1500,
+                        ),
+                        "eno1": misc.AttributeDict(
+                            isup=True,
+                            duplex=psutil.NIC_DUPLEX_FULL,
+                            speed=1000,
+                            mtu=1500,
+                        ),
+                    },
+                    {
+                        "eno2": misc.AttributeDict(
+                            isup=True,
+                            duplex=psutil.NIC_DUPLEX_FULL,
+                            speed=1000,
+                            mtu=1500,
+                        ),
+                        "eno1": misc.AttributeDict(
+                            isup=True,
+                            duplex=psutil.NIC_DUPLEX_FULL,
+                            speed=1000,
+                            mtu=1500,
+                        ),
+                    },
+                ],
+                "net_io_counters.return_value": {
+                    "eno1": misc.AttributeDict(
+                        bytes_sent=1082551675,
+                        bytes_recv=2778549399,
+                        packets_sent=2198791,
+                        packets_recv=2589939,
+                    ),
+                    "eno2": misc.AttributeDict(
+                        bytes_sent=35052252,
+                        bytes_recv=35052252,
+                        packets_sent=72139,
+                        packets_recv=72139,
+                    ),
+                },
+            },
+        )
+        instance = ps.NetworkSpeedBlock(format_up="{interface}")
+
+        await instance.run()
+        result = instance.result()
+        assert result["full_text"] == "eno1"
+
+        await instance.run()
+        result = instance.result()
+        assert result["full_text"] == "eno1"
+
+
+@pytest.mark.asyncio
 async def test_sensors_battery_block():
     with patch(**PSUTIL_MOCK_CONFIG) as mock_psutil:
         mock_psutil.configure_mock(
