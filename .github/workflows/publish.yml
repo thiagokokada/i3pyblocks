@@ -60,3 +60,4 @@ jobs:
         body: Bump development version.
         branch: bump-version
         base: master
+        branch-suffix: short-commit-hash
