@@ -30,7 +30,7 @@ make dev-install
 To run the tests, you may run:
 
 ```shell
-make tests
+make test
 ```
 
 Look at the included `Makefile` for more available commands.
