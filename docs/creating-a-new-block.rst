@@ -264,8 +264,9 @@ a similar way.
 When to use each base block?
 ----------------------------
 
-Generally using :class:`~i3pyblocks.blocks.base.PollingBlock` is the easiest
-way to start. However it is not necessary the most efficient way.
+Generally using either :class:`~i3pyblocks.blocks.base.PollingBlock` (for asyncio)
+or :class:`~i3pyblocks.blocks.base.PollingSyncBlock` (for non-asyncio) [2]_ is
+the easiest way to start. However it is not necessary the most efficient way.
 
 For example, volume is not something that is changed frequently. You may
 change the volume of your system once or twice until you find a confortable
@@ -296,7 +297,7 @@ for projects that integrates well with `asyncio`_. Just implement
 However, some projects doesn't integrate well with *asyncio* (i.e.: their
 methods are not *async*). Using them with :class:`~i3pyblocks.blocks.base.Block`
 would freeze i3pyblocks completely until some update on them happened.
-In those cases, you can use :class:`~i3pyblocks.blocks.base.ExecutorBlock`.
+In those cases, you can use :class:`~i3pyblocks.blocks.base.SyncBlock`.
 It runs the code inside an `Executor`_, that can be either a thread or a process,
 so the updates inside this block doesn't affect the rest of i3pyblocks. The
 usage ends up being very similar to before, just without *async/await* keywords:
@@ -308,6 +309,11 @@ usage ends up being very similar to before, just without *async/await* keywords:
             result = wait_for_event_loop()
             self.update(result)
 
+.. [2] :class:`~i3pyblocks.blocks.base.PollingBlock` should be your first choice
+   even for non-asyncio dependencies if the calls are cheap, since it is more
+   efficient. :class:`~i3pyblocks.blocks.base.PollingSyncBlock` is only recommended
+   if your calls are slow and synchronous (i.e.: they may need a network or `IPC`_
+   communication).
 .. _`event loop`:
      https://en.wikipedia.org/wiki/Event_loop
 .. _`PulseAudio`:
@@ -318,13 +324,15 @@ usage ends up being very similar to before, just without *async/await* keywords:
      https://docs.python.org/3/library/asyncio.html
 .. _`Executor`:
     https://docs.python.org/3/library/concurrent.futures.html
+.. _`IPC`:
+    https://en.wikipedia.org/wiki/Inter-process_communication
 
 .. seealso::
 
    There is multiple examples of each kind of base block usage in i3pyblocks
    already. For examples of :class:`~i3pyblocks.blocks.base.PollingBlock`
    check :mod:`i3pyblocks.blocks.ps` namespace, for examples of
-   :class:`~i3pyblocks.blocks.base.ExecutorBlock` check
+   :class:`~i3pyblocks.blocks.base.SyncBlock` check
    :class:`~i3pyblocks.blocks.pulse.PulseAudioBlock`, and for examples of
    event-based blocks using :class:`~i3pyblocks.blocks.base.Block` check
    :mod:`i3pyblocks.blocks.inotify` namespace.

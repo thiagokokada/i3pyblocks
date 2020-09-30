@@ -4,7 +4,7 @@ This module contains PulseAudioBlock, that uses ``pulsectl`` to show/adjust
 volume in systems that runs `PulseAudio`_.
 
 ``pulsectl`` uses its own event loop so this module is based on
-``ExecutorBlock`` running it in a separate thread, but this module should be
+``SyncBlock`` running it in a separate thread, but this module should be
 pretty efficient since it react to events from PulseAudio itself.
 
 Needs PulseAudio installed in your computer, or you will receive the following
@@ -63,7 +63,7 @@ class PulseAudioBlock(blocks.SyncBlock):
     :param command: Program to run when this block is right clicked.
 
     :param \*\*kwargs: Extra arguments to be passed to
-        :class:`~i3pyblocks.blocks.base.ExecutorBlock` class.
+        :class:`~i3pyblocks.blocks.base.SyncBlock` class.
 
     .. _pavucontrol:
       https://freedesktop.org/software/pulseaudio/pavucontrol/
