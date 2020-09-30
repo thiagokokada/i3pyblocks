@@ -27,7 +27,7 @@ from i3pyblocks._internal import misc, models, subprocess
 
 
 # Based on: https://git.io/fjbHp
-class PulseAudioBlock(blocks.ExecutorBlock):
+class PulseAudioBlock(blocks.SyncBlock):
     r"""Block that shows volume and other info from default PulseAudio sink.
 
     This Block shows the volume of the current default PulseAudio sink, and
@@ -163,7 +163,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
             sink = pulse.sink_info(self.sink_index)
             pulse.volume_change_all_chans(sink, volume)
 
-    async def click_handler(self, button: int, **_kwargs) -> None:
+    def click_handler_sync(self, button: int, **_kwargs) -> None:
         """PulseAudioBlock click handlers
 
         On left click it opens the command specified in ``command`` attribute.
@@ -182,7 +182,7 @@ class PulseAudioBlock(blocks.ExecutorBlock):
 
         self.update_status()
 
-    def run(self) -> None:
+    def run_sync(self) -> None:
         self.find_sink_index()
         self.update_status()
 

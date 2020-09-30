@@ -230,53 +230,109 @@ async def test_polling_block_with_error():
     }
 
 
-def test_invalid_executor_block():
-    class InvalidExecutorBlock(blocks.ExecutorBlock):
+def test_invalid_sync_block():
+    class InvalidSyncBlock(blocks.SyncBlock):
         pass
 
     with pytest.raises(TypeError):
-        InvalidExecutorBlock()
+        InvalidSyncBlock()
 
 
 @pytest.mark.asyncio
-async def test_valid_executor_block():
-    class ValidExecutorBlock(blocks.ExecutorBlock):
+async def test_valid_sync_block():
+    class ValidSyncBlock(blocks.SyncBlock):
         def __init__(self):
             self.count = 0
             super().__init__(default_state=DEFAULT_STATE)
 
-        def run(self):
+        def run_sync(self):
             self.count += 1
             self.update(str(self.count))
 
-    block = ValidExecutorBlock()
+    block = ValidSyncBlock()
 
     await task.runner([block.start()])
 
     assert block.result() == {
         "full_text": "1",
         "instance": str(block.id),
-        "name": "ValidExecutorBlock",
+        "name": "ValidSyncBlock",
+    }
+
+    block.click_handler_sync(
+        x=1,
+        y=1,
+        button=types.MouseButton.LEFT_BUTTON,
+        relative_x=1,
+        relative_y=1,
+        width=1,
+        height=1,
+        modifiers=[],
+    )
+
+    assert block.result() == {
+        "full_text": "2",
+        "instance": str(block.id),
+        "name": "ValidSyncBlock",
+    }
+
+    block.signal_handler_sync(sig=signal.SIGHUP)
+
+    assert block.result() == {
+        "full_text": "3",
+        "instance": str(block.id),
+        "name": "ValidSyncBlock",
     }
 
 
 @pytest.mark.asyncio
-async def test_executor_block_with_error():
-    class ExecutorBlockWithError(blocks.ExecutorBlock):
+async def test_sync_block_with_error():
+    class SyncBlockWithError(blocks.SyncBlock):
         def __init__(self):
             self.count = 0
             super().__init__(default_state=DEFAULT_STATE)
 
-        def run(self):
+        def run_sync(self):
             raise Exception("Boom!")
 
-    block = ExecutorBlockWithError()
+    block = SyncBlockWithError()
 
     await task.runner([block.start()])
 
     assert block.result() == {
-        "full_text": "Exception in ExecutorBlockWithError: Boom!",
+        "full_text": "Exception in SyncBlockWithError: Boom!",
         "instance": str(block.id),
-        "name": "ExecutorBlockWithError",
+        "name": "SyncBlockWithError",
         "urgent": True,
+    }
+
+
+def test_invalid_polling_sync_block():
+    class InvalidPollingSyncBlock(blocks.PollingSyncBlock):
+        pass
+
+    with pytest.raises(TypeError):
+        InvalidPollingSyncBlock()
+
+
+@pytest.mark.asyncio
+async def test_valid_polling_sync_block():
+    class ValidPollingSyncBlock(blocks.PollingSyncBlock):
+        def __init__(self, sleep=0.1):
+            self.count = 0
+            super().__init__(sleep=sleep, default_state=DEFAULT_STATE)
+
+        def run_sync(self):
+            self.count += 1
+            self.update(str(self.count))
+
+    block = ValidPollingSyncBlock()
+    await block.setup()
+
+    await task.runner([block.start()], timeout=0.5)
+
+    assert block.result() == {
+        "full_text": "5",
+        "instance": str(block.id),
+        "name": "ValidPollingSyncBlock",
     }

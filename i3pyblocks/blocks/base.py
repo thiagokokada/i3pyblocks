@@ -376,16 +376,16 @@ class PollingBlock(Block):
     """Polling Block.
 
     This is the most common Block implementation. It is a Block that runs
-    a loop where it executes :meth:`run()` method and sleeps for ``sleep``
-    seconds, afterwards running :meth:`run()` again, keeping this cycle forever.
+    a loop where it executes :meth:`run` method and sleeps for ``sleep``
+    seconds, afterwards running :meth:`run` again, keeping this cycle forever.
 
     By default, a click or a signal event will refresh the contents of this
     Block.
 
     You must not instantiate this class directly, instead you should
-    subclass it and implement :meth:`run()` method first.
+    subclass it and implement :meth:`run` method first.
 
-    :param sleep: Sleep in seconds between each call to :meth:`run()`.
+    :param sleep: Sleep in seconds between each call to :meth:`run`.
     """
 
     def __init__(self, sleep: int = 1, **kwargs) -> None:
@@ -428,20 +428,20 @@ class PollingBlock(Block):
             self.exception(e)
 
 
-class ExecutorBlock(Block):
-    """Executor Block.
+class SyncBlock(Block):
+    """Sync Block.
 
     This is a special Block implementation to be used when it is not possible
     to implement functionality using asyncio, for example, when a external
-    library uses its own event loop.
+    library uses its own event loop or its calls are synchronous and slow.
 
-    What this block does is to call :meth:`run()` method inside an `executor`_,
+    What this block does is to call :meth:`run_sync` method inside an `executor`_,
     that is run in a separate thread or process depending of the selected
     executor. Since it is running in a separate thread/process, it does not
     interfere with the main asyncio loop.
 
     You must not instantiate this class directly, instead you should
-    subclass it and implement :meth:`run()` method first.
+    subclass it and implement :meth:`run_sync` method first.
 
     :param executor: An optional `Executor instance`_. If not passed it will
         use the default one.
@@ -456,11 +456,59 @@ class ExecutorBlock(Block):
         self.executor = executor
         super().__init__(**kwargs)
 
-    @abc.abstractmethod
-    def run(self) -> None:
-        """Main loop in PollingBlock.
+    async def click_handler(
+        self,
+        *,
+        x: int,
+        y: int,
+        button: int,
+        relative_x: int,
+        relative_y: int,
+        width: int,
+        height: int,
+        modifiers: List[Optional[str]],
+    ) -> None:
+        return await misc.run_async(self.click_handler_sync, executor=self.executor)(
+            x=x,
+            y=y,
+            button=button,
+            relative_x=relative_x,
+            relative_y=relative_y,
+            width=width,
+            height=height,
+            modifiers=modifiers,
+        )
 
-        This is the method that will be run inside an executor.
+    async def signal_handler(self, *, sig: signal.Signals) -> None:
+        """Synchronous version of :meth:`click_handler`."""
+        return await misc.run_async(
+            self.signal_handler_sync,
+            executor=self.executor,
+        )(sig=sig)
+
+    def click_handler_sync(
+        self,
+        *,
+        x: int,
+        y: int,
+        button: int,
+        relative_x: int,
+        relative_y: int,
+        width: int,
+        height: int,
+        modifiers: List[Optional[str]],
+    ) -> None:
+        """Synchronous version of :meth:`signal_handler`."""
+        self.run_sync()
+
+    def signal_handler_sync(self, *, sig: signal.Signals) -> None:
+        self.run_sync()
+
+    @abc.abstractmethod
+    def run_sync(self) -> None:
+        """Main loop in SyncBlock.
+
+        This is the method that will be run, should implement its own loop.
 
         Since this is an abstract method, it should be overriden before usage.
         """
@@ -468,6 +516,61 @@ class ExecutorBlock(Block):
 
     async def start(self) -> None:
         try:
-            await misc.run_async(self.run, executor=self.executor)()
+            await misc.run_async(self.run_sync, executor=self.executor)()
+        except Exception as e:
+            self.exception(e)
+
+
+class PollingSyncBlock(SyncBlock):
+    """Polling sync Block.
+
+    This is a special Block implementation to be used when it is not possible
+    to implement functionality using asyncio, for example, when a external
+    library uses its own event loop or its calls are synchronous and slow.
+
+    It is a Block that runs a loop where it executes :meth:`run_sync` method
+    and sleeps for ``sleep`` seconds, afterwards running :meth:`run_sync` again,
+    keeping this cycle forever. Since it is running in a separate thread/process,
+    it does not interfere with the main asyncio loop.
+
+    You must not instantiate this class directly, instead you should subclass it
+    and implement :meth:`run_sync` method first.
+
+    :param executor: An optional `Executor instance`_. If not passed it will
+        use the default one.
+
+    :param sleep: Sleep in seconds between each call to :meth:`run_sync`.
+
+    .. _executor:
+        https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor
+    .. _Executor instance:
+        https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor
+    """
+
+    def __init__(
+        self,
+        sleep: int = 1,
+        executor: Optional[Executor] = None,
+        **kwargs,
+    ) -> None:
+        self.sleep = sleep
+        self.executor = executor
+        super().__init__(**kwargs)
+
+    @abc.abstractmethod
+    def run_sync(self) -> None:
+        """Main loop in PollingSyncBlock.
+
+        This is the method that will be run at each X ``sleep`` seconds.
+
+        Since this is an abstract method, it should be overriden before usage.
+        """
+        pass
+
+    async def start(self) -> None:
+        try:
+            while not self.frozen:
+                await misc.run_async(self.run_sync, executor=self.executor)()
+                await asyncio.sleep(self.sleep)
         except Exception as e:
             self.exception(e)
