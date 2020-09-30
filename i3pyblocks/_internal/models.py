@@ -1,16 +1,5 @@
 import sys
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     if sys.version_info >= (3, 8):
@@ -41,6 +30,4 @@ else:
 
 
 CommandArgs = Union[str, Union[List[str], Tuple[str]]]
-# https://mypy.readthedocs.io/en/stable/generics.html#declaring-decorators
-Decorator = TypeVar("Decorator", bound=Callable[..., Any])
 Threshold = Mapping[float, Optional[str]]

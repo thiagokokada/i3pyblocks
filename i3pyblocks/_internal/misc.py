@@ -1,7 +1,8 @@
 import asyncio
 import sys
+from concurrent.futures import Executor
 from functools import partial, wraps
-from typing import Dict, Optional, cast
+from typing import Any, Awaitable, Callable, Dict, Optional
 
 from i3pyblocks._internal import models
 
@@ -24,7 +25,7 @@ def non_nullable_dict(**kwargs) -> Dict:
     return {k: v for k, v in kwargs.items() if v is not None}
 
 
-def run_async(fn: models.Decorator) -> models.Decorator:
+def run_async(fn: Callable, executor: Executor = None) -> Callable[..., Awaitable[Any]]:
     r"""Calls an sync function async.
 
     Based on here: https://dev.to/0xbf/turn-sync-function-to-async-python-tips-58nn.
@@ -46,20 +47,16 @@ def run_async(fn: models.Decorator) -> models.Decorator:
 
     :param executor: `Executor`_ to be used to make the function async.
 
-    :param \*args: Arguments passed to the function to be wrapped.
-
-    :param \*\*kwargs: Keyword arguments passed to the function to be wrapped.
-
     .. _`executor`:
         https://docs.python.org/3/library/concurrent.futures.html#executor-objects
     """
 
     @wraps(fn)
-    async def run(*args, executor=None, **kwargs):
+    async def run(*args, **kwargs):
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(executor, partial(fn, *args, **kwargs))
 
-    return cast(models.Decorator, run)
+    return run
 
 
 async def get_aio_reader(loop: asyncio.AbstractEventLoop) -> asyncio.StreamReader:
