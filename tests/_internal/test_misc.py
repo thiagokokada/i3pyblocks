@@ -49,6 +49,15 @@ def test_non_nullable_dict():
     }
 
 
+@pytest.mark.asyncio
+async def test_run_async():
+    def foo(bar, spam):
+        return bar, spam
+
+    result = misc.run_async(foo)
+    assert await result("bar", spam="spam") == ("bar", "spam")
+
+
 # TODO: Validate if we can actually read from stdin here
 @pytest.mark.asyncio
 async def test_get_aio_reader(capsys):
