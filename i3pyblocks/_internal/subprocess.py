@@ -101,11 +101,11 @@ def popener(
         - By default, stdin/stdout/stderr point to /dev/null, so the process
           is isolated from outside
 
-    Recommended for those cases where :fun:`~i3pyblocks._internal.subprocess.arun`
+    Recommended for those cases where :func:`~i3pyblocks._internal.subprocess.arun`
     does not cover, i.e.: need to run a program completely in background and the
     result of its execution does not matter.
 
-    .. _subprocess.Popen():
+    .. _`subprocess.Popen`:
         https://docs.python.org/3/library/subprocess.html#subprocess.Popen
     """
     return Popen(

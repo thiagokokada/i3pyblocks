@@ -12,13 +12,11 @@ do not take much time, this event should be rare, but it is better to be safe
 .. _python-xlib:
     https://github.com/python-xlib/python-xlib
 """
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
-
 from Xlib import X, display
 from Xlib.ext import dpms  # noqa: F401 (ensure that Xlib.ext.dpms is available)
 
 from i3pyblocks import blocks
+from i3pyblocks._internal import misc
 
 
 class CaffeineBlock(blocks.PollingBlock):
@@ -51,21 +49,16 @@ class CaffeineBlock(blocks.PollingBlock):
         self,
         format_on: str = "CAFFEINE ON",
         format_off: str = "CAFFEINE OFF",
-        sleep: int = 1,
+        sleep: int = 3,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format_on = format_on
         self.format_off = format_off
         self.display = display.Display()
-        self.loop = asyncio.get_event_loop()
-        self.executor = ThreadPoolExecutor(max_workers=1)
 
     async def get_state(self) -> bool:
-        info = await self.loop.run_in_executor(
-            self.executor,
-            self.display.dpms_info,
-        )
+        info = await misc.run_async(self.display.dpms_info)()
         return bool(int(info.state))
 
     async def click_handler(self, **_kwargs) -> None:
@@ -88,12 +81,8 @@ class CaffeineBlock(blocks.PollingBlock):
                 timeout=-1,
             )
 
-        await self.loop.run_in_executor(
-            self.executor,
-            self.display.sync,
-        )
-
-        self.run()
+        await misc.run_async(self.display.sync)()
+        await self.run()
 
     async def run(self) -> None:
         state = await self.get_state()

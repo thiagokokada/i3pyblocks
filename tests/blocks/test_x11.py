@@ -14,19 +14,8 @@ async def test_caffeine_block():
         autospec=False,
         spec_set=True,
     ) as mock_display:
-        mock_display.configure_mock(
-            **{
-                "Display.return_value.dpms_info.side_effect": [
-                    # One for run() call, another one for click_handler()
-                    misc.AttributeDict(state=1),
-                    misc.AttributeDict(state=1),
-                    # One for run() call, another one for click_handler()
-                    misc.AttributeDict(state=0),
-                    misc.AttributeDict(state=0),
-                ]
-            }
-        )
         mock_Display = mock_display.Display.return_value
+        mock_Display.dpms_info.return_value = misc.AttributeDict(state=1)
 
         instance = x11.CaffeineBlock()
 
@@ -43,6 +32,7 @@ async def test_caffeine_block():
         )
 
         mock_Display.reset_mock()
+        mock_Display.dpms_info.return_value = misc.AttributeDict(state=0)
 
         await instance.run()
         assert instance.result()["full_text"] == "CAFFEINE ON"
