@@ -63,13 +63,13 @@ def test_pulse_audio_block():
         instance = pulse.PulseAudioBlock()
 
         # If volume is 0%, returns Colors.URGENT
-        mock_event(instance, facility="server")
+        instance.run_sync()
         result = instance.result()
         assert result.get("full_text") == "V: 0%"
         assert result.get("color") == types.Color.URGENT
 
         # If volume is 20%, returns Colors.WARN
-        mock_event(instance, facility="sink")
+        mock_event(instance, facility="server")
         result = instance.result()
         assert result.get("full_text") == "V: 20%"
         assert result.get("color") == types.Color.WARN
@@ -88,8 +88,7 @@ def test_pulse_audio_block():
         assert result.get("color") == types.Color.URGENT
 
 
-@pytest.mark.asyncio
-async def test_pulse_audio_block_click_handler():
+def test_pulse_audio_block_click_handler_sync():
     with patch(
         "i3pyblocks.blocks.pulse.pulsectl", autospec=True, spec_set=True
     ) as mock_pulsectl, patch(
@@ -119,7 +118,7 @@ async def test_pulse_audio_block_click_handler():
         mock_pulse = mock_pulsectl.Pulse.return_value
 
         # LEFT_BUTTON should run command
-        await instance.click_handler(types.MouseButton.LEFT_BUTTON)
+        instance.click_handler_sync(types.MouseButton.LEFT_BUTTON)
         mock_subprocess.popener.assert_called_once_with(("command", "-c"))
 
         context_manager_mock = mock_pulse.__enter__
@@ -129,19 +128,19 @@ async def test_pulse_audio_block_click_handler():
         volume_change_all_chans_mock = (
             context_manager_mock.return_value.volume_change_all_chans
         )
-        await instance.click_handler(types.MouseButton.SCROLL_UP)
+        instance.click_handler_sync(types.MouseButton.SCROLL_UP)
         volume_change_all_chans_mock.assert_called_once_with(SINK, 0.05)
 
         volume_change_all_chans_mock.reset_mock()
 
-        await instance.click_handler(types.MouseButton.SCROLL_DOWN)
+        instance.click_handler_sync(types.MouseButton.SCROLL_DOWN)
         volume_change_all_chans_mock.assert_called_once_with(SINK, -0.05)
 
         # When not mute, pressing RIGHT_BUTTON will mute it
-        await instance.click_handler(types.MouseButton.RIGHT_BUTTON)
+        instance.click_handler_sync(types.MouseButton.RIGHT_BUTTON)
         mute_mock.assert_called_once_with(SINK, mute=True)
 
         mute_mock.reset_mock()
 
-        await instance.click_handler(types.MouseButton.RIGHT_BUTTON)
+        instance.click_handler_sync(types.MouseButton.RIGHT_BUTTON)
         mute_mock.assert_called_once_with(SINK_MUTE, mute=False)

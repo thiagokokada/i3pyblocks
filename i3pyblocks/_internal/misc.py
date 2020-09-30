@@ -26,7 +26,7 @@ def non_nullable_dict(**kwargs) -> Dict:
 
 
 def run_async(fn: Callable, executor: Executor = None) -> Callable[..., Awaitable[Any]]:
-    r"""Calls an sync function async.
+    """Calls an sync function async.
 
     Based on here: https://dev.to/0xbf/turn-sync-function-to-async-python-tips-58nn.
 

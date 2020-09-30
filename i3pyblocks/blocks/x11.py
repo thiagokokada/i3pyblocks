@@ -16,10 +16,9 @@ from Xlib import X, display
 from Xlib.ext import dpms  # noqa: F401 (ensure that Xlib.ext.dpms is available)
 
 from i3pyblocks import blocks
-from i3pyblocks._internal import misc
 
 
-class CaffeineBlock(blocks.PollingBlock):
+class CaffeineBlock(blocks.PollingSyncBlock):
     r"""Block that controls of X11 DPMS and screensaver.
 
     When turned on, this blocks disables both `DPMS`_ and screensaver,
@@ -57,12 +56,12 @@ class CaffeineBlock(blocks.PollingBlock):
         self.format_off = format_off
         self.display = display.Display()
 
-    async def get_state(self) -> bool:
-        info = await misc.run_async(self.display.dpms_info)()
+    def get_state(self) -> bool:
+        info = self.display.dpms_info()
         return bool(int(info.state))
 
-    async def click_handler(self, **_kwargs) -> None:
-        state = await self.get_state()
+    def click_handler_sync(self, **_kwargs) -> None:
+        state = self.get_state()
 
         if state:
             self.display.dpms_disable()
@@ -81,10 +80,9 @@ class CaffeineBlock(blocks.PollingBlock):
                 timeout=-1,
             )
 
-        await misc.run_async(self.display.sync)()
-        await self.run()
+        self.display.sync()
+        self.run_sync()
 
-    async def run(self) -> None:
-        state = await self.get_state()
-
+    def run_sync(self) -> None:
+        state = self.get_state()
         self.update(self.format_off if state else self.format_on)
