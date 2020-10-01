@@ -291,7 +291,7 @@ for projects that integrates well with `asyncio`_. Just implement
 
     async def start(self):
         while True:
-            result = await wait_for_event_loop()
+            result = await wait_for_async_event()
             self.update(result)
 
 However, some projects doesn't integrate well with *asyncio* (i.e.: their
@@ -300,20 +300,21 @@ would freeze i3pyblocks completely until some update on them happened.
 In those cases, you can use :class:`~i3pyblocks.blocks.base.SyncBlock`.
 It runs the code inside an `Executor`_, that can be either a thread or a process,
 so the updates inside this block doesn't affect the rest of i3pyblocks. The
-usage ends up being very similar to before, just without *async/await* keywords:
+usage ends up being very similar to before, just without *async/await* keywords
+and using :meth:`~i3pyblocks.blocks.base.SyncBlock.start_sync` instead:
 
 .. code-block:: python
 
-    def start(self):
+    def start_sync(self):
         while True:
-            result = wait_for_event_loop()
+            result = wait_for_sync_event()
             self.update(result)
 
 .. [2] :class:`~i3pyblocks.blocks.base.PollingBlock` should be your first choice
    even for non-asyncio dependencies if the calls are cheap, since it is more
    efficient. :class:`~i3pyblocks.blocks.base.PollingSyncBlock` is only recommended
-   if your calls are slow and synchronous (i.e.: they may need a network or `IPC`_
-   communication).
+   if your calls are **slow** and **synchronous** (i.e.: they need a network or
+   `IPC`_ communication).
 .. _`event loop`:
      https://en.wikipedia.org/wiki/Event_loop
 .. _`PulseAudio`:
@@ -331,9 +332,11 @@ usage ends up being very similar to before, just without *async/await* keywords:
 
    There is multiple examples of each kind of base block usage in i3pyblocks
    already. For examples of :class:`~i3pyblocks.blocks.base.PollingBlock`
-   check :mod:`i3pyblocks.blocks.ps` namespace, for examples of
+   check :mod:`i3pyblocks.blocks.ps` namespace, for example of a
    :class:`~i3pyblocks.blocks.base.SyncBlock` check
-   :class:`~i3pyblocks.blocks.pulse.PulseAudioBlock`, and for examples of
+   :class:`~i3pyblocks.blocks.pulse.PulseAudioBlock`, for example of a
+   :class:`~i3pyblocks.blocks.base.PollingSyncBlock` check
+   :class:`~i3pyblocks.blocks.x11.CaffeineBlock` and for examples of
    event-based blocks using :class:`~i3pyblocks.blocks.base.Block` check
    :mod:`i3pyblocks.blocks.inotify` namespace.
 

@@ -245,7 +245,7 @@ async def test_valid_sync_block():
             self.count = 0
             super().__init__(default_state=DEFAULT_STATE)
 
-        def run_sync(self):
+        def start_sync(self):
             self.count += 1
             self.update(str(self.count))
 
@@ -259,31 +259,6 @@ async def test_valid_sync_block():
         "name": "ValidSyncBlock",
     }
 
-    block.click_handler_sync(
-        x=1,
-        y=1,
-        button=types.MouseButton.LEFT_BUTTON,
-        relative_x=1,
-        relative_y=1,
-        width=1,
-        height=1,
-        modifiers=[],
-    )
-
-    assert block.result() == {
-        "full_text": "2",
-        "instance": str(block.id),
-        "name": "ValidSyncBlock",
-    }
-
-    block.signal_handler_sync(sig=signal.SIGHUP)
-
-    assert block.result() == {
-        "full_text": "3",
-        "instance": str(block.id),
-        "name": "ValidSyncBlock",
-    }
-
 
 @pytest.mark.asyncio
 async def test_sync_block_with_error():
@@ -292,7 +267,7 @@ async def test_sync_block_with_error():
             self.count = 0
             super().__init__(default_state=DEFAULT_STATE)
 
-        def run_sync(self):
+        def start_sync(self):
             raise Exception("Boom!")
 
     block = SyncBlockWithError()
@@ -333,6 +308,31 @@ async def test_valid_polling_sync_block():
 
     assert block.result() == {
         "full_text": "5",
+        "instance": str(block.id),
+        "name": "ValidPollingSyncBlock",
+    }
+
+    block.click_handler_sync(
+        x=1,
+        y=1,
+        button=types.MouseButton.LEFT_BUTTON,
+        relative_x=1,
+        relative_y=1,
+        width=1,
+        height=1,
+        modifiers=[],
+    )
+
+    assert block.result() == {
+        "full_text": "6",
+        "instance": str(block.id),
+        "name": "ValidPollingSyncBlock",
+    }
+
+    block.signal_handler_sync(sig=signal.SIGHUP)
+
+    assert block.result() == {
+        "full_text": "7",
         "instance": str(block.id),
         "name": "ValidPollingSyncBlock",
     }

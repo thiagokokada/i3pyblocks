@@ -163,6 +163,9 @@ class PulseAudioBlock(blocks.SyncBlock):
             sink = pulse.sink_info(self.sink_index)
             pulse.volume_change_all_chans(sink, volume)
 
+    def signal_handler_sync(self, **_kwargs):
+        self.update_status()
+
     def click_handler_sync(self, button: int, **_kwargs) -> None:
         """PulseAudioBlock click handlers
 
@@ -182,7 +185,7 @@ class PulseAudioBlock(blocks.SyncBlock):
 
         self.update_status()
 
-    def run_sync(self) -> None:
+    def start_sync(self) -> None:
         self.find_sink_index()
         self.update_status()
 
