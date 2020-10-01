@@ -8,6 +8,7 @@ class, like PollingBlock.
 import abc
 import asyncio
 import signal
+import time
 import uuid
 from concurrent.futures import Executor
 from typing import Callable, List, Optional
@@ -435,13 +436,13 @@ class SyncBlock(Block):
     to implement functionality using asyncio, for example, when a external
     library uses its own event loop or its calls are synchronous and slow.
 
-    What this block does is to call :meth:`run_sync` method inside an `executor`_,
+    What this block does is to call :meth:`start_sync` method inside an `executor`_,
     that is run in a separate thread or process depending of the selected
     executor. Since it is running in a separate thread/process, it does not
     interfere with the main asyncio loop.
 
     You must not instantiate this class directly, instead you should
-    subclass it and implement :meth:`run_sync` method first.
+    subclass it and implement :meth:`start_sync` method first.
 
     :param executor: An optional `Executor instance`_. If not passed it will
         use the default one.
@@ -480,7 +481,6 @@ class SyncBlock(Block):
         )
 
     async def signal_handler(self, *, sig: signal.Signals) -> None:
-        """Synchronous version of :meth:`click_handler`."""
         return await misc.run_async(
             self.signal_handler_sync,
             executor=self.executor,
@@ -498,25 +498,30 @@ class SyncBlock(Block):
         height: int,
         modifiers: List[Optional[str]],
     ) -> None:
-        """Synchronous version of :meth:`signal_handler`."""
-        self.run_sync()
+        """Synchronous version of :meth:`click_handler`."""
+        pass
 
     def signal_handler_sync(self, *, sig: signal.Signals) -> None:
-        self.run_sync()
+        """Synchronous version of :meth:`signal_handler`."""
+        pass
 
     @abc.abstractmethod
-    def run_sync(self) -> None:
-        """Main loop in SyncBlock.
+    def start_sync(self) -> None:
+        """Starts a synchronous Block.
 
-        This is the method that will be run, should implement its own loop.
+        This is an abstract method, so it should be overriden.
 
-        Since this is an abstract method, it should be overriden before usage.
+        This method is where you generally wants to put your main loop to
+        update the state of the Block. This loop can either be triggered by
+        events or can be an infinity loop. It can even be a single call
+        to :meth:`update()`, but in this case your Block will only be updated
+        once.
         """
         pass
 
     async def start(self) -> None:
         try:
-            await misc.run_async(self.run_sync, executor=self.executor)()
+            await misc.run_async(self.start_sync, executor=self.executor)()
         except Exception as e:
             self.exception(e)
 
@@ -557,6 +562,23 @@ class PollingSyncBlock(SyncBlock):
         self.executor = executor
         super().__init__(**kwargs)
 
+    def click_handler_sync(
+        self,
+        *,
+        x: int,
+        y: int,
+        button: int,
+        relative_x: int,
+        relative_y: int,
+        width: int,
+        height: int,
+        modifiers: List[Optional[str]],
+    ) -> None:
+        self.run_sync()
+
+    def signal_handler_sync(self, *, sig: signal.Signals) -> None:
+        self.run_sync()
+
     @abc.abstractmethod
     def run_sync(self) -> None:
         """Main loop in PollingSyncBlock.
@@ -567,10 +589,7 @@ class PollingSyncBlock(SyncBlock):
         """
         pass
 
-    async def start(self) -> None:
-        try:
-            while not self.frozen:
-                await misc.run_async(self.run_sync, executor=self.executor)()
-                await asyncio.sleep(self.sleep)
-        except Exception as e:
-            self.exception(e)
+    def start_sync(self) -> None:
+        while not self.frozen:
+            self.run_sync()
+            time.sleep(self.sleep)

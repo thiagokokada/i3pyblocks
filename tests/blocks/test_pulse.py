@@ -63,7 +63,7 @@ def test_pulse_audio_block():
         instance = pulse.PulseAudioBlock()
 
         # If volume is 0%, returns Colors.URGENT
-        instance.run_sync()
+        instance.start_sync()
         result = instance.result()
         assert result.get("full_text") == "V: 0%"
         assert result.get("color") == types.Color.URGENT
