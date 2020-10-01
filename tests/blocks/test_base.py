@@ -336,3 +336,5 @@ async def test_valid_polling_sync_block():
         "instance": str(block.id),
         "name": "ValidPollingSyncBlock",
     }
+
+    block.abort()
