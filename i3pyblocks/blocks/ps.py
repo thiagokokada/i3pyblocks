@@ -297,7 +297,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
     def __init__(
         self,
         format_up: str = "{interface}:  U {upload} D {download}",
-        format_down: str = "NO NETWORK",
+        format_down: str = "No network",
         colors: models.Threshold = {
             0: types.Color.NEUTRAL,
             2 * types.IECUnit.MiB: types.Color.WARN,
@@ -346,7 +346,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         self.interface = self._find_interface(self.interface)
 
         if not self.interface:
-            self.abort(self.format_down, color=types.Color.URGENT)
+            self.update(self.format_down, color=types.Color.URGENT)
             return
 
         now = psutil.net_io_counters(pernic=True)
@@ -457,7 +457,7 @@ class SensorsBatteryBlock(blocks.PollingBlock):
 
         # This state maybe temporary trigged by a battery connection/disconnection
         if not battery:
-            self.update(self.format_no_battery)
+            self.update(self.format_no_battery, color=types.Color.URGENT)
             return
 
         color = misc.calculate_threshold(self.colors, battery.percent)
@@ -512,6 +512,13 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
 
     :param fahrenheit: Show temperature in in Fahrenheit instead of Celsius.
 
+    :param sensor_regex: Regex to be used by search the sensor name. If it
+        matches more than one, the first one will be picked.
+
+    :param sensor_index: Sensor index that should be used. Most sensors have
+        more than one sensor (for example, one for each CPU), so this setting
+        allow you to pick each one you want.
+
     :param sleep: Sleep in seconds between each call to
         :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
@@ -522,6 +529,7 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
     def __init__(
         self,
         format: str = "T: {current:.0f}°C",
+        format_no_sensor: str = "No sensor",
         colors: models.Threshold = {
             0: types.Color.NEUTRAL,
             60: types.Color.WARN,
@@ -538,23 +546,33 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
             87.5: "█",
         },
         fahrenheit: bool = False,
-        sensor: str = None,
+        sensor_regex: str = r".*",
+        sensor_index: int = 0,
         sleep: int = 5,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
+        self.format_no_sensor = format_no_sensor
         self.colors = colors
         self.icons = icons
         self.fahrenheit = fahrenheit
-        if sensor:
-            self.sensor = sensor
-        else:
-            self.sensor = next(iter(psutil.sensors_temperatures()))
+        self.sensor_index = sensor_index
+
+        sensors = psutil.sensors_temperatures().keys()
+        self.sensor = next((s for s in sensors if re.search(sensor_regex, s)), None)
 
     async def run(self) -> None:
-        temperatures = psutil.sensors_temperatures(self.fahrenheit)[self.sensor]
-        temperature = temperatures[0]
+        temperatures = psutil.sensors_temperatures(self.fahrenheit).get(self.sensor, [])
+        temperature = (
+            temperatures[self.sensor_index]
+            if self.sensor_index < len(temperatures)
+            else None
+        )
+
+        if not temperature:
+            self.update(self.format_no_sensor, color=types.Color.URGENT)
+            return
 
         color = misc.calculate_threshold(self.colors, temperature.current)
         icon = misc.calculate_threshold(self.icons, temperature.current)
