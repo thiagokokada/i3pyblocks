@@ -218,24 +218,8 @@ class Block(metaclass=abc.ABCMeta):
                 f"id {self.id} is either not initialized or frozen"
             )
 
-    def update(
-        self,
-        full_text: Optional[str] = "",
-        short_text: Optional[str] = None,
-        color: Optional[str] = None,
-        background: Optional[str] = None,
-        border: Optional[str] = None,
-        border_top: Optional[int] = None,
-        border_right: Optional[int] = None,
-        border_bottom: Optional[int] = None,
-        border_left: Optional[int] = None,
-        min_width: Optional[int] = None,
-        align: Optional[str] = None,
-        urgent: Optional[bool] = None,
-        separator: Optional[bool] = None,
-        separator_block_width: Optional[int] = None,
-        markup: Optional[str] = None,
-    ) -> None:
+    @misc.delegates(update_state)
+    def update(self, *args, **kwargs) -> None:
         """Updates a Block.
 
         This method will immediately updates a Block, so its new contents
@@ -246,43 +230,11 @@ class Block(metaclass=abc.ABCMeta):
         The parameters of this method is passed as-is to Block's
         :meth:`update_state()`.
         """
-        self.update_state(
-            full_text=full_text,
-            short_text=short_text,
-            color=color,
-            background=background,
-            border=border,
-            border_top=border_top,
-            border_right=border_right,
-            border_bottom=border_bottom,
-            border_left=border_left,
-            min_width=min_width,
-            align=align,
-            urgent=urgent,
-            separator=separator,
-            separator_block_width=separator_block_width,
-            markup=markup,
-        )
+        self.update_state(*args, **kwargs)
         self.push_update()
 
-    def abort(
-        self,
-        full_text: Optional[str] = "",
-        short_text: Optional[str] = None,
-        color: Optional[str] = None,
-        background: Optional[str] = None,
-        border: Optional[str] = None,
-        border_top: Optional[int] = None,
-        border_right: Optional[int] = None,
-        border_bottom: Optional[int] = None,
-        border_left: Optional[int] = None,
-        min_width: Optional[int] = None,
-        align: Optional[str] = None,
-        urgent: Optional[bool] = None,
-        separator: Optional[bool] = None,
-        separator_block_width: Optional[int] = None,
-        markup: Optional[str] = None,
-    ) -> None:
+    @misc.delegates(update)
+    def abort(self, *args, **kwargs) -> None:
         """Aborts a Block.
 
         This method will do one last update of the Block, and disable all
@@ -296,23 +248,7 @@ class Block(metaclass=abc.ABCMeta):
         The parameters of this method is passed as-is to Block's
         :meth:`update_state()`.
         """
-        self.update(
-            full_text=full_text,
-            short_text=short_text,
-            color=color,
-            background=background,
-            border=border,
-            border_top=border_top,
-            border_right=border_right,
-            border_bottom=border_bottom,
-            border_left=border_left,
-            min_width=min_width,
-            align=align,
-            urgent=urgent,
-            separator=separator,
-            separator_block_width=separator_block_width,
-            markup=markup,
-        )
+        self.update(*args, **kwargs)
         self.frozen = True
 
     def exception(
@@ -456,8 +392,8 @@ class PollingBlock(Block):
     """
 
     def __init__(self, sleep: int = 1, **kwargs) -> None:
-        self.sleep = sleep
         super().__init__(**kwargs)
+        self.sleep = sleep
 
     @abc.abstractmethod
     async def run(self) -> None:
@@ -469,21 +405,12 @@ class PollingBlock(Block):
         """
         pass
 
-    async def click_handler(
-        self,
-        *,
-        x: int,
-        y: int,
-        button: int,
-        relative_x: int,
-        relative_y: int,
-        width: int,
-        height: int,
-        modifiers: List[Optional[str]],
-    ) -> None:
+    @misc.delegates(Block.click_handler)
+    async def click_handler(self, **kwargs) -> None:
         await self.run()
 
-    async def signal_handler(self, *, sig: signal.Signals) -> None:
+    @misc.delegates(Block.signal_handler)
+    async def signal_handler(self, **kwargs) -> None:
         await self.run()
 
     async def start(self) -> None:
@@ -520,37 +447,21 @@ class SyncBlock(Block):
     """
 
     def __init__(self, executor: Optional[Executor] = None, **kwargs) -> None:
-        self.executor = executor
         super().__init__(**kwargs)
+        self.executor = executor
 
-    async def click_handler(
-        self,
-        *,
-        x: int,
-        y: int,
-        button: int,
-        relative_x: int,
-        relative_y: int,
-        width: int,
-        height: int,
-        modifiers: List[Optional[str]],
-    ) -> None:
+    @misc.delegates(Block.click_handler)
+    async def click_handler(self, **kwargs) -> None:
         return await misc.run_async(self.click_handler_sync, executor=self.executor)(
-            x=x,
-            y=y,
-            button=button,
-            relative_x=relative_x,
-            relative_y=relative_y,
-            width=width,
-            height=height,
-            modifiers=modifiers,
+            **kwargs
         )
 
-    async def signal_handler(self, *, sig: signal.Signals) -> None:
+    @misc.delegates(Block.signal_handler)
+    async def signal_handler(self, **kwargs) -> None:
         return await misc.run_async(
             self.signal_handler_sync,
             executor=self.executor,
-        )(sig=sig)
+        )(**kwargs)
 
     def click_handler_sync(
         self,
@@ -624,25 +535,15 @@ class PollingSyncBlock(SyncBlock):
         executor: Optional[Executor] = None,
         **kwargs,
     ) -> None:
+        super().__init__(executor=executor, **kwargs)
         self.sleep = sleep
-        self.executor = executor
-        super().__init__(**kwargs)
 
-    def click_handler_sync(
-        self,
-        *,
-        x: int,
-        y: int,
-        button: int,
-        relative_x: int,
-        relative_y: int,
-        width: int,
-        height: int,
-        modifiers: List[Optional[str]],
-    ) -> None:
+    @misc.delegates(SyncBlock.click_handler_sync)
+    def click_handler_sync(self, **kwargs) -> None:
         self.run_sync()
 
-    def signal_handler_sync(self, *, sig: signal.Signals) -> None:
+    @misc.delegates(SyncBlock.signal_handler_sync)
+    def signal_handler_sync(self, **kwargs) -> None:
         self.run_sync()
 
     @abc.abstractmethod

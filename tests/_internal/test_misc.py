@@ -1,4 +1,5 @@
 import asyncio
+from inspect import Parameter, Signature, signature
 from unittest.mock import patch
 
 import pytest
@@ -47,6 +48,40 @@ def test_non_nullable_dict():
         "some": "body",
         "to": {"love": None},
     }
+
+
+def test_delegates():
+    def foo(a, b):
+        pass
+
+    @misc.delegates(foo)
+    def bar(*args):
+        foo(*args)
+
+    s = signature(bar)
+    assert s == Signature(
+        parameters=[
+            Parameter("a", Parameter.POSITIONAL_OR_KEYWORD),
+            Parameter("b", Parameter.POSITIONAL_OR_KEYWORD),
+        ]
+    )
+
+    class Test:
+        def baz(self, x, y):
+            pass
+
+        @misc.delegates(baz)
+        def quux(self, **kwargs):
+            self.foo(**kwargs)
+
+    s = signature(Test.quux)
+    assert s == Signature(
+        parameters=[
+            Parameter("self", Parameter.POSITIONAL_OR_KEYWORD),
+            Parameter("x", Parameter.POSITIONAL_OR_KEYWORD),
+            Parameter("y", Parameter.POSITIONAL_OR_KEYWORD),
+        ]
+    )
 
 
 @pytest.mark.asyncio

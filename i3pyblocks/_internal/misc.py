@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import sys
 from concurrent.futures import Executor
 from functools import partial, wraps
@@ -23,6 +24,48 @@ def calculate_threshold(items: models.Threshold, value: float) -> Optional[str]:
 def non_nullable_dict(**kwargs) -> Dict:
     """Returns a dict without its keys with None values."""
     return {k: v for k, v in kwargs.items() if v is not None}
+
+
+def delegates(to_f, delegated_params=["args", "kwargs"]):
+    r"""Delegate function parameters signature.
+
+    Based on here: https://www.fast.ai/2019/08/06/delegation/
+
+    Allow delegation of functions or methods using ``*args`` and ``**kwargs``.
+    Meant to be used as a decorator.
+
+    For example::
+
+        def foo(a, b):
+            pass
+
+        @delegates(foo)
+        def bar(**kwargs):
+            foo(**kwargs)
+
+    When inspecting the parameters from ``bar``, we will have ``bar(a, b)``
+    instead of ``bar(**kwargs)``.
+
+    :param to_f: Target function/method to delegate.
+
+    :param replace: Arguments to replace in the destination function.
+    """
+
+    def delegate_signature(from_f):
+        from_sig = inspect.signature(from_f)
+        from_params = dict(from_sig.parameters)
+        for param in delegated_params:
+            from_params.pop(param, None)
+
+        to_sig = inspect.signature(to_f)
+        to_params = dict(to_sig.parameters)
+
+        new_params = {**to_params, **from_params}
+        from_f.__signature__ = from_sig.replace(parameters=new_params.values())
+
+        return from_f
+
+    return delegate_signature
 
 
 def run_async(fn: Callable, executor: Executor = None) -> Callable[..., Awaitable[Any]]:
