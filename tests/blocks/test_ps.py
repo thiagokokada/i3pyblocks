@@ -125,7 +125,7 @@ async def test_network_speed_block_down():
 
         result = instance.result()
 
-        assert result["full_text"] == "NO NETWORK"
+        assert result["full_text"] == "No network"
         assert result["color"] == types.Color.URGENT
 
 
@@ -312,6 +312,20 @@ async def test_sensors_battery_block():
 
 
 @pytest.mark.asyncio
+async def test_sensors_temperature_block_no_sensors():
+    with patch(**PSUTIL_MOCK_CONFIG) as mock_psutil:
+        mock_psutil.configure_mock(**{"sensors_temperatures.return_value": {}})
+        instance_default = ps.SensorsTemperaturesBlock()
+
+        await instance_default.run()
+
+        result = instance_default.result()
+
+        assert result["full_text"] == "No sensor"
+        assert result["color"] == types.Color.URGENT
+
+
+@pytest.mark.asyncio
 async def test_sensors_temperature_block():
     with patch(**PSUTIL_MOCK_CONFIG) as mock_psutil:
         mock_psutil.configure_mock(
@@ -358,7 +372,7 @@ async def test_sensors_temperature_block():
             }
         )
         instance_default = ps.SensorsTemperaturesBlock(
-            format="{icon} {label} {current} {high} {critical}"
+            format="{icon} {label} {current} {high} {critical}",
         )
 
         await instance_default.run()
@@ -368,7 +382,7 @@ async def test_sensors_temperature_block():
         assert result["full_text"] == "▇ Package id 0 78.0 82.0 100.0"
         assert result["color"] == types.Color.WARN
 
-        instance_acpitz = ps.SensorsTemperaturesBlock(sensor="acpitz")
+        instance_acpitz = ps.SensorsTemperaturesBlock(sensor_regex="acpi.*")
 
         await instance_acpitz.run()
 
