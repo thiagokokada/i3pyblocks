@@ -1,4 +1,6 @@
-# Need to be first, since i3pyblocks.core depends on i3pyblocks.logger to be
-# available
-from i3pyblocks._internal.logger import logger
+import logging
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 from i3pyblocks.core import Runner
