@@ -142,6 +142,7 @@ class Runner:
         while self.queue.qsize() > 0:
             id_, result = self.queue.get_nowait()
             self.results[id_] = result
+            self.queue.task_done()
 
     async def write_results(self) -> None:
         """Writes results to stdout.
