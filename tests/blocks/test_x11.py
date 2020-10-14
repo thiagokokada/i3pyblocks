@@ -1,6 +1,6 @@
 import pytest
-from asynctest import patch
 from helpers import misc
+from mock import patch
 
 X = pytest.importorskip("Xlib.X")
 x11 = pytest.importorskip("i3pyblocks.blocks.x11")

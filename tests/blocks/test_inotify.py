@@ -2,8 +2,8 @@ import asyncio
 import signal
 
 import pytest
-from asynctest import CoroutineMock, patch
 from helpers import misc, task
+from mock import patch
 
 from i3pyblocks import types
 
@@ -164,7 +164,6 @@ async def test_backlight_block_click_handler(tmpdir):
     ) as mock_subprocess:
         mock_subprocess.configure_mock(
             **{
-                "arun": CoroutineMock(),
                 "arun.return_value": (misc.AttributeDict(returncode=0)),
             }
         )

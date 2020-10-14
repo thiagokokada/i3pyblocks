@@ -2,10 +2,9 @@ import asyncio
 import json
 import os
 import signal
-from unittest.mock import patch
 
 import pytest
-from asynctest import CoroutineMock
+from mock import patch
 
 from i3pyblocks import blocks, core, types
 from i3pyblocks.blocks import basic
@@ -331,13 +330,9 @@ async def test_runner_with_click_events(capsys):
 
     mock_input = [b"[\n", click_event, b","]
 
-    with patch(
-        "i3pyblocks._internal.misc.get_aio_reader", new=CoroutineMock()
-    ) as get_aio_reader_mock:
+    with patch("i3pyblocks._internal.misc.get_aio_reader") as get_aio_reader_mock:
         reader_mock = get_aio_reader_mock.return_value
-        reader_mock.readline = CoroutineMock()
         reader_mock.readline.return_value = mock_input[0]
-        reader_mock.readuntil = CoroutineMock()
         reader_mock.readuntil.side_effect = mock_input[1:]
 
         await runner.start(timeout=0.5)
