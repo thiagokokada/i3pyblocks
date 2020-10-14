@@ -1,7 +1,6 @@
-from unittest.mock import Mock, patch
-
 import pytest
 from helpers import misc
+from mock import Mock, patch
 
 from i3pyblocks import types
 

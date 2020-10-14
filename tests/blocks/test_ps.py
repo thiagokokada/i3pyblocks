@@ -1,8 +1,8 @@
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 from helpers import misc
+from mock import patch
 
 from i3pyblocks import types
 

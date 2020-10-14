@@ -1,8 +1,8 @@
 import asyncio
 from inspect import Parameter, Signature, signature
-from unittest.mock import patch
 
 import pytest
+from mock import patch
 
 from i3pyblocks._internal import misc
 
