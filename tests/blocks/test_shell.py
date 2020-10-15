@@ -1,8 +1,8 @@
 from asyncio import subprocess
 
 import pytest
-from asynctest import CoroutineMock, call, patch
 from helpers import misc
+from mock import call, patch
 
 from i3pyblocks import types
 from i3pyblocks.blocks import shell
@@ -36,7 +36,6 @@ async def test_shell_block_click_handler():
     ) as mock_subprocess:
         mock_subprocess.configure_mock(
             **{
-                "arun": CoroutineMock(),
                 "arun.return_value": (
                     misc.AttributeDict(
                         stdout="stdout\n",

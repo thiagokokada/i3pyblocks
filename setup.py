@@ -45,7 +45,7 @@ setuptools.setup(
             "sphinx-rtd-theme",
         ],
         "test": [
-            "asynctest",
+            "mock>=4.0",
             "pytest",
             "pytest-aiohttp",
             "pytest-asyncio",
