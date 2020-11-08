@@ -20,8 +20,8 @@ let
   libs = with pkgs; [ libpulseaudio ];
   mach-nix = import (builtins.fetchGit {
     url = "https://github.com/DavHau/mach-nix/";
-    ref = "refs/tags/2.4.1";
-  });
+    ref = "refs/tags/3.0.2";
+  }) {};
 in
 mach-nix.buildPythonApplication rec {
   pname = "i3pyblocks";
@@ -32,19 +32,12 @@ mach-nix.buildPythonApplication rec {
     ref = "master";
   };
 
-  extras = extraFeatures ++ [ "test" ];
+  extras = extraFeatures;
 
   buildInputs = libs ++ [ makeWrapper ];
 
   makeWrapperArgs =
     [ "--suffix" "LD_LIBRARY_PATH" ":" "${stdenv.lib.makeLibraryPath libs}" ];
-
-  disable_checks = false;
-
-  checkPhase = ''
-    export LD_LIBRARY_PATH="${stdenv.lib.makeLibraryPath libs}"
-    ${pythonPkg.interpreter} -m pytest
-  '';
 
   meta = with stdenv.lib; {
     homepage = "https://github.com/thiagokokada/i3pyblocks";
@@ -53,6 +46,4 @@ mach-nix.buildPythonApplication rec {
     platforms = platforms.linux;
     maintainers = [ maintainers.thiagokokada ];
   };
-
-  python = pythonPkg;
 }
