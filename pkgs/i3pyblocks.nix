@@ -1,29 +1,12 @@
 { config
 , lib
-, pkgs
 , stdenv
 , makeWrapper
-  # Use Python from system so we ensure that we are using the same glibc
-, pythonPkg ? pkgs.python38
-, extraFeatures ? [
-    "blocks.dbus"
-    "blocks.http"
-    "blocks.i3ipc"
-    "blocks.inotify"
-    "blocks.ps"
-    "blocks.pulse"
-    "blocks.x11"
-  ]
+, python3Packages
+, extraLibs ? []
 }:
 
-let
-  libs = with pkgs; [ libpulseaudio ];
-  mach-nix = import (builtins.fetchGit {
-    url = "https://github.com/DavHau/mach-nix/";
-    ref = "refs/tags/3.0.2";
-  }) {};
-in
-mach-nix.buildPythonApplication rec {
+python3Packages.buildPythonApplication rec {
   pname = "i3pyblocks";
   version = "master";
 
@@ -32,12 +15,19 @@ mach-nix.buildPythonApplication rec {
     ref = "master";
   };
 
-  extras = extraFeatures;
+  propagatedBuildInputs = extraLibs;
 
-  buildInputs = libs ++ [ makeWrapper ];
+  checkInputs = with python3Packages; [
+    asynctest
+    mock
+    pytest
+    pytest-aiohttp
+    pytest-asyncio
+  ];
 
-  makeWrapperArgs =
-    [ "--suffix" "LD_LIBRARY_PATH" ":" "${stdenv.lib.makeLibraryPath libs}" ];
+  checkPhase = ''
+    pytest -c /dev/null
+  '';
 
   meta = with stdenv.lib; {
     homepage = "https://github.com/thiagokokada/i3pyblocks";
