@@ -1,16 +1,16 @@
 self: super:
 
 let
-  unstable = import (import ./pkgs/nixpkgs-src.nix {
-    fakeSha256 = unstable.stdenv.lib.fakeSha256;
-  }) {
-    config = {};
-    overlays = [];
-  };
+  unstable = import (builtins.fetchTarball {
+    url = "https://github.com/nixos/nixpkgs/tarball/53301ab31b7ff2ccb93934e3427f13a7d5aa9801";
+    # Use fakeSha256 to generate a new sha256 when updating, i.e.:
+    # sha256 = super.stdenv.lib.fakeSha256;
+    sha256 = "017mh1f5lkxhq6zk63li6rcfi2i86gk069nyvvpm84dcn88qc7dg";
+  }) {};
 in
 {
   i3pyblocks = unstable.callPackage ./pkgs/i3pyblocks.nix {
-    python3Packages = unstable.python3Packages;
+    inherit (unstable);
     extraLibs = with unstable.python3Packages; [
       aiohttp
       aionotify
