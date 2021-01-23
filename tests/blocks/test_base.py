@@ -230,6 +230,28 @@ async def test_polling_block_with_error():
     }
 
 
+@pytest.mark.asyncio
+async def test_polling_block_with_error_ignored():
+    class PollingBlockWithError(blocks.PollingBlock):
+        def __init__(self, sleep=1):
+            self.count = 0
+            super().__init__(
+                sleep=sleep, ignore_errors=True, default_state=DEFAULT_STATE
+            )
+
+        def run(self):
+            raise Exception("Boom!")
+
+    block = PollingBlockWithError()
+    await block.setup()
+
+    assert block.result() == {
+        "full_text": "",
+        "instance": str(block.id),
+        "name": "PollingBlockWithError",
+    }
+
+
 def test_invalid_sync_block():
     class InvalidSyncBlock(blocks.SyncBlock):
         pass

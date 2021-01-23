@@ -50,6 +50,10 @@ class Block(metaclass=abc.ABCMeta):
         And all calls to :meth:`result()` will have ``background == "#008000"``,
         unless overriden by :meth:`update_state()` with a different value.
 
+    :param ignore_errors: If set to true, do not show errors in the bar for
+        this block. May be useful in cases where the block is expected to fail
+        in some situations. The errors will still be logged.
+
     :ivar id: Unique identifier for Block based on UUIDv4.
 
     :cvar ex_format: Reference of :class:`~i3pyblocks.formatter.ExtendedFormatter`'s
@@ -76,11 +80,13 @@ class Block(metaclass=abc.ABCMeta):
         *,
         block_name: Optional[str] = None,
         default_state: Optional[models.State] = None,
+        ignore_errors: bool = False,
     ) -> None:
         self.id = uuid.uuid4()
         self.block_name = block_name or self.__class__.__name__
         self.frozen = True
         self.update_queue: Optional[asyncio.Queue] = None
+        self.ignore_errors = ignore_errors
 
         # Those are default values for properties if they are not overriden
         self._default_state = misc.non_nullable_dict(
@@ -272,9 +278,12 @@ class Block(metaclass=abc.ABCMeta):
             exception=exception,
         )
         logger.exception(formatted_msg)
-        self.abort(formatted_msg, urgent=True)
-        if reraise:
-            raise exception
+        if self.ignore_errors:
+            self.abort("")
+        else:
+            self.abort(formatted_msg, urgent=True)
+            if reraise:
+                raise exception
 
     async def setup(self, queue: Optional[asyncio.Queue] = None) -> None:
         """Setup a Block.
