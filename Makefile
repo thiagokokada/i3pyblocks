@@ -19,6 +19,10 @@ black-fix:
 clean:
 	rm -rf *.egg-info .{mypy,pytest}_cache __pycache__
 
+deps-upgrade:
+	CUSTOM_COMPILE_COMMAND="make deps-compile"\
+		$(PYTHON) -m piptools compile -U requirements/*.in -qo requirements.txt
+
 deps-compile:
 	CUSTOM_COMPILE_COMMAND="make deps-compile"\
 		$(PYTHON) -m piptools compile requirements/*.in -qo requirements.txt
