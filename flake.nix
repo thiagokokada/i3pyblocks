@@ -15,6 +15,10 @@
               (splitString "="
                 (fileContents versionFile))));
       };
+
+      overlay = final: prev: {
+        i3pyblocks = self.defaultPackage;
+      };
     } // flake-utils.lib.eachDefaultSystem (
       system:
       let
@@ -60,10 +64,6 @@
           };
 
         defaultPackage = self.customPackage.${system} { };
-
-        overlay = final: prev: {
-          i3pyblocks = self.defaultPackage;
-        };
 
         devShell = import ./shell.nix { inherit pkgs; };
       }
