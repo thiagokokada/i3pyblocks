@@ -1,14 +1,17 @@
-with import <nixpkgs> {};
+{ pkgs ? import <nixpkgs> { } }:
+
+with pkgs;
 let
   venvDir = "./venv";
   pythonEnv = python38Full;
-in mkShell {
+in
+mkShell {
   name = "i3pyblocks";
   buildInputs = [
     libpulseaudio
     pythonEnv
   ];
-  LD_LIBRARY_PATH="${libpulseaudio}/lib";
+  LD_LIBRARY_PATH = "${libpulseaudio}/lib";
 
   shellHook = ''
     SOURCE_DATE_EPOCH=$(date +%s)
