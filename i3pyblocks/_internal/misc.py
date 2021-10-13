@@ -96,7 +96,7 @@ def run_async(fn: Callable, executor: Executor = None) -> Callable[..., Awaitabl
 
     @wraps(fn)
     async def run(*args, **kwargs):
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         return await loop.run_in_executor(executor, partial(fn, *args, **kwargs))
 
     return run

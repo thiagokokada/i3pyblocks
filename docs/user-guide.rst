@@ -13,7 +13,7 @@ it, you can run:
     $ python3 -m venv venv
     $ source venv/bin/activate
 
-To actually install i3pyblocks, make sure you have Python >=3.6 installed and
+To actually install i3pyblocks, make sure you have Python >=3.7 installed and
 simply run this simple command in your terminal of choice:
 
 .. code-block:: sh
@@ -78,6 +78,8 @@ Let's start with a basic configuration showing a simple text
 
 .. code-block:: python
 
+    import asyncio
+
     from i3pyblocks import core, utils
     from i3pyblocks.blocks import basic, datetime
 
@@ -90,7 +92,7 @@ Let's start with a basic configuration showing a simple text
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 In the code above we are creating a new :class:`~i3pyblocks.core.Runner`
 instance, the most important class in i3pyblocks, responsible to manage
@@ -146,6 +148,8 @@ instead of the default one. You can do something like this:
 
 .. code-block:: python
 
+    import asyncio
+
     from i3pyblocks import core, utils
     from i3pyblocks.blocks import datetime
 
@@ -163,7 +167,7 @@ instead of the default one. You can do something like this:
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 Running this for ~5 seconds in terminal results:
 
@@ -194,6 +198,8 @@ degree of customization, for example:
 
 .. code-block:: python
 
+    import asyncio
+
     from i3pyblocks import core, utils
     from i3pyblocks.blocks import ps
 
@@ -206,7 +212,7 @@ degree of customization, for example:
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 Running this in terminal, results:
 
@@ -223,6 +229,7 @@ parameters, you can always extend the class:
 
 .. code-block:: python
 
+    import asyncio
     from datetime import datetime, timezone
 
     from i3pyblocks import core, utils
@@ -241,7 +248,7 @@ parameters, you can always extend the class:
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 .. _`Python's format`:
     https://pyformat.info/
@@ -260,6 +267,8 @@ While it is possible to create the Pango markup manually, using
 
 .. code-block:: python
 
+    import asyncio
+
     from i3pyblocks import core, utils, types
     from i3pyblocks.blocks import basic
 
@@ -276,7 +285,7 @@ While it is possible to create the Pango markup manually, using
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 Running this in terminal:
 
@@ -292,6 +301,8 @@ Use Pango markup with the i3pyblocks placeholders to archive the same effect
 even with dynamic text:
 
 .. code-block:: python
+
+    import asyncio
 
     from i3pyblocks import core, utils, types
     from i3pyblocks.blocks import ps
@@ -309,7 +320,7 @@ even with dynamic text:
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 .. warning::
 
@@ -331,6 +342,7 @@ passing ``signals`` parameter to :meth:`~i3pyblocks.core.Runner.register_block`:
 
 .. code-block:: python
 
+    import asyncio
     import signal
 
     from i3pyblocks import core, utils
@@ -350,7 +362,7 @@ passing ``signals`` parameter to :meth:`~i3pyblocks.core.Runner.register_block`:
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 This only allow :class:`~i3pyblocks.blocks.datetime.DateTimeBlock` to receive
 ``SIGUSR1`` and ``SIGUSR2`` signals, it does not necessary handle them. Of
@@ -360,6 +372,7 @@ can override :meth:`~i3pyblocks.blocks.base.Block.signal_handler`:
 
 .. code-block:: python
 
+    import asyncio
     import signal
 
     from i3pyblocks import core, utils
@@ -385,7 +398,7 @@ can override :meth:`~i3pyblocks.blocks.base.Block.signal_handler`:
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 Running it and sending ``pkill -SIGUSR2 i3pyblocks`` in another terminal result in:
 

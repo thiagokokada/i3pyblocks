@@ -5,7 +5,7 @@ Development setup
 -----------------
 
 If you want to quick start the development of **i3pyblocks**, make sure you
-have Python >=3.6 installed and run:
+have Python >=3.7 installed and run:
 
 .. code-block:: sh
 
@@ -35,6 +35,8 @@ reasonable easy. Let's start with a simple, "Hello World!" example:
 
 .. code-block:: python
 
+    import asyncio
+
     from i3pyblocks import Runner, blocks, utils
 
     class HelloWorldBlock(blocks.Block):
@@ -49,7 +51,7 @@ reasonable easy. Let's start with a simple, "Hello World!" example:
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 It is a silly example, but it should be sufficient to illustrate. We are using
 the :class:`~i3pyblocks.blocks.base.Block`, that is the root of all blocks in
@@ -113,7 +115,7 @@ One of the easiest ways to do it is to use time, for example:
       await runner.start()
 
 
-  utils.asyncio_run(main())
+  asyncio.run(main())
 
 Running it in terminal for ~5 seconds results in:
 
@@ -157,7 +159,7 @@ so common that i3pyblocks has an abstraction for it, the
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 
 :class:`~i3pyblocks.blocks.base.PollingBlock` will call
@@ -180,6 +182,8 @@ that will alter the output of i3bar. For example:
 
 .. code-block:: python
 
+    import asyncio
+
     from i3pyblocks import Runner, blocks, utils
 
     class WhiteHelloWorldBlock(blocks.Block):
@@ -194,7 +198,7 @@ that will alter the output of i3bar. For example:
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 Running it in terminal:
 
@@ -221,6 +225,7 @@ we will implement :meth:`~i3pyblocks.blocks.base.Block.signal_handler`:
 
 .. code-block:: python
 
+    import asyncio
     import signal
 
     from i3pyblocks import Runner, blocks, utils
@@ -240,7 +245,7 @@ we will implement :meth:`~i3pyblocks.blocks.base.Block.signal_handler`:
         await runner.start()
 
 
-    utils.asyncio_run(main())
+    asyncio.run(main())
 
 Now running this in one terminal and running ``pkill -SIGUSR1 i3pyblocks`` in
 another results in:
