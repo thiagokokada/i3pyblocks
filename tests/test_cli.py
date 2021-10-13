@@ -56,7 +56,7 @@ def test_config(capfd, tmpdir):
 
 
             if __name__ == "__main__":
-                utils.asyncio_run(main())
+                asyncio.run(main())
             """
         )
         f.write(config)

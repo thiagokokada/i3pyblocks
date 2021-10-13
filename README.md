@@ -12,7 +12,7 @@ A replacement for i3status, written in [Python][python] using [asyncio][asyncio]
 
 Works in both [i3wm][i3wm] and [sway][sway].
 
-For Python 3.6+.
+For Python 3.7+.
 
 ## Installation and Usage
 

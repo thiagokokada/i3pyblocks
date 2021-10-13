@@ -39,7 +39,7 @@ Highlights
   `D-Bus`_, `inotify`_) instead of polling
 - Flexible API allowing for full customization. You can even completely override
   some methods for you own needs if you want
-- Modern Python 3.6+ codebase fully `type annotated`_, thanks to `mypy`_
+- Modern Python 3.7+ codebase fully `type annotated`_, thanks to `mypy`_
 
 .. _D-Bus:
    https://en.wikipedia.org/wiki/D-Bus

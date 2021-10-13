@@ -31,7 +31,7 @@ class Runner:
     """
 
     def __init__(self) -> None:
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_running_loop()
         self.blocks: Dict[uuid.UUID, blocks.Block] = {}
         self.results: Dict[uuid.UUID, Optional[models.State]] = {}
         self.tasks: List[asyncio.Future] = []
@@ -83,7 +83,7 @@ class Runner:
                 )
 
         def callback_fn(sig: signal.Signals):
-            return asyncio.ensure_future(signal_handler(sig))
+            return asyncio.create_task(signal_handler(sig))
 
         for signum in signums:
             sig = signal.Signals(signum)  # Make sure this is a Signals instance
@@ -96,7 +96,7 @@ class Runner:
         :param awaitable: Either a coroutine, task or future that will be added
             to the task list to be schedule inside main loop in i3pyblocks.
         """
-        task = asyncio.ensure_future(awaitable)
+        task = asyncio.create_task(awaitable)
         self.tasks.append(task)
         logger.debug(f"Registered async task {awaitable} in {self}")
 
