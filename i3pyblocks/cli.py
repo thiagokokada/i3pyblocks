@@ -4,7 +4,7 @@ import types
 from importlib import machinery
 from typing import List, Optional
 
-from i3pyblocks.__version__ import __version__
+from i3pyblocks import __version__
 
 
 async def config_example():

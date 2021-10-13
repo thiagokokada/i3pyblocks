@@ -3,8 +3,7 @@ from textwrap import dedent
 
 import pytest
 
-from i3pyblocks import cli
-from i3pyblocks.__version__ import __version__
+from i3pyblocks import __version__, cli
 
 
 def run_until_timeout(target, args, timeout=1):
