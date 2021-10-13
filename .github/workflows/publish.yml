@@ -26,8 +26,8 @@ jobs:
       run: |
         # from refs/tags/v1.2.3 get 1.2.3
         VERSION="${GITHUB_REF##*/}"
-        VERSION_FILE='i3pyblocks/__version__.py'
-        echo "__version__ = \"${VERSION}\"" > "${VERSION_FILE}"
+        VERSION_FILE='i3pyblocks/version'
+        echo "${VERSION}" > "${VERSION_FILE}"
       shell: bash
 
     - name: Install dependencies
@@ -48,8 +48,8 @@ jobs:
       run: |
         # from refs/tags/v1.2.3 get 1.2.3
         VERSION="${GITHUB_REF##*/}-dev"
-        VERSION_FILE='i3pyblocks/__version__.py'
-        echo "__version__ = \"${VERSION}\"" > "${VERSION_FILE}"
+        VERSION_FILE='i3pyblocks/version'
+        echo "${VERSION}" > "${VERSION_FILE}"
       shell: bash
 
     - name: Create PR to bump version
