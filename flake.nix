@@ -8,14 +8,6 @@
 
   outputs = { self, nixpkgs, flake-utils, ... }:
     {
-      lib = {
-        parseVersion = with nixpkgs.lib; versionFile:
-          (replaceStrings [ " " "\"" ] [ "" "" ]
-            (last
-              (splitString "="
-                (fileContents versionFile))));
-      };
-
       overlay = final: prev: {
         i3pyblocks = self.defaultPackage;
       };
@@ -41,7 +33,7 @@
           }:
           python3Packages.buildPythonApplication rec {
             pname = "i3pyblocks";
-            version = self.lib.parseVersion ./i3pyblocks/__version__.py;
+            version = (lib.fileContents ./i3pyblocks/version);
 
             src = ./.;
 
