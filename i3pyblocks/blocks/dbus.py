@@ -60,7 +60,7 @@ class DbusBlock(blocks.Block):
         self.object_path = object_path
         self.interface_name = interface_name
         self.dbus_conn_sleep = dbus_conn_sleep
-        self.interface = None
+        self.interface: Optional[dbus_aio.ProxyInterface] = None
 
     async def setup(self, queue: Optional[asyncio.Queue] = None) -> None:
         try:
