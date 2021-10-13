@@ -7,42 +7,59 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        inherit (nixpkgs) lib;
-        inherit (pkgs) python3Packages;
-        parseVersion = with builtins; with lib; versionFile:
-          (replaceStrings [" " "\""] ["" ""]
+    {
+      lib = {
+        parseVersion = with nixpkgs.lib; versionFile:
+          (replaceStrings [ " " "\"" ] [ "" "" ]
             (last
               (splitString "="
                 (fileContents versionFile))));
+      };
+    } // flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+
+        inherit (nixpkgs) lib;
+        inherit (pkgs) python3Packages;
       in
       {
-        defaultPackage = python3Packages.buildPythonApplication rec {
-          pname = "i3pyblocks";
-          version = parseVersion ./i3pyblocks/__version__.py;
+        customPackage =
+          { extraLibs ? with python3Packages; [
+              aiohttp
+              aionotify
+              dbus-next
+              i3ipc
+              psutil
+              pulsectl
+              xlib
+            ]
+          }:
+          python3Packages.buildPythonApplication rec {
+            pname = "i3pyblocks";
+            version = self.lib.parseVersion ./i3pyblocks/__version__.py;
 
-          src = ./.;
+            src = ./.;
 
-          propagatedBuildInputs = with python3Packages; [
-            aiohttp
-            aionotify
-            dbus-next
-            i3ipc
-            psutil
-            pulsectl
-            xlib
-          ];
+            propagatedBuildInputs = extraLibs;
 
-          meta = with lib; {
-            homepage = "https://github.com/thiagokokada/i3pyblocks";
-            description = "A replacement for i3status, written in Python using asyncio.";
-            license = licenses.mit;
-            platforms = platforms.linux;
+            checkInputs = with python3Packages; [
+              asynctest
+              mock
+              pytest-aiohttp
+              pytest-asyncio
+              pytestCheckHook
+            ];
+
+            meta = with lib; {
+              homepage = "https://github.com/thiagokokada/i3pyblocks";
+              description = "A replacement for i3status, written in Python using asyncio.";
+              license = licenses.mit;
+              platforms = platforms.linux;
+            };
           };
-        };
+
+        defaultPackage = self.customPackage.${system} { };
 
         overlay = final: prev: {
           i3pyblocks = self.defaultPackage;
