@@ -15,47 +15,13 @@
       system:
       let
         pkgs = import nixpkgs { inherit system; };
-
-        inherit (nixpkgs) lib;
-        inherit (pkgs) python3Packages;
       in
       {
-        customPackage =
-          { extraLibs ? with python3Packages; [
-              aiohttp
-              aionotify
-              dbus-next
-              i3ipc
-              psutil
-              pulsectl
-              xlib
-            ]
-          }:
-          python3Packages.buildPythonApplication rec {
-            pname = "i3pyblocks";
-            version = (lib.fileContents ./i3pyblocks/version);
+        # Use this to build a custom version of i3pyblocks by
+        # overriding extraLibs param
+        customPackage = import ./default.nix;
 
-            src = ./.;
-
-            propagatedBuildInputs = extraLibs;
-
-            checkInputs = with python3Packages; [
-              asynctest
-              mock
-              pytest-aiohttp
-              pytest-asyncio
-              pytestCheckHook
-            ];
-
-            meta = with lib; {
-              homepage = "https://github.com/thiagokokada/i3pyblocks";
-              description = "A replacement for i3status, written in Python using asyncio.";
-              license = licenses.mit;
-              platforms = platforms.linux;
-            };
-          };
-
-        defaultPackage = self.customPackage.${system} { };
+        defaultPackage = self.customPackage.${system} { inherit pkgs; };
 
         devShell = import ./shell.nix { inherit pkgs; };
       }
