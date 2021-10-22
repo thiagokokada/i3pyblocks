@@ -17,7 +17,7 @@ python3Packages.buildPythonApplication rec {
   pname = "i3pyblocks";
   version = (lib.fileContents ./i3pyblocks/version);
 
-  src = ./.;
+  src = builtins.path { path = ./.; name = pname; };
 
   propagatedBuildInputs = extraLibs;
 
