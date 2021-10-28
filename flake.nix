@@ -9,7 +9,7 @@
   outputs = { self, nixpkgs, flake-utils, ... }:
     {
       overlay = final: prev: {
-        i3pyblocks = self.defaultPackage;
+        i3pyblocks = self.defaultPackage.${final.stdenv.hostPlatform.system};
       };
     } // flake-utils.lib.eachDefaultSystem (
       system:
