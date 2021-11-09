@@ -247,6 +247,24 @@ class MediaPlayerBlock(DbusBlock):
             **kwargs,
         )
         self.format = format
+        self.metadata: Dict[str, str] = {
+            "artist": "",
+            "title": "",
+            "track_number": "",
+        }
+
+    def update_properties(
+        self,
+        properties: Dict[str, Variant],
+    ) -> None:
+        if "Metadata" in properties:
+            metadata = properties["Metadata"].value
+            if "xesam:artist" in metadata:
+                self.metadata["artist"] = ", ".join(metadata["xesam:artist"].value)
+            if "xesam:title" in metadata:
+                self.metadata["title"] = metadata["xesam:title"].value
+            if "xesam:trackNumber" in metadata:
+                self.metadata["track_number"] = metadata["xesam:trackNumber"].value
 
     def update_callback(
         self,
@@ -254,15 +272,8 @@ class MediaPlayerBlock(DbusBlock):
         changed_properties: Dict[str, Variant],
         invalidated_properties: List[Variant],
     ) -> None:
-        metadata = changed_properties["Metadata"].value
-        self.update(
-            self.ex_format(
-                self.format,
-                artist=", ".join(metadata["xesam:artist"].value),
-                title=metadata["xesam:title"].value,
-                track_number=metadata["xesam:trackNumber"].value,
-            )
-        )
+        self.update_properties(changed_properties)
+        self.update(self.ex_format(self.format, **self.metadata))
 
     async def start(self) -> None:
         try:
