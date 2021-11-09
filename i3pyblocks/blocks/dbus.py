@@ -247,7 +247,7 @@ class MediaPlayerBlock(DbusBlock):
             **kwargs,
         )
         self.format = format
-        self.metadata: Dict[str, str] = {
+        self.metadata = {
             "artist": "",
             "title": "",
             "track_number": "",
