@@ -56,6 +56,10 @@ class PulseAudioBlock(blocks.SyncBlock):
 
     :param color_mute: Color used when the sound is mute.
 
+    :param backgrounds: Similar to ``colors``, but for the background.
+
+    :param background_mute: Background used when the sound is mute.
+
     :param icons: Similar to ``colors``, but for icons. Can be used to create a
         graphic representation of the volume. Only displayed when ``format``
         includes ``{icon}`` placeholder.
@@ -79,6 +83,8 @@ class PulseAudioBlock(blocks.SyncBlock):
             25: types.Color.NEUTRAL,
         },
         color_mute: Optional[str] = types.Color.URGENT,
+        backgrounds: models.Threshold = {},
+        background_mute: Optional[str] = None,
         icons: models.Threshold = {
             0.0: "▁",
             12.5: "▂",
@@ -97,6 +103,8 @@ class PulseAudioBlock(blocks.SyncBlock):
         self.format_mute = format_mute
         self.colors = colors
         self.color_mute = color_mute
+        self.backgrounds = backgrounds
+        self.background_mute = background_mute
         self.icons = icons
         self.command = command
 
@@ -129,14 +137,20 @@ class PulseAudioBlock(blocks.SyncBlock):
             sink = pulse.sink_info(self.sink_index)
 
             if sink.mute:
-                self.update(self.format_mute, color=self.color_mute)
+                self.update(
+                    self.format_mute,
+                    color=self.color_mute,
+                    background=self.background_mute,
+                )
             else:
                 volume = pulse.volume_get_all_chans(sink) * 100
                 color = misc.calculate_threshold(self.colors, volume)
+                background = misc.calculate_threshold(self.backgrounds, volume)
                 icon = misc.calculate_threshold(self.icons, volume)
                 self.update(
                     self.ex_format(self.format, volume=volume, icon=icon),
                     color=color,
+                    background=background,
                 )
 
     def toggle_mute(self) -> None:

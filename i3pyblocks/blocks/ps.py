@@ -49,6 +49,8 @@ class CpuPercentBlock(blocks.PollingBlock):
         When the CPU % is between [0, 10) the color is set to "000000", from
         [10, 50) is set to "FF0000" and from 50 and beyond it is "#FFFFFF".
 
+    :param backgrounds: Similar to ``colors``, but for the background.
+
     :param icons: Similar to ``colors``, but for icons. Can be used to create a
         graphic representation of the CPU %. Only displayed when ``format``
         includes ``{icon}`` placeholder.
@@ -68,6 +70,7 @@ class CpuPercentBlock(blocks.PollingBlock):
             75: types.Color.WARN,
             90: types.Color.URGENT,
         },
+        backgrounds: models.Threshold = {},
         icons: models.Threshold = {
             0.0: "▁",
             12.5: "▂",
@@ -84,12 +87,14 @@ class CpuPercentBlock(blocks.PollingBlock):
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = colors
+        self.backgrounds = backgrounds
         self.icons = icons
 
     async def run(self) -> None:
         percent = psutil.cpu_percent(interval=None)
 
         color = misc.calculate_threshold(self.colors, percent)
+        background = misc.calculate_threshold(self.backgrounds, percent)
         icon = misc.calculate_threshold(self.icons, percent)
 
         self.update(
@@ -99,6 +104,7 @@ class CpuPercentBlock(blocks.PollingBlock):
                 icon=icon,
             ),
             color=color,
+            background=background,
         )
 
 
@@ -130,6 +136,8 @@ class DiskUsageBlock(blocks.PollingBlock):
         When the disk % is between [0, 10) the color is set to "000000", from
         [10, 50) is set to "FF0000" and from 50 and beyond it is "#FFFFFF".
 
+    :param backgrounds: Similar to ``colors``, but for the background.
+
     :param icons: Similar to ``colors``, but for icons. Can be used to create a
         graphic representation of the disk %. Only displayed when ``format``
         includes ``{icon}`` placeholder.
@@ -153,6 +161,7 @@ class DiskUsageBlock(blocks.PollingBlock):
             75: types.Color.WARN,
             90: types.Color.URGENT,
         },
+        backgrounds: models.Threshold = {},
         icons: models.Threshold = {
             0.0: "▁",
             12.5: "▂",
@@ -170,6 +179,7 @@ class DiskUsageBlock(blocks.PollingBlock):
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = colors
+        self.backgrounds = backgrounds
         self.icons = icons
         self.divisor = divisor
         self.path = Path(path)
@@ -185,6 +195,7 @@ class DiskUsageBlock(blocks.PollingBlock):
         disk = psutil.disk_usage(str(self.path))
 
         color = misc.calculate_threshold(self.colors, disk.percent)
+        background = misc.calculate_threshold(self.backgrounds, disk.percent)
         icon = misc.calculate_threshold(self.icons, disk.percent)
 
         self.update(
@@ -199,6 +210,7 @@ class DiskUsageBlock(blocks.PollingBlock):
                 icon=icon,
             ),
             color=color,
+            background=background,
         )
 
 
@@ -220,6 +232,8 @@ class LoadAvgBlock(blocks.PollingBlock):
         When the load1 is between [0, 2) the color is set to "000000", from
         [2, 4) is set to "FF0000" and from 4 and beyond it is "#FFFFFF".
 
+    :param backgrounds: Similar to ``colors``, but for the background.
+
     :param sleep: Sleep in seconds between each call to
         :meth:`~i3pyblocks.blocks.base.PollingBlock.run()`.
 
@@ -235,21 +249,25 @@ class LoadAvgBlock(blocks.PollingBlock):
             2: types.Color.WARN,
             4: types.Color.URGENT,
         },
+        backgrounds: models.Threshold = {},
         sleep: int = 5,
         **kwargs,
     ) -> None:
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = colors
+        self.backgrounds = backgrounds
 
     async def run(self) -> None:
         load1, load5, load15 = psutil.getloadavg()
 
         color = misc.calculate_threshold(self.colors, load1)
+        background = misc.calculate_threshold(self.backgrounds, load1)
 
         self.update(
             self.ex_format(self.format, load1=load1, load5=load5, load15=load15),
             color=color,
+            background=background,
         )
 
 
@@ -283,6 +301,8 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         "000000", from [2, 4) is set to "FF0000" and from 4 and beyond it is
         "#FFFFFF".
 
+    :param backgrounds: Similar to ``colors``, but for the background.
+
     :param interface_regex: Regex for which interfaces to use. By default it
          already includes the most common ones and excludes things like ``lo``
          (loopback interface).
@@ -303,6 +323,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
             2 * types.IECUnit.MiB: types.Color.WARN,
             5 * types.IECUnit.MiB: types.Color.URGENT,
         },
+        backgrounds: models.Threshold = {},
         interface_regex: str = r"en*|eth*|ppp*|sl*|wl*|ww*",
         sleep: int = 3,
         **kwargs,
@@ -311,6 +332,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
         self.format_up = format_up
         self.format_down = format_down
         self.colors = colors
+        self.backgrounds = backgrounds
         self.interface_regex = re.compile(interface_regex)
         self.interface = self._find_interface()
         self.previous = psutil.net_io_counters(pernic=True)
@@ -363,6 +385,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
             upload, download = 0, 0
 
         color = misc.calculate_threshold(self.colors, max(upload, download))
+        background = misc.calculate_threshold(self.backgrounds, max(upload, download))
 
         self.update(
             self.ex_format(
@@ -372,6 +395,7 @@ class NetworkSpeedBlock(blocks.PollingBlock):
                 interface=self.interface,
             ),
             color=color,
+            background=background,
         )
 
         self.previous = now
@@ -409,6 +433,8 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         "000000", from [10, 25) is set to "FF0000" and from 25 and beyond it is
         "#FFFFFF".
 
+    :param backgrounds: Similar to ``colors``, but for the background.
+
     :param icons: Similar to ``colors``, but for icons. Can be used to create a
         graphic representation of the battery %. Only displayed when ``format``
         includes ``{icon}`` placeholder.
@@ -431,6 +457,7 @@ class SensorsBatteryBlock(blocks.PollingBlock):
             10: types.Color.WARN,
             25: types.Color.NEUTRAL,
         },
+        backgrounds: models.Threshold = {},
         icons: models.Threshold = {
             0.0: "▁",
             12.5: "▂",
@@ -450,6 +477,7 @@ class SensorsBatteryBlock(blocks.PollingBlock):
         self.format_unknown = format_unknown
         self.format_no_battery = format_no_battery
         self.colors = colors
+        self.backgrounds = backgrounds
         self.icons = icons
 
     async def run(self):
@@ -461,6 +489,7 @@ class SensorsBatteryBlock(blocks.PollingBlock):
             return
 
         color = misc.calculate_threshold(self.colors, battery.percent)
+        background = misc.calculate_threshold(self.backgrounds, battery.percent)
         icon = misc.calculate_threshold(self.icons, battery.percent)
 
         if battery.power_plugged or battery.secsleft == psutil.POWER_TIME_UNLIMITED:
@@ -479,6 +508,7 @@ class SensorsBatteryBlock(blocks.PollingBlock):
                 icon=icon,
             ),
             color=color,
+            background=background,
         )
 
 
@@ -505,6 +535,8 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
         When the sensor temperature is between [0, 50) % the color is set to
         "000000", from [50, 80) is set to "FF0000" and from 80 and beyond it is
         "#FFFFFF".
+
+    :param backgrounds: Similar to ``colors``, but for the background.
 
     :param icons: Similar to ``colors``, but for icons. Can be used to create a
         graphic representation of the temperature. Only displayed when ``format``
@@ -535,6 +567,7 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
             60: types.Color.WARN,
             85: types.Color.URGENT,
         },
+        backgrounds: models.Threshold = {},
         icons: models.Threshold = {
             0.0: "▁",
             12.5: "▂",
@@ -555,6 +588,7 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
         self.format = format
         self.format_no_sensor = format_no_sensor
         self.colors = colors
+        self.backgrounds = backgrounds
         self.icons = icons
         self.fahrenheit = fahrenheit
         self.sensor_index = sensor_index
@@ -575,6 +609,7 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
             return
 
         color = misc.calculate_threshold(self.colors, temperature.current)
+        background = misc.calculate_threshold(self.backgrounds, temperature.current)
         icon = misc.calculate_threshold(self.icons, temperature.current)
 
         self.update(
@@ -587,6 +622,7 @@ class SensorsTemperaturesBlock(blocks.PollingBlock):
                 icon=icon,
             ),
             color=color,
+            background=background,
         )
 
 
@@ -615,6 +651,8 @@ class VirtualMemoryBlock(blocks.PollingBlock):
         "000000", from [50, 80) is set to "FF0000" and from 80 and beyond it is
         "#FFFFFF".
 
+    :param backgrounds: Similar to ``colors``, but for the background.
+
     :param divisor: Divisor used for all size reportings for this Block. For
         example, using ``1024 ** 1024`` here makes all sizes return in MiB.
 
@@ -637,6 +675,7 @@ class VirtualMemoryBlock(blocks.PollingBlock):
             75: types.Color.WARN,
             90: types.Color.URGENT,
         },
+        backgrounds: models.Threshold = {},
         icons: models.Threshold = {
             0.0: "▁",
             12.5: "▂",
@@ -654,6 +693,7 @@ class VirtualMemoryBlock(blocks.PollingBlock):
         super().__init__(sleep=sleep, **kwargs)
         self.format = format
         self.colors = colors
+        self.backgrounds = backgrounds
         self.icons = icons
         self.divisor = divisor
 
@@ -664,6 +704,7 @@ class VirtualMemoryBlock(blocks.PollingBlock):
         memory = psutil.virtual_memory()
 
         color = misc.calculate_threshold(self.colors, memory.percent)
+        background = misc.calculate_threshold(self.backgrounds, memory.percent)
         icon = misc.calculate_threshold(self.icons, memory.percent)
 
         self.update(
@@ -677,4 +718,5 @@ class VirtualMemoryBlock(blocks.PollingBlock):
                 icon=icon,
             ),
             color=color,
+            background=background,
         )
