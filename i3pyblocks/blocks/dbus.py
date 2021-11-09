@@ -226,6 +226,10 @@ class MediaPlayerBlock(DbusBlock):
         - ``{title}``: Title name.
         - ``{track_number}``: Track number.
 
+    :param color_playing: Color to display when media is "Playing"
+
+    :param background_playing: Background to display when media is "Playing"
+
     .. _MPRIS2:
         https://specifications.freedesktop.org/mpris-spec/latest/
     """
@@ -238,6 +242,8 @@ class MediaPlayerBlock(DbusBlock):
         self,
         player: str = "spotify",
         format: str = "{artist} - {track_number}. {title}",
+        color_playing: Optional[str] = None,
+        background_playing: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(
@@ -247,11 +253,14 @@ class MediaPlayerBlock(DbusBlock):
             **kwargs,
         )
         self.format = format
+        self.color_playing = color_playing
+        self.background_playing = background_playing
         self.metadata = {
             "artist": "",
             "title": "",
             "track_number": "",
         }
+        self.playing = False
 
     def update_properties(
         self,
@@ -265,6 +274,8 @@ class MediaPlayerBlock(DbusBlock):
                 self.metadata["title"] = metadata["xesam:title"].value
             if "xesam:trackNumber" in metadata:
                 self.metadata["track_number"] = metadata["xesam:trackNumber"].value
+        if "PlaybackStatus" in properties:
+            self.playing = properties["PlaybackStatus"].value == "Playing"
 
     def update_callback(
         self,
@@ -273,7 +284,11 @@ class MediaPlayerBlock(DbusBlock):
         invalidated_properties: List[Variant],
     ) -> None:
         self.update_properties(changed_properties)
-        self.update(self.ex_format(self.format, **self.metadata))
+        self.update(
+            self.ex_format(self.format, **self.metadata),
+            color=self.color_playing if self.playing else None,
+            background=self.background_playing if self.playing else None,
+        )
 
     async def start(self) -> None:
         try:
