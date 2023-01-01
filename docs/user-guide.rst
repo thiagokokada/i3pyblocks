@@ -21,7 +21,7 @@ simply run this simple command in your terminal of choice:
     $ python3 -m pip install i3pyblocks
 
 This will install a basic installation without dependencies, so most blocks will
-not work. Check ``extras_require`` section in `setup.py`_ file to see the current
+not work. Check ``options.extras_require`` section in `setup.cfg`_ to see the current
 available optional dependencies for each block.
 
 For example, if you want to use :mod:`i3pyblocks.blocks.pulse` you will need
@@ -60,8 +60,8 @@ similar to below:
     https://python-poetry.org/
 .. _pipenv:
     https://pipenv.pypa.io/en/latest/
-.. _setup.py:
-    https://github.com/thiagokokada/i3pyblocks/blob/master/setup.py
+.. _setup.cfg:
+    https://github.com/thiagokokada/i3pyblocks/blob/master/setup.cfg
 .. _NixOS:
     https://nixos.org/
 .. _nix-overlay:
