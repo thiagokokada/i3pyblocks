@@ -107,6 +107,7 @@ class PulseAudioBlock(blocks.SyncBlock):
         self.background_mute = background_mute
         self.icons = icons
         self.command = command
+        self.sink_index = None
 
     def _event_callback(self, event: pulsectl.PulseEventInfo) -> None:
         if event.facility == "server":
@@ -124,15 +125,22 @@ class PulseAudioBlock(blocks.SyncBlock):
             sink_list = pulse.sink_list()
             logger.debug(f"Current available sinks: {sink_list}")
 
-            self.sink_index = next(
-                # Find the sink with default_sink_name
-                (sink.index for sink in sink_list if sink.name == default_sink_name),
-                # Returns the first from the list as fallback
-                0,
-            )
+            if len(sink_list) > 0:
+                # Select the first available sink if the default sink not available
+                self.sink_index = sink_list[0].index
+                # Find the default sink
+                for sink in sink_list:
+                    if sink.name == default_sink_name:
+                        self.sink_index = sink.index
+                        break
+            else:
+                self.sink_index = None
 
     def update_status(self) -> None:
         """Update the PulseAudioBlock state."""
+        if self.sink_index is None:
+            logger.debug("Skip status update: sink_index is None")
+            return
         with pulsectl.Pulse("update-status") as pulse:
             sink = pulse.sink_info(self.sink_index)
 
@@ -155,6 +163,9 @@ class PulseAudioBlock(blocks.SyncBlock):
 
     def toggle_mute(self) -> None:
         """Toggle mute on/off."""
+        if self.sink_index is None:
+            logger.debug("Skip mute toggle: sink_index is None")
+            return
         with pulsectl.Pulse("toggle-mute") as pulse:
             sink = pulse.sink_info(self.sink_index)
 
@@ -173,6 +184,9 @@ class PulseAudioBlock(blocks.SyncBlock):
         # Using self.pulse.volume_change_all_chans() may cause a deadlock
         # when successive operations are done
         # We probably need have better control over loop in pulsectl
+        if self.sink_index is None:
+            logger.debug("Skip volume change: sink_index is None")
+            return
         with pulsectl.Pulse("volume-changer") as pulse:
             sink = pulse.sink_info(self.sink_index)
             pulse.volume_change_all_chans(sink, volume)
