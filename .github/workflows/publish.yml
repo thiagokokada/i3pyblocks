@@ -40,7 +40,7 @@ jobs:
         python -m build --wheel --sdist -o dist/ .
 
     - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@v1.4.1
+      uses: pypa/gh-action-pypi-publish@v1.13.0
       with:
         password: ${{ secrets.pypi_password }}
 
